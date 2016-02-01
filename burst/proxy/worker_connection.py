@@ -44,7 +44,7 @@ class WorkerConnection(Protocol):
     def connectionLost(self, reason=connectionDone):
         # 要删除掉对应的worker，因为不确定连接是否会及时释放
         # TODO，等测试一下，如果确定会自动释放的话，这代码就可以不用写了
-        self.factory.app.task_dispatcher.remove_worker(self)
+        self.factory.app.proxy.task_dispatcher.remove_worker(self)
 
     def dataReceived(self, data):
         """
@@ -83,7 +83,7 @@ class WorkerConnection(Protocol):
 
         if box.cmd == constants.CMD_WORKER_ASK_FOR_JOB:
             # 说明是标记自己空闲
-            task = self.factory.app.task_dispatcher.alloc_task(self)
+            task = self.factory.app.proxy.task_dispatcher.alloc_task(self)
             if task:
                 # 如果能申请成功，就继续执行
                 self.assign_task(task)

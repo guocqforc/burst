@@ -62,4 +62,4 @@ class ClientConnection(Protocol):
         group_id = self.factory.app.group_router(box)
 
         task = Task(data, box, self)
-        self.factory.app.task_dispatcher.add_task(group_id, task)
+        self.factory.app.proxy.task_dispatcher.add_task(group_id, task)
