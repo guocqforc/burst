@@ -4,7 +4,7 @@ import sys
 sys.path.insert(0, '../../')
 
 from netkit.contrib.tcp_client import TcpClient
-from reimp import Box
+from netkit.box import Box
 
 import time
 

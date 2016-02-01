@@ -5,10 +5,11 @@ sys.path.insert(0, '../../')
 
 import logging
 
-from reimp import Melon, logger, Box
+from burst import Burst, Blueprint, logger
+from netkit.box import Box
 import user
 
-app = Melon(Box, {
+app = Burst(Box, {
     1: {
         'count': 2,
     },

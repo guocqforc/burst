@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from reimp import Blueprint, logger
+from burst import Blueprint, logger
 
 bp = Blueprint('user')
 
