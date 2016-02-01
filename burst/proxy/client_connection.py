@@ -4,7 +4,7 @@ from twisted.internet.protocol import Protocol, Factory
 
 from burst.utils import safe_call
 from burst.log import logger
-from burst.proxy.worker_box import WorkerBox
+from burst.share.worker_box import WorkerBox
 
 
 class ClientConnectionFactory(Factory):
