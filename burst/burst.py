@@ -2,13 +2,12 @@
 
 import os
 import copy
-import weakref
+import json
 import sys
 import subprocess
 import time
 import signal
 from collections import Counter
-import Queue
 # linux 默认就是epoll
 from twisted.internet import reactor
 
@@ -89,7 +88,7 @@ class Burst(RoutesMixin, AppEventsMixin):
             self.debug = debug
 
         # 只要没有这个环境变量，就是主进程
-        if not os.getenv(constants.WORKER_GROUP_ENV_KEY):
+        if not os.getenv(constants.WORKER_ENV_KEY):
             # 主进程
             logger.info('Running server on %s:%s, debug: %s',
                         host, port, self.debug)
@@ -100,8 +99,7 @@ class Burst(RoutesMixin, AppEventsMixin):
 
             # 启动监听worker
             for group_id in self.group_conf:
-                self.msg_queue_dict[group_id] = Queue.Queue()
-                address = "worker_%s.sock"
+                address = constants.WORKER_ADDRESS_TPL % group_id
 
                 # 给内部worker通信用的
                 reactor.listenUnix(address, self.worker_connection_factory_class(self, group_id))
@@ -153,8 +151,11 @@ class Burst(RoutesMixin, AppEventsMixin):
             # 要传入group_id
             worker_env = copy.deepcopy(os.environ)
             worker_env.update({
-                constants.WORKER_GROUP_ENV_KEY: str(group_id)
+                constants.WORKER_ENV_KEY: json.dumps(dict(
+                    group_id=group_id
+                ))
             })
+
             args = [sys.executable] + sys.argv
             inner_p = subprocess.Popen(args, env=worker_env)
             inner_p.group_id = group_id

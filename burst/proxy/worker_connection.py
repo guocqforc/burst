@@ -83,7 +83,7 @@ class WorkerConnection(Protocol):
 
         if box.cmd == constants.CMD_WORKER_ASK_FOR_JOB:
             # 说明是标记自己空闲
-            task = self.factory.app.task_dispatcher.alloc_task()
+            task = self.factory.app.task_dispatcher.alloc_task(self)
             if task:
                 # 如果能申请成功，就继续执行
                 self.assign_task(task)
