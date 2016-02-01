@@ -7,6 +7,8 @@ from twisted.internet import reactor
 from ..log import logger
 from . import ClientConnectionFactory, WorkerConnectionFactory
 from burst.proxy.task_dispatcher import TaskDispatcher
+from .. import constants
+import setproctitle
 
 
 class Proxy(object):
@@ -14,16 +16,18 @@ class Proxy(object):
     proxy相关
     """
 
-    app = None
+    type = constants.PROC_TYPE_PROXY
 
     client_connection_factory_class = ClientConnectionFactory
     worker_connection_factory_class = WorkerConnectionFactory
+
+    app = None
 
     host = None
     port = None
 
     # 任务调度器
-    task_dispatcher = TaskDispatcher()
+    task_dispatcher = None
 
     def __init__(self, app):
         """
@@ -31,10 +35,13 @@ class Proxy(object):
         :return:
         """
         self.app = app
+        self.task_dispatcher = TaskDispatcher()
 
     def run(self, host=None, port=None):
         self.host = host
         self.port = port
+
+        setproctitle.setproctitle(self.app.make_proc_name(self.type))
 
         # 主进程
         self._handle_proc_signals()

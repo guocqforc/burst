@@ -9,11 +9,15 @@ from . import constants
 from proxy import Proxy
 from worker import Worker
 from controller import Controller
+import setproctitle
 
 
 class Burst(RoutesMixin, AppEventsMixin):
 
     # 配置都放到 burst 里，而和proxy或者worker直接相关的类，则放到自己的部分
+
+    # 进程名字
+    name = None
 
     box_class = None
     proxy_backlog = constants.PROXY_BACKLOG
@@ -82,7 +86,21 @@ class Burst(RoutesMixin, AppEventsMixin):
                 self.proxy.run(host, port)
             else:
                 # worker
-                self.worker.run()
+                self.worker.run(burst_env['group_id'])
+
+    def make_proc_name(self, proc_type):
+        """
+        获取进程名称
+        :param proc_type:
+        :return:
+        """
+        proc_name = '%s: %s process %s' % (
+            '-'.join([constants.NAME, self.name or '']),
+            proc_type,
+            setproctitle.getproctitle()
+        )
+
+        return proc_name
 
     def _validate_cmds(self):
         """

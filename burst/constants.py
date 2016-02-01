@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-LOGGER_NAME = 'burst'
+NAME = 'burst'
 
 # worker的状态
 WORKER_STATUS_IDLE = 1
@@ -30,5 +30,7 @@ CMD_WORKER_ASK_FOR_JOB = -1
 WORKER_ADDRESS_TPL = 'worker_%s.sock'
 
 # 进程类型
-PROC_TYPE_PROXY = 1
-PROC_TYPE_WORKER = 2
+PROC_TYPE_CONTROLLER = 'controller'
+PROC_TYPE_PROXY = 'proxy'
+PROC_TYPE_WORKER = 'worker'
+

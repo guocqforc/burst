@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 
 import signal
-import json
-import os
 from .connection import Connection
 from ..log import logger
 from .request import Request
 from .. import constants
+import setproctitle
 
 
 class Worker(object):
+
+    type = constants.PROC_TYPE_WORKER
 
     request_class = Request
     connection_class = Connection
@@ -25,29 +26,27 @@ class Worker(object):
         """
         self.app = app
 
-    def run(self):
-        # 从环境变量获取group_id
-        env = json.loads(os.environ[constants.CHILD_ENV_KEY])
-        self.group_id = env['group_id']
+    def run(self, group_id):
+        self.group_id = group_id
 
-        self._try_serve_forever()
+        setproctitle.setproctitle(self.app.make_proc_name(self.type))
+
+        self._handle_proc_signals()
+        self._before_worker_run()
+
+        try:
+            address = self.app.worker_address_tpl % self.group_id
+            conn = self.connection_class(self, address, self.app.conn_timeout)
+            conn.run()
+        except KeyboardInterrupt:
+            pass
+        except:
+            logger.error('exc occur.', exc_info=True)
 
     def _before_worker_run(self):
         self.app.events.create_worker()
         for bp in self.app.blueprints:
             bp.events.create_app_worker()
-
-    def _try_serve_forever(self):
-        self._handle_proc_signals()
-
-        self._before_worker_run()
-
-        try:
-            self._serve_forever()
-        except KeyboardInterrupt:
-            pass
-        except:
-            logger.error('exc occur.', exc_info=True)
 
     def _handle_proc_signals(self):
         def exit_handler(signum, frame):
@@ -66,7 +65,3 @@ class Worker(object):
         signal.signal(signal.SIGTERM, safe_stop_handler)
         signal.signal(signal.SIGHUP, safe_stop_handler)
 
-    def _serve_forever(self):
-        address = self.app.worker_address_tpl % self.group_id
-        conn = self.connection_class(self, address, self.app.conn_timeout)
-        conn.run()

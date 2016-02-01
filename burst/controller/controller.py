@@ -7,6 +7,7 @@ import sys
 import subprocess
 import time
 import signal
+import setproctitle
 from .. import constants
 
 
@@ -14,6 +15,8 @@ class Controller(object):
     """
     controller相关
     """
+
+    type = constants.PROC_TYPE_CONTROLLER
 
     app = None
 
@@ -28,8 +31,11 @@ class Controller(object):
         :return:
         """
         self.app = app
+        self.processes = []
 
     def run(self):
+        setproctitle.setproctitle(self.app.make_proc_name(self.type))
+
         self._handle_proc_signals()
 
         self._fork_workers()
