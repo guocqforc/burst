@@ -13,7 +13,7 @@ class ClientConnectionFactory(Factory):
         self.app = app
 
     def buildProtocol(self, addr):
-        return ClientConnection(self, (addr.host, addr.port))
+        return ClientConnection(self, addr)
 
 
 class ClientConnection(Protocol):
