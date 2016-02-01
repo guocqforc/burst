@@ -18,7 +18,7 @@ from .worker import RoutesMixin, AppEventsMixin, Request
 from . import constants
 
 
-class burst(RoutesMixin, AppEventsMixin):
+class Burst(RoutesMixin, AppEventsMixin):
 
     CONN_ID_MAX = 2 ** 63 - 1
 
