@@ -2,7 +2,7 @@
 
 __version__ = '1.0.79'
 
-from .burst import burst
-from .worker import Blueprint
+from .burst import Burst
+from .blueprint import Blueprint
 from .log import logger
 from .utils import safe_call, safe_func
