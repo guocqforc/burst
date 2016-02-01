@@ -3,8 +3,7 @@
 import os
 import socket
 import thread
-from netkit.contrib.tcp_client import TcpClient
-from netkit.box import Box
+from unix_client import UnixClient
 import time
 from .. import constants
 from ..log import logger
@@ -14,10 +13,10 @@ class Connection(object):
 
     job_info = None
 
-    def __init__(self, app, host, port, conn_timeout):
+    def __init__(self, app, address, conn_timeout):
         self.app = app
         # 直接创建即可
-        self.client = TcpClient(Box, host, port, conn_timeout)
+        self.client = UnixClient(app.box_class, address, conn_timeout)
 
     def run(self):
         thread.start_new_thread(self._monitor_job_timeout, ())
@@ -64,7 +63,7 @@ class Connection(object):
         self._read_message()
 
     def _ask_for_job(self):
-        gw_box = Box()
+        gw_box = self.app.box_class()
         gw_box.cmd = constants.CMD_WORKER_ASK_FOR_JOB
 
         return self.write(gw_box.pack())
@@ -107,12 +106,12 @@ class Connection(object):
         return ret
 
     def _read_message(self):
-        req_gw_box = None
+        req_box = None
 
         while 1:
             try:
                 # 读取数据 gw_box
-                req_gw_box = self.client.read()
+                req_box = self.client.read()
             except socket.timeout:
                 # 超时了
                 if not self.app.enable:
@@ -124,8 +123,8 @@ class Connection(object):
                 # 正常收到数据了
                 break
 
-        if req_gw_box:
-            self._on_read_complete(req_gw_box)
+        if req_box:
+            self._on_read_complete(req_box)
 
         if self.closed():
             self._on_connection_close()
@@ -157,20 +156,6 @@ class Connection(object):
         """
         出现任何异常的时候，服务器不再主动关闭连接
         """
-
-        if not request.is_valid:
-            return False
-
-        if request.gw_box.cmd == constants.CMD_CLIENT_CREATED:
-            self.app.events.create_client(request)
-            for bp in self.app.blueprints:
-                bp.events.create_app_client(request)
-            return True
-        elif request.gw_box.cmd == constants.CMD_CLIENT_CLOSED:
-            self.app.events.close_client(request)
-            for bp in self.app.blueprints:
-                bp.events.close_app_client(request)
-            return True
 
         if not request.view_func:
             logger.info('cmd invalid. request: %s' % request)

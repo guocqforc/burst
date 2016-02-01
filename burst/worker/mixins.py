@@ -111,20 +111,6 @@ class AppEventsMixin(object):
         f(conn)
         """
 
-    @_reg_event_handler
-    def create_client(self, f):
-        """
-        client 连接之后.
-        f(request)
-        """
-
-    @_reg_event_handler
-    def close_client(self, f):
-        """
-        client close之后.
-        f(request)
-        """
-
 
 class BlueprintEventsMixin(object):
 
@@ -201,18 +187,4 @@ class BlueprintEventsMixin(object):
         """
         worker连接close之后
         f(conn)
-        """
-
-    @_reg_event_handler
-    def create_app_client(self, f):
-        """
-        client 连接之后.
-        f(request)
-        """
-
-    @_reg_event_handler
-    def close_app_client(self, f):
-        """
-        client close之后.
-        f(request)
         """
