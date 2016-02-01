@@ -49,7 +49,7 @@ class Proxy(object):
         self.port = port
 
         # 主进程
-        self._handle_parent_proc_signals()
+        self._handle_proc_signals()
 
         reactor.listenTCP(port, self.client_connection_factory_class(self),
                           backlog=self.app.backlog, interface=host)
@@ -110,7 +110,7 @@ class Proxy(object):
             # 时间短点，退出的快一些
             time.sleep(0.1)
 
-    def _handle_parent_proc_signals(self):
+    def _handle_proc_signals(self):
         def exit_handler(signum, frame):
             self.enable = False
 

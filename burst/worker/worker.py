@@ -38,7 +38,7 @@ class Worker(object):
             bp.events.create_app_worker()
 
     def _try_serve_forever(self):
-        self._handle_child_proc_signals()
+        self._handle_proc_signals()
 
         self._before_worker_run()
 
@@ -49,7 +49,7 @@ class Worker(object):
         except:
             logger.error('exc occur.', exc_info=True)
 
-    def _handle_child_proc_signals(self):
+    def _handle_proc_signals(self):
         def exit_handler(signum, frame):
             # 防止重复处理KeyboardInterrupt，导致抛出异常
             if self.enable:
