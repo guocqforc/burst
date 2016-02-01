@@ -57,6 +57,7 @@ class Burst(RoutesMixin, AppEventsMixin):
         RoutesMixin.__init__(self)
         AppEventsMixin.__init__(self)
 
+        self.name = name
         self.box_class = box_class
         self.group_conf = group_conf
         self.group_router = group_router
@@ -95,7 +96,7 @@ class Burst(RoutesMixin, AppEventsMixin):
         :return:
         """
         proc_name = '%s: %s process %s' % (
-            '-'.join([constants.NAME, self.name or '']),
+            self.name or constants.NAME,
             proc_type,
             setproctitle.getproctitle()
         )
