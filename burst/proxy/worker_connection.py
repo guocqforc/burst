@@ -88,7 +88,8 @@ class WorkerConnection(Protocol):
                 return
         else:
             # 要转发数据给原来的用户
-            if self._doing_task and self._doing_task.client_conn:
+            # 要求连接存在，并且连接还处于连接中
+            if self._doing_task.client_conn and self._doing_task.client_conn.connected:
                 self._doing_task.client_conn.transport.write(data)
 
     def assign_task(self, task):
