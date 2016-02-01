@@ -21,12 +21,13 @@ class Task(object):
     def __init__(self, raw_data, box, client_conn):
         self.raw_data = raw_data
         self.box = box
-        self.client_conn_ref = client_conn
+        self.client_conn = client_conn
 
     @property
-    def client_conn_ref(self):
-        return self._client_conn_ref
+    def client_conn(self):
+        # 如果已经释放, ()会返回None
+        return self._client_conn_ref()
 
-    @client_conn_ref.setter
-    def client_conn_ref(self, value):
+    @client_conn.setter
+    def client_conn(self, value):
         self._client_conn_ref = weakref.ref(value)

@@ -79,6 +79,18 @@ class WorkerConnection(Protocol):
         :return:
         """
 
+        if box.cmd == constants.CMD_ASK_FOR_JOB:
+            # 说明是标记自己空闲
+            task = self.factory.app.task_dispatcher.alloc_task()
+            if task:
+                # 如果能申请成功，就继续执行
+                self.assign_task(task)
+                return
+        else:
+            # 要转发数据给原来的用户
+            if self._doing_task and self._doing_task.client_conn:
+                self._doing_task.client_conn.transport.write(data)
+
     def assign_task(self, task):
         """
         分配任务
@@ -86,7 +98,8 @@ class WorkerConnection(Protocol):
         :return:
         """
         self._doing_task = task
-        # TODO 处理
+        # 发送
+        self.transport.write(task.raw_data)
 
     @property
     def status(self):
