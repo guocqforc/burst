@@ -61,14 +61,13 @@ class Burst(RoutesMixin, AppEventsMixin):
     def register_blueprint(self, blueprint):
         blueprint.register_to_app(self)
 
-    def run(self, host=None, port=None, debug=None):
+    def run(self, host=None, port=None):
         self._validate_cmds()
 
         # 只要没有这个环境变量，就是主进程
         if not os.getenv(constants.WORKER_ENV_KEY):
             # 主进程
-            logger.info('Running server on %s:%s',
-                        host, port)
+            logger.info('Running server on %s:%s', host, port)
             self.proxy.run(host, port)
         else:
             # 子进程
