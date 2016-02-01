@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from twisted.internet.protocol import Protocol, Factory
+from twisted.internet.protocol import Protocol, Factory, connectionDone
 
 from burst.utils import safe_call
 from burst.log import logger
@@ -24,9 +24,11 @@ class ClientConnection(Protocol):
         self.address = address
         self._read_buffer = ''
 
-        # 放到弱引用映射里去
-        self.conn_id = self.factory.app.alloc_conn_id()
-        self.factory.app.conn_dict[self.conn_id] = self
+    def connectionMade(self):
+        pass
+
+    def connectionLost(self, reason=connectionDone):
+        pass
 
     def dataReceived(self, data):
         """

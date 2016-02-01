@@ -16,11 +16,10 @@ from .log import logger
 from .proxy import ClientConnectionFactory, WorkerConnectionFactory
 from .worker import RoutesMixin, AppEventsMixin, Request
 from . import constants
+from share.task_dispatcher import TaskDispatcher
 
 
 class Burst(RoutesMixin, AppEventsMixin):
-
-    CONN_ID_MAX = 2 ** 63 - 1
 
     client_connection_factory_class = ClientConnectionFactory
     worker_connection_factory_class = WorkerConnectionFactory
@@ -30,9 +29,6 @@ class Burst(RoutesMixin, AppEventsMixin):
 
     group_conf = None
     group_router = None
-
-    conn_id_counter = 0
-    conn_dict = None
 
     host = None
     port = None
@@ -50,7 +46,11 @@ class Burst(RoutesMixin, AppEventsMixin):
 
     # 子进程列表
     processes = None
-    msg_queue_dict = None
+    # 任务调度器
+    task_dispatcher = TaskDispatcher()
+
+    # 客户端连接的数据
+    conn_id_counter = 0
 
     def __init__(self, box_class, group_conf, group_router):
         """
@@ -75,25 +75,9 @@ class Burst(RoutesMixin, AppEventsMixin):
         self.group_router = group_router
 
         self.blueprints = list()
-        self.msg_queue_dict = dict()
-        self.conn_dict = weakref.WeakValueDictionary()
 
     def register_blueprint(self, blueprint):
         blueprint.register_to_app(self)
-
-    def alloc_conn_id(self):
-        """
-        获取自增的连接ID
-        :return:
-        """
-
-        # 使用longlong型
-        if self.conn_id_counter >= self.CONN_ID_MAX:
-            self.conn_id_counter = 0
-
-        self.conn_id_counter += 1
-
-        return self.conn_id_counter
 
     def run(self, host=None, port=None, debug=None):
         self._validate_cmds()

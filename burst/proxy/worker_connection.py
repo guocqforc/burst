@@ -4,6 +4,7 @@ from twisted.internet.protocol import Protocol, Factory, connectionDone
 
 from burst.utils import safe_call
 from burst.log import logger
+from .. import constants
 
 
 class WorkerConnectionFactory(Factory):
@@ -13,14 +14,16 @@ class WorkerConnectionFactory(Factory):
         self.group_id = group_id
 
     def buildProtocol(self, addr):
-        return WorkerConnection(self, (addr.host, addr.port), self.group_id)
+        return WorkerConnection(self, addr, self.group_id)
 
 
 class WorkerConnection(Protocol):
 
     # 状态
     _status = None
-
+    # 正在处理的任务
+    _doing_task = None
+    # 读取缓冲
     _read_buffer = None
 
     def __init__(self, factory, address, group_id):
@@ -75,28 +78,15 @@ class WorkerConnection(Protocol):
         :param box: 解析之后的box
         :return:
         """
-        msg = dict(
-            conn_id=id(self),
-            address=self.address,
-            data=data,
-        )
 
-        # 获取映射的group_id
-        group_id = self.factory.app.group_router(box)
-
-        try:
-            self.factory.app.parent_output_dict[group_id].put_nowait(msg)
-        except:
-            logger.error('exc occur. msg: %r', msg, exc_info=True)
-
-    def assign_task(self, msg):
+    def assign_task(self, task):
         """
         分配任务
-        :param msg:
+        :param task:
         :return:
         """
-        # TODO
-
+        self._doing_task = task
+        # TODO 处理
 
     @property
     def status(self):
@@ -105,3 +95,7 @@ class WorkerConnection(Protocol):
     @status.setter
     def status(self, value):
         self._status = value
+
+        if self._status == constants.WORKER_STATUS_IDLE:
+            # 没有正在处理的任务
+            self._doing_task = None

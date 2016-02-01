@@ -10,7 +10,7 @@ WORKER_STATUS_BUSY = 2
 RET_INVALID_CMD = -10000
 RET_INTERNAL = -10001
 
-# 默认host和port
+# 默认backlog
 SERVER_BACKLOG = 256
 
 # 重连等待时间
@@ -21,3 +21,7 @@ WORKER_GROUP_ENV_KEY = 'burst_WORKER_GROUP'
 
 # 网络连接超时(秒)，包括 connect once，read once，write once
 CONN_TIMEOUT = 3
+
+# 内部使用的命令字
+# 与maple不同，除了ask for job之外，都仅是转发，所以只要保证ask for job的cmd不要被使用就好
+CMD_ASK_FOR_JOB = -1
