@@ -5,6 +5,7 @@
 """
 
 import weakref
+from ..log import logger
 
 
 class Task(object):
@@ -30,4 +31,7 @@ class Task(object):
 
     @client_conn.setter
     def client_conn(self, value):
-        self._client_conn_ref = weakref.ref(value)
+        def on_del(reference):
+            logger.error('reference: %s deleted', reference)
+
+        self._client_conn_ref = weakref.ref(value, on_del)
