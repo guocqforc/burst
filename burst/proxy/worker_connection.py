@@ -17,6 +17,10 @@ class WorkerConnectionFactory(Factory):
 
 
 class WorkerConnection(Protocol):
+
+    # 状态
+    _status = None
+
     _read_buffer = None
 
     def __init__(self, factory, address, group_id):
@@ -84,3 +88,20 @@ class WorkerConnection(Protocol):
             self.factory.app.parent_output_dict[group_id].put_nowait(msg)
         except:
             logger.error('exc occur. msg: %r', msg, exc_info=True)
+
+    def assign_task(self, msg):
+        """
+        分配任务
+        :param msg:
+        :return:
+        """
+        # TODO
+
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, value):
+        self._status = value
