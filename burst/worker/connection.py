@@ -4,7 +4,7 @@ import os
 import socket
 import thread
 from netkit.contrib.tcp_client import TcpClient
-from ..share.worker_box import WorkerBox
+from netkit.box import Box
 import time
 from .. import constants
 from ..log import logger
@@ -17,7 +17,7 @@ class Connection(object):
     def __init__(self, app, host, port, conn_timeout):
         self.app = app
         # 直接创建即可
-        self.client = TcpClient(WorkerBox, host, port, conn_timeout)
+        self.client = TcpClient(Box, host, port, conn_timeout)
 
     def run(self):
         thread.start_new_thread(self._monitor_job_timeout, ())
@@ -64,7 +64,7 @@ class Connection(object):
         self._read_message()
 
     def _ask_for_job(self):
-        gw_box = GWBox()
+        gw_box = Box()
         gw_box.cmd = constants.CMD_WORKER_ASK_FOR_JOB
 
         return self.write(gw_box.pack())

@@ -4,7 +4,7 @@ from twisted.internet.protocol import Protocol, Factory, connectionDone
 
 from burst.utils import safe_call
 from burst.log import logger
-from burst.share.worker_box import WorkerBox
+from ..share.task import Task
 
 
 class ClientConnectionFactory(Factory):
@@ -23,12 +23,6 @@ class ClientConnection(Protocol):
         self.factory = factory
         self.address = address
         self._read_buffer = ''
-
-    def connectionMade(self):
-        pass
-
-    def connectionLost(self, reason=connectionDone):
-        pass
 
     def dataReceived(self, data):
         """
@@ -64,10 +58,8 @@ class ClientConnection(Protocol):
         :param box: 解析之后的box
         :return:
         """
-        worker_box = WorkerBox(init_data=dict(
-            body=data
-        ))
-
         # 获取映射的group_id
         group_id = self.factory.app.group_router(box)
 
+        task = Task(data, box, self)
+        self.factory.app.task_dispatcher.add_task(group_id, task)

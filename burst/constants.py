@@ -24,4 +24,4 @@ CONN_TIMEOUT = 3
 
 # 内部使用的命令字
 # 与maple不同，除了ask for job之外，都仅是转发，所以只要保证ask for job的cmd不要被使用就好
-CMD_ASK_FOR_JOB = -1
+CMD_WORKER_ASK_FOR_JOB = -1
