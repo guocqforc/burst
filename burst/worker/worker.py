@@ -27,7 +27,7 @@ class Worker(object):
 
     def run(self):
         # 从环境变量获取group_id
-        env = json.loads(os.environ[constants.WORKER_ENV_KEY])
+        env = json.loads(os.environ[constants.CHILD_ENV_KEY])
         self.group_id = env['group_id']
 
         self._try_serve_forever()

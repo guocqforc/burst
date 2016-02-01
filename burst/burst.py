@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 
 import os
+import json
 from collections import Counter
 from .log import logger
 from .mixins import RoutesMixin, AppEventsMixin
 from . import constants
 from proxy import Proxy
 from worker import Worker
+from controller import Controller
 
 
 class Burst(RoutesMixin, AppEventsMixin):
@@ -28,6 +30,7 @@ class Burst(RoutesMixin, AppEventsMixin):
     # worker的address模板
     worker_address_tpl = constants.WORKER_ADDRESS_TPL
 
+    controller = None
     proxy = None
     worker = None
     blueprints = None
@@ -54,6 +57,7 @@ class Burst(RoutesMixin, AppEventsMixin):
         self.group_conf = group_conf
         self.group_router = group_router
 
+        self.controller = Controller(self)
         self.proxy = Proxy(self)
         self.worker = Worker(self)
         self.blueprints = list()
@@ -65,13 +69,20 @@ class Burst(RoutesMixin, AppEventsMixin):
         self._validate_cmds()
 
         # 只要没有这个环境变量，就是主进程
-        if not os.getenv(constants.WORKER_ENV_KEY):
+        str_burst_env = os.getenv(constants.CHILD_ENV_KEY)
+
+        if not str_burst_env:
             # 主进程
             logger.info('Running server on %s:%s', host, port)
-            self.proxy.run(host, port)
+            self.controller.run()
         else:
-            # 子进程
-            self.worker.run()
+            burst_env = json.loads(str_burst_env)
+            if burst_env['type'] == constants.PROC_TYPE_PROXY:
+                # proxy
+                self.proxy.run(host, port)
+            else:
+                # worker
+                self.worker.run()
 
     def _validate_cmds(self):
         """

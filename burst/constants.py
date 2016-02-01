@@ -17,7 +17,7 @@ PROXY_BACKLOG = 256
 TRY_CONNECT_INTERVAL = 1
 
 # worker的group_id env
-WORKER_ENV_KEY = 'BURST_WORKER'
+CHILD_ENV_KEY = 'BURST_ENV'
 
 # 网络连接超时(秒)，包括 connect once，read once，write once
 CONN_TIMEOUT = 3
@@ -28,3 +28,7 @@ CMD_WORKER_ASK_FOR_JOB = -1
 
 # worker监听的address状态
 WORKER_ADDRESS_TPL = 'worker_%s.sock'
+
+# 进程类型
+PROC_TYPE_PROXY = 1
+PROC_TYPE_WORKER = 2
