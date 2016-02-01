@@ -42,7 +42,9 @@ class WorkerConnection(Protocol):
         pass
 
     def connectionLost(self, reason=connectionDone):
-        pass
+        # 要删除掉对应的worker，因为不确定连接是否会及时释放
+        # TODO，等测试一下，如果确定会自动释放的话，这代码就可以不用写了
+        self.factory.app.task_dispatcher.remove_worker(self)
 
     def dataReceived(self, data):
         """

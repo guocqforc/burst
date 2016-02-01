@@ -24,17 +24,9 @@ class TaskDispatcher(object):
         self.idle_workers_dict = defaultdict(set)
         self.group_queue = GroupQueue()
 
-    def add_worker(self, worker):
-        """
-        添加新worker，新worker一定是idle状态的
-        :param worker:
-        :return:
-        """
-        self.idle_workers_dict[worker.group_id].add(worker)
-
     def remove_worker(self, worker):
         """
-        删除worker，一般是worker死掉了
+        删除worker，一般是worker断掉了
         :param worker:
         :return:
         """
@@ -98,10 +90,9 @@ class TaskDispatcher(object):
             src_workers_dict = self.busy_workers_dict
             dst_workers_dict = self.idle_workers_dict
 
-        try:
+        if worker in src_workers_dict[worker.group_id]:
+            # 因为有可能worker的状态是None的话，是不在任何队列里面的，所以先判断一下
             src_workers_dict[worker.group_id].remove(worker)
-        except:
-            logger.error('exc occur, worker: %s', worker, exc_info=True)
-        finally:
-            dst_workers_dict[worker.group_id].add(worker)
+
+        dst_workers_dict[worker.group_id].add(worker)
 
