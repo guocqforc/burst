@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from collections import  defaultdict
+from collections import defaultdict
 
 from burst import constants
 from burst.proxy.group_queue import GroupQueue
