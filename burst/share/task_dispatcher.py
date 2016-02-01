@@ -46,7 +46,7 @@ class TaskDispatcher(object):
             self.idle_workers_dict[worker.group_id].remove(worker)
             return
 
-    def push_task(self, group_id, item):
+    def add_task(self, group_id, item):
         """
         添加任务
         当新消息来得时候，应该先检查有没有空闲的worker，如果没有的话，才放入消息队列
