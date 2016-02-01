@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 
 from collections import  defaultdict
-from .. import constants
-from ..log import logger
-from group_queue import GroupQueue
+
+from burst import constants
+from burst.proxy.group_queue import GroupQueue
 
 
 class TaskDispatcher(object):

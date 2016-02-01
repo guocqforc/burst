@@ -5,7 +5,7 @@
 """
 
 import weakref
-from ..log import logger
+from burst.log import logger
 
 
 class Task(object):

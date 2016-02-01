@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from twisted.internet.protocol import Protocol, Factory, connectionDone
+from twisted.internet.protocol import Protocol, Factory
 
 from burst.utils import safe_call
 from burst.log import logger
-from ..share.task import Task
+from burst.proxy.task import Task
 
 
 class ClientConnectionFactory(Factory):
