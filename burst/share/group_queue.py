@@ -1,5 +1,9 @@
 # -*- coding: utf-8 -*-
 
+"""
+封装通过group_id来访问数据的功能
+"""
+
 from collections import defaultdict
 import Queue
 
