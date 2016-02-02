@@ -32,7 +32,6 @@ class ClientConnection(Protocol):
     def connectionMade(self):
         # 转换string为int
         self._client_ip_num = ip_str_to_int(self.transport.client[0])
-        logger.error('_client_ip_num: %s', self._client_ip_num)
 
     def dataReceived(self, data):
         """
