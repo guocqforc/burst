@@ -54,7 +54,7 @@ class Proxy(object):
             address = self.app.worker_address_tpl % group_id
 
             # 给内部worker通信用的
-            reactor.listenUnix(address, self.worker_connection_factory_class(self, group_id))
+            reactor.listenUNIX(address, self.worker_connection_factory_class(self, group_id))
 
         try:
             reactor.run(installSignalHandlers=False)
