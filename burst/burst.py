@@ -4,6 +4,7 @@ import sys
 import os
 import json
 from collections import Counter
+from netkit.box import Box
 from .log import logger
 from .mixins import RoutesMixin, AppEventsMixin
 from . import constants
@@ -17,9 +18,9 @@ class Burst(RoutesMixin, AppEventsMixin):
     # 配置都放到 burst 里，而和proxy或者worker直接相关的类，则放到自己的部分
 
     # 进程名字
-    name = None
+    name = constants.NAME
 
-    box_class = None
+    box_class = Box
     proxy_backlog = constants.PROXY_BACKLOG
 
     group_conf = None
@@ -39,10 +40,9 @@ class Burst(RoutesMixin, AppEventsMixin):
     worker = None
     blueprints = None
 
-    def __init__(self, box_class, group_conf, group_router):
+    def __init__(self, group_conf, group_router):
         """
         构造函数
-        :param box_class: box类
         :param group_conf: 进程配置，格式如下:
             {
                 $group_id: {
@@ -57,7 +57,6 @@ class Burst(RoutesMixin, AppEventsMixin):
         RoutesMixin.__init__(self)
         AppEventsMixin.__init__(self)
 
-        self.box_class = box_class
         self.group_conf = group_conf
         self.group_router = group_router
 
@@ -95,7 +94,7 @@ class Burst(RoutesMixin, AppEventsMixin):
         :return:
         """
         proc_name = '[%s: %s] %s' % (
-            self.name or constants.NAME,
+            self.name,
             proc_type,
             ' '.join([sys.executable] + sys.argv)
         )
