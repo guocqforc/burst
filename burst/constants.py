@@ -23,8 +23,10 @@ CHILD_ENV_KEY = 'BURST_ENV'
 CONN_TIMEOUT = 3
 
 # 内部使用的命令字
-# 与maple不同，除了ask for job之外，都仅是转发，所以只要保证ask for job的cmd不要被使用就好
-CMD_WORKER_ASK_FOR_JOB = -1
+# 请求任务. 如果body里面带数据，说明是要写回；如果没有数据，说明只是要分配job
+CMD_WORKER_ASK_FOR_JOB = 100
+# 分配任务
+CMD_WORKER_ASSIGN_JOB = 200
 
 # proxy<->worker之间通信的address模板
 IPC_ADDRESS_TPL = NAME + '_%s.sock'

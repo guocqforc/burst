@@ -7,6 +7,7 @@ from unix_client import UnixClient
 import time
 from .. import constants
 from ..log import logger
+from ipc_box import IPCBox
 
 
 class Connection(object):
@@ -16,7 +17,7 @@ class Connection(object):
     def __init__(self, worker, address, conn_timeout):
         self.worker = worker
         # 直接创建即可
-        self.client = UnixClient(self.worker.app.box_class, address, conn_timeout)
+        self.client = UnixClient(IPCBox, address, conn_timeout)
 
     def run(self):
         thread.start_new_thread(self._monitor_job_timeout, ())
@@ -63,10 +64,10 @@ class Connection(object):
         self._read_message()
 
     def _ask_for_job(self):
-        gw_box = self.worker.app.box_class()
-        gw_box.cmd = constants.CMD_WORKER_ASK_FOR_JOB
+        ipc_box = IPCBox()
+        ipc_box.cmd = constants.CMD_WORKER_ASK_FOR_JOB
 
-        return self.write(gw_box.pack())
+        return self.write(ipc_box.pack())
 
     def _connect(self):
         try:
@@ -177,14 +178,14 @@ class Connection(object):
         view_func_exc = None
 
         try:
-            request.view_func(request)
+            rsp = request.view_func(request)
         except Exception, e:
             logger.error('view_func raise exception. request: %s, e: %s',
                          request, e, exc_info=True)
             view_func_exc = e
-            # 必须是没有回应过
-            if not request.responded:
-                request.write(dict(ret=constants.RET_INTERNAL))
+            request.write(dict(ret=constants.RET_INTERNAL))
+        else:
+            request.write(rsp)
 
         if request.blueprint:
             request.blueprint.events.after_request(request, view_func_exc)

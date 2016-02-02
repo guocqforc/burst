@@ -64,7 +64,9 @@ def after_response(worker, rsp, result):
 @app.route(1)
 def index(request):
     logger.error('request: %s, worker: %s', request, request.worker)
-    request.write(dict(ret=100))
+    return dict(
+        ret=10
+    )
 
 
 app.register_blueprint(user.bp)

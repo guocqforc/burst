@@ -1,30 +1,45 @@
 # -*- coding: utf-8 -*-
 
 
+from ipc_box import IPCBox
+from .. import constants
+from ..log import logger
+
+
 class Request(object):
     """
     请求
     """
 
     conn = None
+    ipc_box = None
     box = None
+    is_valid = False
     blueprint = None
-    # 是否已经作出回应
-    responded = False
     route_rule = None
 
-    def __init__(self, conn, box):
+    def __init__(self, conn, ipc_box):
         self.conn = conn
-        self.box = box
-        self._parse_route_rule()
+        self.ipc_box = ipc_box
+        # 赋值
+        self.is_valid = self._parse_raw_data()
 
-    @property
-    def worker(self):
-        return self.conn.worker
+    def _parse_raw_data(self):
+        if not self.ipc_box.body:
+            return True
 
-    @property
-    def app(self):
-        return self.worker.app
+        try:
+            self.box = self.app.box_class()
+        except Exception, e:
+            logger.error('parse raw_data fail. e: %s, request: %s', e, self)
+            return False
+
+        if self.box.unpack(self.ipc_box.body) > 0:
+            self._parse_route_rule()
+            return True
+        else:
+            logger.error('unpack fail. request: %s', self)
+            return False
 
     def _parse_route_rule(self):
         if self.cmd is None:
@@ -42,6 +57,14 @@ class Request(object):
                 self.blueprint = bp
                 self.route_rule = route_rule
                 break
+
+    @property
+    def worker(self):
+        return self.conn.worker
+
+    @property
+    def app(self):
+        return self.worker.app
 
     @property
     def cmd(self):
@@ -65,7 +88,8 @@ class Request(object):
 
     def write(self, data):
         """
-        写回
+        写回，业务代码中请不要调用
+        如果处理函数没有return数据的话，data可能为None，此时相当于直接进行ask_for_job
         :param data: 可以是dict也可以是box
         :return:
         """
@@ -75,12 +99,20 @@ class Request(object):
         elif isinstance(data, dict):
             data = self.box.map(data).pack()
 
-        succ = self.conn.write(data)
-        if succ:
-            # 如果发送成功，就标记为已经回应
-            self.responded = True
+        logger.error('data: %r', data)
+        ipc_box = IPCBox(dict(
+            cmd=constants.CMD_WORKER_ASK_FOR_JOB,
+            body=data or '',
+        ))
 
-        return succ
+        return self.conn.write(ipc_box.pack())
+
+    def client_ip(self):
+        """
+        客户端连接IP
+        :return:
+        """
+        return self.ipc_box.client_ip
 
     def __repr__(self):
         return 'cmd: %r, endpoint: %s, box: %r' % (self.cmd, self.endpoint, self.box)
