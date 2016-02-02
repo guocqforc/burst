@@ -30,7 +30,7 @@ CMD_WORKER_ASK_FOR_JOB = -1
 WORKER_ADDRESS_TPL = 'worker_%s.sock'
 
 # 进程类型
-PROC_TYPE_CONTROLLER = 'controller'
+PROC_TYPE_MASTER = 'master'
 PROC_TYPE_PROXY = 'proxy'
 PROC_TYPE_WORKER = 'worker'
 

@@ -9,7 +9,7 @@ from .mixins import RoutesMixin, AppEventsMixin
 from . import constants
 from proxy import Proxy
 from worker import Worker
-from controller import Controller
+from master import Master
 
 
 class Burst(RoutesMixin, AppEventsMixin):
@@ -34,7 +34,7 @@ class Burst(RoutesMixin, AppEventsMixin):
     # worker的address模板
     worker_address_tpl = constants.WORKER_ADDRESS_TPL
 
-    controller = None
+    master = None
     proxy = None
     worker = None
     blueprints = None
@@ -57,12 +57,11 @@ class Burst(RoutesMixin, AppEventsMixin):
         RoutesMixin.__init__(self)
         AppEventsMixin.__init__(self)
 
-        self.name = name
         self.box_class = box_class
         self.group_conf = group_conf
         self.group_router = group_router
 
-        self.controller = Controller(self)
+        self.master = Master(self)
         self.proxy = Proxy(self)
         self.worker = Worker(self)
         self.blueprints = list()
@@ -79,7 +78,7 @@ class Burst(RoutesMixin, AppEventsMixin):
         if not str_burst_env:
             # 主进程
             logger.info('Running server on %s:%s', host, port)
-            self.controller.run()
+            self.master.run()
         else:
             burst_env = json.loads(str_burst_env)
             if burst_env['type'] == constants.PROC_TYPE_PROXY:

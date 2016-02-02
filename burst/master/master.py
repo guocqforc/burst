@@ -11,12 +11,12 @@ import setproctitle
 from .. import constants
 
 
-class Controller(object):
+class Master(object):
     """
-    controller相关
+    master相关
     """
 
-    type = constants.PROC_TYPE_CONTROLLER
+    type = constants.PROC_TYPE_MASTER
 
     app = None
 
