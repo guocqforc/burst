@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from ipc_box import IPCBox
+from ..proxy import TaskBox
 from .. import constants
 from ..log import logger
 
@@ -12,20 +12,20 @@ class Request(object):
     """
 
     conn = None
-    ipc_box = None
+    task_box = None
     box = None
     is_valid = False
     blueprint = None
     route_rule = None
 
-    def __init__(self, conn, ipc_box):
+    def __init__(self, conn, task_box):
         self.conn = conn
-        self.ipc_box = ipc_box
+        self.task_box = task_box
         # 赋值
         self.is_valid = self._parse_raw_data()
 
     def _parse_raw_data(self):
-        if not self.ipc_box.body:
+        if not self.task_box.body:
             return True
 
         try:
@@ -34,7 +34,7 @@ class Request(object):
             logger.error('parse raw_data fail. e: %s, request: %s', e, self)
             return False
 
-        if self.box.unpack(self.ipc_box.body) > 0:
+        if self.box.unpack(self.task_box.body) > 0:
             self._parse_route_rule()
             return True
         else:
@@ -100,19 +100,19 @@ class Request(object):
             data = self.box.map(data).pack()
 
         logger.error('data: %r', data)
-        ipc_box = IPCBox(dict(
+        task_box = TaskBox(dict(
             cmd=constants.CMD_WORKER_ASK_FOR_JOB,
             body=data or '',
         ))
 
-        return self.conn.write(ipc_box.pack())
+        return self.conn.write(task_box.pack())
 
     def client_ip(self):
         """
         客户端连接IP
         :return:
         """
-        return self.ipc_box.client_ip
+        return self.task_box.client_ip
 
     def __repr__(self):
         return 'cmd: %r, endpoint: %s, box: %r' % (self.cmd, self.endpoint, self.box)

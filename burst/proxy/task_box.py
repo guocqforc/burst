@@ -13,7 +13,7 @@ HEADER_ATTRS = OrderedDict([
     ])
 
 
-class IPCBox(Box):
+class TaskBox(Box):
     header_attrs = HEADER_ATTRS
 
     @property

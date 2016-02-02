@@ -7,7 +7,7 @@ from unix_client import UnixClient
 import time
 from .. import constants
 from ..log import logger
-from ipc_box import IPCBox
+from ..proxy import TaskBox
 
 
 class Connection(object):
@@ -17,7 +17,7 @@ class Connection(object):
     def __init__(self, worker, address, conn_timeout):
         self.worker = worker
         # 直接创建即可
-        self.client = UnixClient(IPCBox, address, conn_timeout)
+        self.client = UnixClient(TaskBox, address, conn_timeout)
 
     def run(self):
         thread.start_new_thread(self._monitor_job_timeout, ())
@@ -64,10 +64,10 @@ class Connection(object):
         self._read_message()
 
     def _ask_for_job(self):
-        ipc_box = IPCBox()
-        ipc_box.cmd = constants.CMD_WORKER_ASK_FOR_JOB
+        task_box = TaskBox()
+        task_box.cmd = constants.CMD_WORKER_ASK_FOR_JOB
 
-        return self.write(ipc_box.pack())
+        return self.write(task_box.pack())
 
     def _connect(self):
         try:

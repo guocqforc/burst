@@ -5,7 +5,7 @@ from twisted.internet.protocol import Protocol, Factory, connectionDone
 from ..utils import safe_call
 from ..log import logger
 from .. import constants
-from ..worker import IPCBox
+from .task_box import TaskBox
 
 
 class WorkerConnectionFactory(Factory):
@@ -56,8 +56,8 @@ class WorkerConnection(Protocol):
 
         while self._read_buffer:
             # 因为box后面还是要用的
-            ipc_box = IPCBox()
-            ret = ipc_box.unpack(self._read_buffer)
+            task_box = TaskBox()
+            ret = task_box.unpack(self._read_buffer)
             if ret == 0:
                 # 说明要继续收
                 return
@@ -65,7 +65,7 @@ class WorkerConnection(Protocol):
                 # 收好了
                 box_data = self._read_buffer[:ret]
                 self._read_buffer = self._read_buffer[ret:]
-                safe_call(self._on_read_complete, ipc_box)
+                safe_call(self._on_read_complete, task_box)
                 continue
             else:
                 # 数据已经混乱了，全部丢弃
@@ -73,20 +73,20 @@ class WorkerConnection(Protocol):
                 self._read_buffer = ''
                 return
 
-    def _on_read_complete(self, ipc_box):
+    def _on_read_complete(self, task_box):
         """
         完整数据接收完成
-        :param ipc_box: 解析之后的ipc_box
+        :param task_box: 解析之后的task_box
         :return:
         """
 
-        if ipc_box.cmd == constants.CMD_WORKER_ASK_FOR_JOB:
+        if task_box.cmd == constants.CMD_WORKER_ASK_FOR_JOB:
             # 如果有数据，就要先处理
-            if ipc_box.body:
+            if task_box.body:
                 # 要转发数据给原来的用户
                 # 要求连接存在，并且连接还处于连接中
                 if self._doing_task.client_conn and self._doing_task.client_conn.connected:
-                    self._doing_task.client_conn.transport.write(ipc_box.body)
+                    self._doing_task.client_conn.transport.write(task_box.body)
 
             # 无论有没有任务，都会标记自己空闲
             task = self.factory.proxy.task_dispatcher.alloc_task(self)
@@ -102,12 +102,7 @@ class WorkerConnection(Protocol):
         """
         self._doing_task = task
         # 发送
-        ipc_box = IPCBox(dict(
-            cmd=constants.CMD_WORKER_ASSIGN_JOB,
-            body=task.raw_data,
-        ))
-
-        self.transport.write(ipc_box.pack())
+        self.transport.write(task.task_box.pack())
 
     @property
     def status(self):
