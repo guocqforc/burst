@@ -22,16 +22,15 @@ class Worker(object):
     # 是否有效(父进程中代表程序有效，子进程中代表worker是否有效)
     enable = True
 
-    def __init__(self, app):
+    def __init__(self, app, group_id):
         """
         构造函数
         :return:
         """
         self.app = app
-
-    def run(self, group_id):
         self.group_id = group_id
 
+    def run(self):
         setproctitle.setproctitle(self.app.make_proc_name(
             '%s:%s' % (self.type, self.group_id)
         ))

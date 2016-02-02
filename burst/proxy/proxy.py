@@ -29,18 +29,18 @@ class Proxy(object):
     # 任务调度器
     task_dispatcher = None
 
-    def __init__(self, app):
+    def __init__(self, app, host, port):
         """
         构造函数
         :return:
         """
         self.app = app
-        self.task_dispatcher = TaskDispatcher()
-
-    def run(self, host=None, port=None):
         self.host = host
         self.port = port
 
+        self.task_dispatcher = TaskDispatcher()
+
+    def run(self):
         setproctitle.setproctitle(self.app.make_proc_name(self.type))
 
         # 主进程
@@ -54,8 +54,8 @@ class Proxy(object):
             reactor.listenUNIX(address, self.worker_connection_factory_class(self, group_id))
 
         # 启动对外监听
-        reactor.listenTCP(port, self.client_connection_factory_class(self),
-                          backlog=self.app.proxy_backlog, interface=host)
+        reactor.listenTCP(self.port, self.client_connection_factory_class(self),
+                          backlog=self.app.proxy_backlog, interface=self.host)
 
         try:
             reactor.run(installSignalHandlers=False)

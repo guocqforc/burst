@@ -34,9 +34,6 @@ class Burst(RoutesMixin, AppEventsMixin):
     # proxy<->worker之间通信的address模板
     ipc_address_tpl = constants.IPC_ADDRESS_TPL
 
-    master = None
-    proxy = None
-    worker = None
     blueprints = None
 
     def __init__(self, box_class, group_conf, group_router):
@@ -61,9 +58,6 @@ class Burst(RoutesMixin, AppEventsMixin):
         self.group_conf = group_conf
         self.group_router = group_router
 
-        self.master = Master(self)
-        self.proxy = Proxy(self)
-        self.worker = Worker(self)
         self.blueprints = list()
 
     def register_blueprint(self, blueprint):
@@ -78,15 +72,15 @@ class Burst(RoutesMixin, AppEventsMixin):
         if not str_burst_env:
             # 主进程
             logger.info('Running server on %s:%s', host, port)
-            self.master.run()
+            Master(self).run()
         else:
             burst_env = json.loads(str_burst_env)
             if burst_env['type'] == constants.PROC_TYPE_PROXY:
                 # proxy
-                self.proxy.run(host, port)
+                Proxy(self, host, port).run()
             else:
                 # worker
-                self.worker.run(burst_env['group_id'])
+                Worker(self, burst_env['group_id']).run()
 
     def make_proc_name(self, subtitle):
         """
