@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from burst.mixins import RoutesMixin, BlueprintEventsMixin
+from mixins import RoutesMixin, BlueprintEventsMixin
 
 
 class Blueprint(RoutesMixin, BlueprintEventsMixin):
