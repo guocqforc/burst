@@ -2,9 +2,9 @@
 
 from twisted.internet.protocol import Protocol, Factory
 
-from burst.utils import safe_call
-from burst.log import logger
-from burst.proxy.task import Task
+from ..utils import safe_call
+from ..log import logger
+from task import Task
 
 
 class ClientConnectionFactory(Factory):

@@ -3,12 +3,12 @@
 import signal
 # linux 默认就是epoll
 from twisted.internet import reactor
+import setproctitle
 
 from ..log import logger
 from . import ClientConnectionFactory, WorkerConnectionFactory
-from burst.proxy.task_dispatcher import TaskDispatcher
+from task_dispatcher import TaskDispatcher
 from .. import constants
-import setproctitle
 
 
 class Proxy(object):

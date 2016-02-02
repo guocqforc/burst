@@ -2,10 +2,11 @@
 
 import signal
 from .connection import Connection
+import setproctitle
+
 from ..log import logger
 from .request import Request
 from .. import constants
-import setproctitle
 
 
 class Worker(object):

@@ -5,9 +5,9 @@ import os
 import json
 from collections import Counter
 from netkit.box import Box
-from .log import logger
-from .mixins import RoutesMixin, AppEventsMixin
-from . import constants
+from log import logger
+from mixins import RoutesMixin, AppEventsMixin
+import constants
 from proxy import Proxy
 from worker import Worker
 from master import Master

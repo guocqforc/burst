@@ -2,8 +2,8 @@
 
 from twisted.internet.protocol import Protocol, Factory, connectionDone
 
-from burst.utils import safe_call
-from burst.log import logger
+from ..utils import safe_call
+from ..log import logger
 from .. import constants
 
 
