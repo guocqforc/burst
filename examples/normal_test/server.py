@@ -64,7 +64,7 @@ def after_response(worker, rsp, result):
 
 @app.route(1)
 def index(request):
-    logger.error('request: %s, worker: %s', request, request.worker)
+    logger.error('request: %s, client_ip: %s, worker: %s', request, request.client_ip, request.worker)
     return dict(
         ret=10
     )
