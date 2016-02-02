@@ -52,20 +52,20 @@ class Master(object):
             inner_p = subprocess.Popen(args, env=worker_env)
             return inner_p
 
-        proxy_proc_env = dict(
+        proc_env = dict(
             type=constants.PROC_TYPE_PROXY
         )
-        p = start_child_process(proxy_proc_env)
-        p.burst_env = proxy_proc_env
+        p = start_child_process(proc_env)
+        p.proc_env = proc_env
         self.processes.append(p)
 
         for group_id, group_info in self.app.group_conf.items():
-            burst_env = dict(
+            proc_env = dict(
                 type=constants.PROC_TYPE_WORKER,
                 group_id=group_id,
             )
-            p = start_child_process(burst_env)
-            p.burst_env = burst_env
+            p = start_child_process(proc_env)
+            p.proc_env = proc_env
             self.processes.append(p)
 
         while 1:
@@ -78,7 +78,7 @@ class Master(object):
 
                     if self.enable:
                         # 如果还要继续服务
-                        p = start_child_process(old_p.burst_env)
+                        p = start_child_process(old_p.proc_env)
                         self.processes[idx] = p
 
             if not filter(lambda x: x, self.processes):
