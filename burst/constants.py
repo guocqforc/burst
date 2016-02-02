@@ -26,8 +26,8 @@ CONN_TIMEOUT = 3
 # 与maple不同，除了ask for job之外，都仅是转发，所以只要保证ask for job的cmd不要被使用就好
 CMD_WORKER_ASK_FOR_JOB = -1
 
-# worker监听的address状态
-WORKER_ADDRESS_TPL = 'worker_%s.sock'
+# proxy<->worker之间通信的address模板
+IPC_ADDRESS_TPL = NAME + '_%s.sock'
 
 # 进程类型
 PROC_TYPE_MASTER = 'master'

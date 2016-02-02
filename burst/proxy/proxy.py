@@ -51,7 +51,7 @@ class Proxy(object):
 
         # 启动监听worker
         for group_id in self.app.group_conf:
-            address = self.app.worker_address_tpl % group_id
+            address = self.app.ipc_address_tpl % group_id
 
             # 给内部worker通信用的
             reactor.listenUNIX(address, self.worker_connection_factory_class(self, group_id))
