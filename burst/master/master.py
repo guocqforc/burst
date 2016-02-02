@@ -41,23 +41,22 @@ class Master(object):
         self._fork_workers()
 
     def _fork_workers(self):
-        def start_child_process(child_env):
+        def start_child_process(proc_env):
             # 要传入group_id
             worker_env = copy.deepcopy(os.environ)
             worker_env.update({
-                constants.CHILD_ENV_KEY: json.dumps(child_env)
+                constants.CHILD_ENV_KEY: json.dumps(proc_env)
             })
 
             args = [sys.executable] + sys.argv
             inner_p = subprocess.Popen(args, env=worker_env)
+            inner_p.proc_env = proc_env
             return inner_p
 
         proc_env = dict(
             type=constants.PROC_TYPE_PROXY
         )
         p = start_child_process(proc_env)
-        p.proc_env = proc_env
-        print p.proc_env
         self.processes.append(p)
 
         for group_id, group_info in self.app.group_conf.items():
@@ -66,21 +65,18 @@ class Master(object):
                 group_id=group_id,
             )
             p = start_child_process(proc_env)
-            p.proc_env = proc_env
-            print p.proc_env
             self.processes.append(p)
 
         while 1:
             for idx, p in enumerate(self.processes):
                 if p and p.poll() is not None:
-                    old_p = p
-
                     # 说明退出了
+                    proc_env = p.proc_env
                     self.processes[idx] = None
 
                     if self.enable:
                         # 如果还要继续服务
-                        p = start_child_process(old_p.proc_env)
+                        p = start_child_process(proc_env)
                         self.processes[idx] = p
 
             if not filter(lambda x: x, self.processes):
