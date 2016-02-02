@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from .. import constants
-
 
 class Request(object):
     """
@@ -21,8 +19,12 @@ class Request(object):
         self._parse_route_rule()
 
     @property
+    def worker(self):
+        return self.conn.worker
+
+    @property
     def app(self):
-        return self.conn.worker.app
+        return self.worker.app
 
     def _parse_route_rule(self):
         if self.cmd is None:
