@@ -11,5 +11,5 @@ setup(
     license="MIT",
     author="dantezhu",
     author_email="zny2008@gmail.com",
-    description="twisted with multiprocessing worker",
+    description="twisted with master, proxy and worker",
 )
