@@ -56,7 +56,7 @@ class WorkerConnection(Protocol):
 
         while self._read_buffer:
             # 因为box后面还是要用的
-            box = self.factory.proxy.box_class()
+            box = self.factory.proxy.app.box_class()
             ret = box.unpack(self._read_buffer)
             if ret == 0:
                 # 说明要继续收

@@ -22,7 +22,10 @@ class GroupQueue(object):
         return self.queue_dict[group_id].put_nowait(item)
 
     def get(self, group_id):
-        return self.queue_dict[group_id].get_nowait()
+        if self.empty(group_id):
+            return None
+        else:
+            return self.queue_dict[group_id].get_nowait()
 
     def empty(self, group_id):
         """
