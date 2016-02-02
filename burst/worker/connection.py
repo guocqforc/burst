@@ -13,10 +13,10 @@ class Connection(object):
 
     job_info = None
 
-    def __init__(self, app, address, conn_timeout):
-        self.app = app
+    def __init__(self, worker, address, conn_timeout):
+        self.worker = worker
         # 直接创建即可
-        self.client = UnixClient(app.box_class, address, conn_timeout)
+        self.client = UnixClient(self.worker.app.box_class, address, conn_timeout)
 
     def run(self):
         thread.start_new_thread(self._monitor_job_timeout, ())
@@ -34,27 +34,27 @@ class Connection(object):
         :return:
         """
 
-        while self.app.enable:
+        while self.worker.enable:
             time.sleep(1)
 
             job_info = self.job_info
             if job_info:
                 past_time = time.time() - job_info['begin_time']
-                if self.app.job_timeout is not None and past_time > self.app.job_timeout:
+                if self.worker.app.job_timeout is not None and past_time > self.worker.app.job_timeout:
                     # 说明worker的处理时间已经太长了
                     logger.error('job is timeout: %s / %s, request: %s',
-                                 past_time, self.app.job_timeout, job_info['request'])
+                                 past_time, self.worker.app.job_timeout, job_info['request'])
                     # 强制从子线程退出worker
                     os._exit(-1)
 
     def _handle(self):
-        while self.app.enable and self.closed():
+        while self.worker.enable and self.closed():
             if not self._connect():
-                logger.error('connect fail, host: %s, port: %s, sleep %ss', 
-                             self.client.host, self.client.port, constants.TRY_CONNECT_INTERVAL)
+                logger.error('connect fail, address: %s, sleep %ss',
+                             self.client.address, constants.TRY_CONNECT_INTERVAL)
                 time.sleep(constants.TRY_CONNECT_INTERVAL)
 
-        if not self.app.enable:
+        if not self.worker.enable:
             # 安全退出
             raise KeyboardInterrupt
 
@@ -63,7 +63,7 @@ class Connection(object):
         self._read_message()
 
     def _ask_for_job(self):
-        gw_box = self.app.box_class()
+        gw_box = self.worker.app.box_class()
         gw_box.cmd = constants.CMD_WORKER_ASK_FOR_JOB
 
         return self.write(gw_box.pack())
@@ -76,8 +76,8 @@ class Connection(object):
         except:
             return False
         else:
-            self.app.events.create_conn(self)
-            for bp in self.app.blueprints:
+            self.worker.app.events.create_conn(self)
+            for bp in self.worker.app.blueprints:
                 bp.events.create_app_conn(self)
 
             return True
@@ -91,17 +91,17 @@ class Connection(object):
             return False
 
         # 只支持字符串
-        self.app.events.before_response(self, data)
-        for bp in self.app.blueprints:
+        self.worker.app.events.before_response(self, data)
+        for bp in self.worker.app.blueprints:
             bp.events.before_app_response(self, data)
 
         ret = self.client.write(data)
         if not ret:
             logger.error('connection write fail. data: %r', data)
 
-        for bp in self.app.blueprints:
+        for bp in self.worker.app.blueprints:
             bp.events.after_app_response(self, data, ret)
-        self.app.events.after_response(self, data, ret)
+        self.worker.app.events.after_response(self, data, ret)
 
         return ret
 
@@ -114,7 +114,7 @@ class Connection(object):
                 req_box = self.client.read()
             except socket.timeout:
                 # 超时了
-                if not self.app.enable:
+                if not self.worker.enable:
                     return
                 else:
                     # 继续读
@@ -132,17 +132,17 @@ class Connection(object):
     def _on_connection_close(self):
         # 链接被关闭的回调
 
-        logger.error('connection closed, host: %s, port: %s', self.client.host, self.client.port)
+        logger.error('connection closed, address: %s', self.client.address)
 
-        for bp in self.app.blueprints:
+        for bp in self.worker.app.blueprints:
             bp.events.close_app_conn(self)
-        self.app.events.close_conn(self)
+        self.worker.app.events.close_conn(self)
 
     def _on_read_complete(self, data):
         """
         数据获取结束
         """
-        request = self.app.request_class(self, data)
+        request = self.worker.app.request_class(self, data)
 
         # 设置job开始处理的时间和信息
         self.job_info = dict(
@@ -163,14 +163,14 @@ class Connection(object):
                 request.write_to_client(dict(ret=constants.RET_INVALID_CMD))
             return False
 
-        if not self.app.got_first_request:
-            self.app.got_first_request = True
-            self.app.events.before_first_request(request)
-            for bp in self.app.blueprints:
+        if not self.worker.app.got_first_request:
+            self.worker.app.got_first_request = True
+            self.worker.app.events.before_first_request(request)
+            for bp in self.worker.app.blueprints:
                 bp.events.before_app_first_request(request)
 
-        self.app.events.before_request(request)
-        for bp in self.app.blueprints:
+        self.worker.app.events.before_request(request)
+        for bp in self.worker.app.blueprints:
             bp.events.before_app_request(request)
         if request.blueprint:
             request.blueprint.events.before_request(request)
@@ -189,9 +189,9 @@ class Connection(object):
 
         if request.blueprint:
             request.blueprint.events.after_request(request, view_func_exc)
-        for bp in self.app.blueprints:
+        for bp in self.worker.app.blueprints:
             bp.events.after_app_request(request, view_func_exc)
-        self.app.events.after_request(request, view_func_exc)
+        self.worker.app.events.after_request(request, view_func_exc)
 
         return True
 
