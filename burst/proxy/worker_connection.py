@@ -40,7 +40,8 @@ class WorkerConnection(Protocol):
         self._read_buffer = ''
 
     def connectionMade(self):
-        pass
+        # 建立连接就直接去申请task
+        self._try_alloc_task()
 
     def connectionLost(self, reason=connectionDone):
         # 要删除掉对应的worker
@@ -79,7 +80,7 @@ class WorkerConnection(Protocol):
         :return:
         """
 
-        if task_box.cmd == constants.CMD_WORKER_ASK_FOR_JOB:
+        if task_box.cmd == constants.CMD_WORKER_TASK_DONE:
             # 如果有数据，就要先处理
             if task_box.body:
                 # 要转发数据给原来的用户
@@ -87,11 +88,14 @@ class WorkerConnection(Protocol):
                 if self._doing_task.client_conn and self._doing_task.client_conn.connected:
                     self._doing_task.client_conn.transport.write(task_box.body)
 
-            # 无论有没有任务，都会标记自己空闲
-            task = self.factory.proxy.task_dispatcher.alloc_task(self)
-            if task:
-                # 如果能申请成功，就继续执行
-                self.assign_task(task)
+            self._try_alloc_task()
+
+    def _try_alloc_task(self):
+        # 无论有没有任务，都会标记自己空闲
+        task = self.factory.proxy.task_dispatcher.alloc_task(self)
+        if task:
+            # 如果能申请成功，就继续执行
+            self.assign_task(task)
 
     def assign_task(self, task):
         """

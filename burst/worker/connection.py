@@ -59,15 +59,7 @@ class Connection(object):
             # 安全退出
             raise KeyboardInterrupt
 
-        # 跟gateway要job
-        self._ask_for_job()
         self._read_message()
-
-    def _ask_for_job(self):
-        task_box = TaskBox()
-        task_box.cmd = constants.CMD_WORKER_ASK_FOR_JOB
-
-        return self.write(task_box.pack())
 
     def _connect(self):
         try:

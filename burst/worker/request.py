@@ -110,7 +110,7 @@ class Request(object):
             data = self.box.map(data).pack()
 
         task_box = TaskBox(dict(
-            cmd=constants.CMD_WORKER_ASK_FOR_JOB,
+            cmd=constants.CMD_WORKER_TASK_DONE,
             body=data or '',
         ))
 

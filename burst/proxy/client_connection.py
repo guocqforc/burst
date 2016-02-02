@@ -72,7 +72,7 @@ class ClientConnection(Protocol):
 
         # 打包成内部通信的task_box
         task_box = TaskBox(dict(
-            cmd=constants.CMD_WORKER_ASSIGN_JOB,
+            cmd=constants.CMD_WORKER_TASK_ASSIGN,
             client_ip_num=self._client_ip_num,
             body=data,
         ))

@@ -23,10 +23,10 @@ CHILD_ENV_KEY = 'BURST_ENV'
 CONN_TIMEOUT = 3
 
 # 内部使用的命令字
-# 请求任务. 如果body里面带数据，说明是要写回；如果没有数据，说明只是要分配job
-CMD_WORKER_ASK_FOR_JOB = 100
-# 分配任务
-CMD_WORKER_ASSIGN_JOB = 200
+# 分配任务. 如果body里面带数据，说明是要写回；如果没有数据，说明只是要分配job
+CMD_WORKER_TASK_ASSIGN = 100
+# 任务完成
+CMD_WORKER_TASK_DONE = 200
 
 # proxy<->worker之间通信的address模板
 IPC_ADDRESS_TPL = NAME + '_%s.sock'
