@@ -20,7 +20,7 @@ class Request(object):
 
     @property
     def app(self):
-        return self.conn.app
+        return self.conn.worker.app
 
     def _parse_route_rule(self):
         if self.cmd is None:
@@ -71,12 +71,7 @@ class Request(object):
         elif isinstance(data, dict):
             data = self.box.map(data).pack()
 
-        gw_box = self.gw_box.map(dict(
-            cmd=constants.CMD_WRITE_TO_CLIENT,
-            body=data,
-        ))
-
-        return self.conn.write(gw_box.pack())
+        return self.conn.write(data)
 
     def __repr__(self):
         return 'cmd: %r, endpoint: %s, box: %r' % (self.cmd, self.endpoint, self.box)

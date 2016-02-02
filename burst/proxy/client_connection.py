@@ -59,7 +59,7 @@ class ClientConnection(Protocol):
         :return:
         """
         # 获取映射的group_id
-        group_id = self.factory.proxy.group_router(box)
+        group_id = self.factory.proxy.app.group_router(box)
 
         task = Task(data, box, self)
         self.factory.proxy.task_dispatcher.add_task(group_id, task)

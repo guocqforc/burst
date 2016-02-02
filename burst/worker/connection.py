@@ -142,7 +142,7 @@ class Connection(object):
         """
         数据获取结束
         """
-        request = self.worker.app.request_class(self, data)
+        request = self.worker.request_class(self, data)
 
         # 设置job开始处理的时间和信息
         self.job_info = dict(
