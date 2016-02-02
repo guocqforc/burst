@@ -24,3 +24,26 @@ def safe_func(func):
     def func_wrapper(*args, **kwargs):
         return safe_call(func, *args, **kwargs)
     return func_wrapper
+
+
+def ip_int_to_str(ip_num):
+    """
+    转换ip格式，从int转为str
+    :param ip_num:
+    :return:
+    """
+    import socket
+    import struct
+    return socket.inet_ntoa(struct.pack("!I", ip_num))
+
+
+def ip_str_to_int(ip_str):
+    """
+    转化ip格式，从str转为int
+    :param ip_str:
+    :return:
+    """
+    import socket
+    import struct
+
+    return struct.unpack("!I", socket.inet_aton(ip_str))[0]

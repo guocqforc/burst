@@ -7,7 +7,7 @@ bp = Blueprint('user')
 
 @bp.route(101)
 def login(request):
-    logger.error('request: %s, worker: %s', request, request.worker)
+    logger.error('request: %s, client_ip: %s, worker: %s', request, request.client_ip, request.worker)
     return dict(ret=101, body=repr(request))
 
 

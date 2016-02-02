@@ -3,6 +3,7 @@
 import sys
 sys.path.insert(0, '../../')
 
+from netkit.box import Box
 from burst import Burst, Blueprint
 import user
 
@@ -21,7 +22,7 @@ handler.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-app = Burst({
+app = Burst(Box, {
     1: {
         'count': 2,
     },

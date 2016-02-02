@@ -2,7 +2,7 @@
 
 from twisted.internet.protocol import Protocol, Factory
 
-from ..utils import safe_call
+from ..utils import safe_call, ip_str_to_int
 from ..log import logger
 from task import Task
 from task_box import TaskBox
@@ -21,10 +21,18 @@ class ClientConnectionFactory(Factory):
 class ClientConnection(Protocol):
     _read_buffer = None
 
+    # 客户端IP的数字
+    _client_ip_num = None
+
     def __init__(self, factory, address):
         self.factory = factory
         self.address = address
         self._read_buffer = ''
+
+    def connectionMade(self):
+        # 转换string为int
+        self._client_ip_num = ip_str_to_int(self.transport.client[0])
+        logger.error('_client_ip_num: %s', self._client_ip_num)
 
     def dataReceived(self, data):
         """
@@ -66,6 +74,7 @@ class ClientConnection(Protocol):
         # 打包成内部通信的task_box
         task_box = TaskBox(dict(
             cmd=constants.CMD_WORKER_ASSIGN_JOB,
+            client_ip_num=self._client_ip_num,
             body=data,
         ))
 

@@ -4,7 +4,6 @@ import sys
 import os
 import json
 from collections import Counter
-from netkit.box import Box
 from log import logger
 from mixins import RoutesMixin, AppEventsMixin
 import constants
@@ -20,7 +19,7 @@ class Burst(RoutesMixin, AppEventsMixin):
     # 进程名字
     name = constants.NAME
 
-    box_class = Box
+    box_class = None
     proxy_backlog = constants.PROXY_BACKLOG
 
     group_conf = None
@@ -40,9 +39,10 @@ class Burst(RoutesMixin, AppEventsMixin):
     worker = None
     blueprints = None
 
-    def __init__(self, group_conf, group_router):
+    def __init__(self, box_class, group_conf, group_router):
         """
         构造函数
+        :param box_class: box类
         :param group_conf: 进程配置，格式如下:
             {
                 $group_id: {
@@ -57,6 +57,7 @@ class Burst(RoutesMixin, AppEventsMixin):
         RoutesMixin.__init__(self)
         AppEventsMixin.__init__(self)
 
+        self.box_class = box_class
         self.group_conf = group_conf
         self.group_router = group_router
 

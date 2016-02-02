@@ -4,6 +4,7 @@
 from ..proxy import TaskBox
 from .. import constants
 from ..log import logger
+from ..utils import ip_int_to_str
 
 
 class Request(object):
@@ -12,6 +13,7 @@ class Request(object):
     """
 
     conn = None
+    # 封装的传输box，外面不需要理解
     task_box = None
     box = None
     is_valid = False
@@ -67,6 +69,14 @@ class Request(object):
         return self.worker.app
 
     @property
+    def client_ip(self):
+        """
+        客户端连接IP，外面不需要了解task_box
+        :return:
+        """
+        return ip_int_to_str(self.task_box.client_ip_num)
+
+    @property
     def cmd(self):
         try:
             return self.box.cmd
@@ -106,13 +116,6 @@ class Request(object):
         ))
 
         return self.conn.write(task_box.pack())
-
-    def client_ip(self):
-        """
-        客户端连接IP
-        :return:
-        """
-        return self.task_box.client_ip
 
     def __repr__(self):
         return 'cmd: %r, endpoint: %s, box: %r' % (self.cmd, self.endpoint, self.box)
