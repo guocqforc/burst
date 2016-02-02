@@ -9,8 +9,8 @@ from .. import constants
 
 class WorkerConnectionFactory(Factory):
 
-    def __init__(self, app, group_id):
-        self.app = app
+    def __init__(self, proxy, group_id):
+        self.proxy = proxy
         self.group_id = group_id
 
     def buildProtocol(self, addr):
@@ -44,7 +44,7 @@ class WorkerConnection(Protocol):
     def connectionLost(self, reason=connectionDone):
         # 要删除掉对应的worker，因为不确定连接是否会及时释放
         # TODO，等测试一下，如果确定会自动释放的话，这代码就可以不用写了
-        self.factory.app.proxy.task_dispatcher.remove_worker(self)
+        self.factory.proxy.task_dispatcher.remove_worker(self)
 
     def dataReceived(self, data):
         """
@@ -56,7 +56,7 @@ class WorkerConnection(Protocol):
 
         while self._read_buffer:
             # 因为box后面还是要用的
-            box = self.factory.app.box_class()
+            box = self.factory.proxy.box_class()
             ret = box.unpack(self._read_buffer)
             if ret == 0:
                 # 说明要继续收
@@ -83,7 +83,7 @@ class WorkerConnection(Protocol):
 
         if box.cmd == constants.CMD_WORKER_ASK_FOR_JOB:
             # 说明是标记自己空闲
-            task = self.factory.app.proxy.task_dispatcher.alloc_task(self)
+            task = self.factory.proxy.task_dispatcher.alloc_task(self)
             if task:
                 # 如果能申请成功，就继续执行
                 self.assign_task(task)

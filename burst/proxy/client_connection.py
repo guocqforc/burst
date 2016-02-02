@@ -9,8 +9,8 @@ from task import Task
 
 class ClientConnectionFactory(Factory):
 
-    def __init__(self, app):
-        self.app = app
+    def __init__(self, proxy):
+        self.proxy = proxy
 
     def buildProtocol(self, addr):
         return ClientConnection(self, addr)
@@ -34,7 +34,7 @@ class ClientConnection(Protocol):
 
         while self._read_buffer:
             # 因为box后面还是要用的
-            box = self.factory.app.box_class()
+            box = self.factory.proxy.box_class()
             ret = box.unpack(self._read_buffer)
             if ret == 0:
                 # 说明要继续收
@@ -59,7 +59,7 @@ class ClientConnection(Protocol):
         :return:
         """
         # 获取映射的group_id
-        group_id = self.factory.app.group_router(box)
+        group_id = self.factory.proxy.group_router(box)
 
         task = Task(data, box, self)
-        self.factory.app.proxy.task_dispatcher.add_task(group_id, task)
+        self.factory.proxy.task_dispatcher.add_task(group_id, task)
