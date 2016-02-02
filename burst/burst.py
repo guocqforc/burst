@@ -87,15 +87,15 @@ class Burst(RoutesMixin, AppEventsMixin):
                 # worker
                 self.worker.run(burst_env['group_id'])
 
-    def make_proc_name(self, proc_type):
+    def make_proc_name(self, subtitle):
         """
         获取进程名称
-        :param proc_type:
+        :param subtitle:
         :return:
         """
-        proc_name = '[%s: %s] %s' % (
+        proc_name = '[%s:%s] %s' % (
             self.name,
-            proc_type,
+            subtitle,
             ' '.join([sys.executable] + sys.argv)
         )
 

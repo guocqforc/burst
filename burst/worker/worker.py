@@ -30,7 +30,9 @@ class Worker(object):
     def run(self, group_id):
         self.group_id = group_id
 
-        setproctitle.setproctitle(self.app.make_proc_name(self.type))
+        setproctitle.setproctitle(self.app.make_proc_name(
+            '%s-%s' % (self.type, self.group_id)
+        ))
 
         self._handle_proc_signals()
         self._before_worker_run()
