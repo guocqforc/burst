@@ -109,7 +109,6 @@ class Request(object):
         elif isinstance(data, dict):
             data = self.box.map(data).pack()
 
-        logger.error('data: %r', data)
         task_box = TaskBox(dict(
             cmd=constants.CMD_WORKER_ASK_FOR_JOB,
             body=data or '',
