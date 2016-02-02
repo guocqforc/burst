@@ -57,6 +57,7 @@ class Master(object):
         )
         p = start_child_process(proc_env)
         p.proc_env = proc_env
+        print p.proc_env
         self.processes.append(p)
 
         for group_id, group_info in self.app.group_conf.items():
@@ -66,6 +67,7 @@ class Master(object):
             )
             p = start_child_process(proc_env)
             p.proc_env = proc_env
+            print p.proc_env
             self.processes.append(p)
 
         while 1:
