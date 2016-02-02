@@ -47,7 +47,7 @@ class Proxy(object):
         self._handle_proc_signals()
 
         reactor.listenTCP(port, self.client_connection_factory_class(self),
-                          backlog=self.app.backlog, interface=host)
+                          backlog=self.app.proxy_backlog, interface=host)
 
         # 启动监听worker
         for group_id in self.app.group_conf:
