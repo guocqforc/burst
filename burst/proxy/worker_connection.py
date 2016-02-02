@@ -63,7 +63,6 @@ class WorkerConnection(Protocol):
                 return
             elif ret > 0:
                 # 收好了
-                box_data = self._read_buffer[:ret]
                 self._read_buffer = self._read_buffer[ret:]
                 safe_call(self._on_read_complete, task_box)
                 continue
