@@ -59,7 +59,7 @@ class AppEventsMixin(object):
     def create_worker(self, f):
         """
         创建worker
-        f()
+        f(worker)
         """
 
     @_reg_event_handler
@@ -137,7 +137,7 @@ class BlueprintEventsMixin(object):
     def create_app_worker(self, f):
         """
         创建worker
-        f()
+        f(worker)
         """
 
     @_reg_event_handler

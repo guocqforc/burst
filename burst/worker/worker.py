@@ -47,9 +47,9 @@ class Worker(object):
             logger.error('exc occur.', exc_info=True)
 
     def _before_worker_run(self):
-        self.app.events.create_worker()
+        self.app.events.create_worker(self)
         for bp in self.app.blueprints:
-            bp.events.create_app_worker()
+            bp.events.create_app_worker(self)
 
     def _handle_proc_signals(self):
         def exit_handler(signum, frame):
