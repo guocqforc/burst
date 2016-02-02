@@ -3,13 +3,10 @@
 import sys
 sys.path.insert(0, '../../')
 
-import logging
-
 from burst import Burst, Blueprint, logger
-from netkit.box import Box
 import user
 
-app = Burst(Box, {
+app = Burst({
     1: {
         'count': 2,
     },
