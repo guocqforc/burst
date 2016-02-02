@@ -64,8 +64,11 @@ class Master(object):
                 type=constants.PROC_TYPE_WORKER,
                 group_id=group_id,
             )
-            p = start_child_process(proc_env)
-            self.processes.append(p)
+
+            # 进程个数
+            for it in xrange(0, group_info['count']):
+                p = start_child_process(proc_env)
+                self.processes.append(p)
 
         while 1:
             for idx, p in enumerate(self.processes):

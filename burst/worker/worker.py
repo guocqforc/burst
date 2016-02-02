@@ -31,7 +31,7 @@ class Worker(object):
         self.group_id = group_id
 
         setproctitle.setproctitle(self.app.make_proc_name(
-            '%s-%s' % (self.type, self.group_id)
+            '%s:%s' % (self.type, self.group_id)
         ))
 
         self._handle_proc_signals()
