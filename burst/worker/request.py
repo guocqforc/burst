@@ -11,6 +11,8 @@ class Request(object):
     conn = None
     box = None
     blueprint = None
+    # 是否已经作出回应
+    responded = False
     route_rule = None
 
     def __init__(self, conn, box):
@@ -71,7 +73,12 @@ class Request(object):
         elif isinstance(data, dict):
             data = self.box.map(data).pack()
 
-        return self.conn.write(data)
+        succ = self.conn.write(data)
+        if succ:
+            # 如果发送成功，就标记为已经回应
+            self.responded = True
+
+        return succ
 
     def __repr__(self):
         return 'cmd: %r, endpoint: %s, box: %r' % (self.cmd, self.endpoint, self.box)

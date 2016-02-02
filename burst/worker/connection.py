@@ -159,12 +159,11 @@ class Connection(object):
 
         if not request.view_func:
             logger.info('cmd invalid. request: %s' % request)
-            if not request.responded:
-                request.write_to_client(dict(ret=constants.RET_INVALID_CMD))
+            request.write(dict(ret=constants.RET_INVALID_CMD))
             return False
 
-        if not self.worker.app.got_first_request:
-            self.worker.app.got_first_request = True
+        if not self.worker.got_first_request:
+            self.worker.got_first_request = True
             self.worker.app.events.before_first_request(request)
             for bp in self.worker.app.blueprints:
                 bp.events.before_app_first_request(request)
@@ -185,7 +184,7 @@ class Connection(object):
             view_func_exc = e
             # 必须是没有回应过
             if not request.responded:
-                request.write_to_client(dict(ret=constants.RET_INTERNAL))
+                request.write(dict(ret=constants.RET_INTERNAL))
 
         if request.blueprint:
             request.blueprint.events.after_request(request, view_func_exc)

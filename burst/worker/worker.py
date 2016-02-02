@@ -15,6 +15,8 @@ class Worker(object):
 
     request_class = Request
     connection_class = Connection
+    got_first_request = False
+
     group_id = None
 
     # 是否有效(父进程中代表程序有效，子进程中代表worker是否有效)
