@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import sys
 import os
 import json
 from collections import Counter
@@ -9,7 +10,6 @@ from . import constants
 from proxy import Proxy
 from worker import Worker
 from controller import Controller
-import setproctitle
 
 
 class Burst(RoutesMixin, AppEventsMixin):
@@ -95,10 +95,10 @@ class Burst(RoutesMixin, AppEventsMixin):
         :param proc_type:
         :return:
         """
-        proc_name = '%s: %s process %s' % (
+        proc_name = '[%s: %s] %s' % (
             self.name or constants.NAME,
             proc_type,
-            setproctitle.getproctitle()
+            ' '.join([sys.executable] + sys.argv)
         )
 
         return proc_name
