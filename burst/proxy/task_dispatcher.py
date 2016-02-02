@@ -12,6 +12,7 @@ class TaskDispatcher(object):
     主要包括: 消息来了之后的分发
     """
 
+    # 之所以不用WeakSet的原因是，经过测试worker断掉之后，对象不会立即被删除，极有有可能会被用到。
     # 繁忙worker列表
     busy_workers_dict = None
     # 空闲
