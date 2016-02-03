@@ -29,7 +29,7 @@ class Burst(RoutesMixin, AppEventsMixin):
     conn_timeout = constants.CONN_TIMEOUT
     # 处理job超时(秒). 超过后worker会自杀. None 代表永不超时
     job_timeout = None
-    # 停止子进程超时(秒). 使用 TERM / USR1 进行停止时，如果超时未停止会发送KILL信号
+    # 停止子进程超时(秒). 使用 TERM 进行停止时，如果超时未停止会发送KILL信号
     stop_timeout = None
     # proxy<->worker之间通信的address模板
     ipc_address_tpl = constants.IPC_ADDRESS_TPL
