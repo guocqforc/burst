@@ -85,12 +85,16 @@ class WorkerConnection(Protocol):
         """
 
         if job_box.cmd == constants.CMD_WORKER_TASK_DONE:
+            self._on_job_end()
+
             # 如果有数据，就要先处理
             if job_box.body:
                 # 要转发数据给原来的用户
                 # 要求连接存在，并且连接还处于连接中
                 if self._doing_job.client_conn and self._doing_job.client_conn.connected:
                     self._doing_job.client_conn.transport.write(job_box.body)
+
+                    self.factory.proxy.stat_counter.client_rsp += 1
 
             self._try_alloc_job()
 
@@ -110,6 +114,7 @@ class WorkerConnection(Protocol):
         self._doing_job = job
         # 发送
         self.transport.write(job.job_box.pack())
+        self._on_job_begin()
 
     @property
     def status(self):
@@ -129,6 +134,7 @@ class WorkerConnection(Protocol):
         当作业开始
         :return:
         """
+        self.factory.proxy.stat_counter.worker_req += 1
         self._job_begin_time = time.time()
 
     def _on_job_end(self):
@@ -137,4 +143,7 @@ class WorkerConnection(Protocol):
         :return:
         """
         now = time.time()
-        past_time = now - self._job_begin_time
+        past_time_ms = int((now - self._job_begin_time) * 1000)
+
+        self.factory.proxy.stat_counter.add_job_time(past_time_ms)
+        self.factory.proxy.stat_counter.worker_rsp += 1

@@ -31,12 +31,14 @@ class ClientConnection(Protocol):
 
     def connectionMade(self):
 
-        self.factory.proxy.client_connections_count += 1
+        self.factory.proxy.stat_counter.clients += 1
+
         # 转换string为int
         self._client_ip_num = ip_str_to_int(self.transport.client[0])
 
     def connectionLost(self, reason=connectionDone):
-        self.factory.proxy.client_connections_count -= 1
+
+        self.factory.proxy.stat_counter.clients -= 1
 
     def dataReceived(self, data):
         """
@@ -72,6 +74,8 @@ class ClientConnection(Protocol):
         :param box: 解析之后的box
         :return:
         """
+        self.factory.proxy.stat_counter.client_req += 1
+
         # 获取映射的group_id
         group_id = self.factory.proxy.app.group_router(box)
 

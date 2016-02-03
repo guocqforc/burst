@@ -9,6 +9,7 @@ import setproctitle
 from ..log import logger
 from . import ClientConnectionFactory, WorkerConnectionFactory
 from job_dispatcher import JobDispatcher
+from stat_counter import StatCounter
 from .. import constants
 
 
@@ -29,9 +30,8 @@ class Proxy(object):
 
     # 任务调度器
     job_dispatcher = None
-
-    # 客户端连接数统计
-    client_connections_count = None
+    # 统计
+    stat_counter = None
 
     def __init__(self, app, host, port):
         """
@@ -43,8 +43,7 @@ class Proxy(object):
         self.port = port
 
         self.job_dispatcher = JobDispatcher()
-
-        self.client_connections_count = 0
+        self.stat_counter = StatCounter()
 
     def run(self):
         setproctitle.setproctitle(self.app.make_proc_name(self.type))

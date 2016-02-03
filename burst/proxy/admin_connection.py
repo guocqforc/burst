@@ -88,18 +88,23 @@ class AdminConnection(Protocol):
                 idle_workers = len(self.factory.proxy.job_dispatcher.idle_workers_dict)
                 busy_workers = len(self.factory.proxy.job_dispatcher.busy_workers_dict)
 
-                jobs_queue_dict = self.factory.proxy.job_dispatcher.group_queue.queue_dict
-
-                jobs = dict([(group_id, len(queue)) for group_id, queue in jobs_queue_dict.items()])
+                # 正在处理的
+                pending_jobs_queue = self.factory.proxy.job_dispatcher.group_queue.queue_dict
+                pending_jobs = dict([(group_id, len(queue)) for group_id, queue in pending_jobs_queue.items()])
 
                 rsp_body = dict(
-                    clients=self.factory.proxy.client_connections_count,
+                    clients=self.factory.proxy.stat_counter.clients,
+                    client_req=self.factory.proxy.stat_counter.client_req,
+                    client_rsp=self.factory.proxy.stat_counter.client_rsp,
+                    worker_req=self.factory.proxy.stat_counter.worker_req,
+                    worker_rsp=self.factory.proxy.stat_counter.worker_rsp,
                     workers=dict(
                         all=idle_workers + busy_workers,
                         idle=idle_workers,
                         busy=busy_workers,
                     ),
-                    jobs=jobs,
+                    pending_jobs=pending_jobs,
+                    job_times=dict(self.factory.proxy.stat_counter.job_time_counter),
                 )
 
                 rsp = box.map(dict(
