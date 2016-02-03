@@ -4,7 +4,6 @@ import sys
 import os
 import json
 from collections import Counter
-import socket
 from log import logger
 from mixins import RoutesMixin, AppEventsMixin
 import constants

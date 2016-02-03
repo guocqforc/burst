@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import signal
-import socket
+import os
 # linux 默认就是epoll
 from twisted.internet import reactor
 import setproctitle
@@ -50,6 +50,10 @@ class Proxy(object):
         # 启动监听worker
         for group_id in self.app.group_conf:
             ipc_address = self.app.ipc_address_tpl % group_id
+
+            # 防止之前异常导致遗留
+            if os.path.exists(ipc_address):
+                os.remove(ipc_address)
 
             # 给内部worker通信用的
             reactor.listenUNIX(ipc_address, self.worker_connection_factory_class(self, group_id))
