@@ -7,7 +7,9 @@ from twisted.internet import reactor
 import setproctitle
 
 from ..log import logger
-from . import ClientConnectionFactory, WorkerConnectionFactory
+from client_connection import ClientConnectionFactory
+from worker_connection import WorkerConnectionFactory
+from admin_connection import AdminConnectionFactory
 from job_dispatcher import JobDispatcher
 from stat_counter import StatCounter
 from .. import constants
@@ -22,6 +24,7 @@ class Proxy(object):
 
     client_connection_factory_class = ClientConnectionFactory
     worker_connection_factory_class = WorkerConnectionFactory
+    admin_connection_factory_class = AdminConnectionFactory
 
     app = None
 
@@ -65,6 +68,11 @@ class Proxy(object):
         # 启动对外监听
         reactor.listenTCP(self.port, self.client_connection_factory_class(self),
                           backlog=self.app.proxy_backlog, interface=self.host)
+
+        # 启动admin服务
+        if self.app.admin_address:
+            reactor.listenTCP(self.app.admin_address[1], self.admin_connection_factory_class(self),
+                              interface=self.app.admin_address[0])
 
         try:
             reactor.run(installSignalHandlers=False)
