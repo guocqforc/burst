@@ -30,6 +30,9 @@ class Proxy(object):
     # 任务调度器
     job_dispatcher = None
 
+    # 客户端连接数统计
+    client_connections_count = None
+
     def __init__(self, app, host, port):
         """
         构造函数
@@ -40,6 +43,8 @@ class Proxy(object):
         self.port = port
 
         self.job_dispatcher = JobDispatcher()
+
+        self.client_connections_count = 0
 
     def run(self):
         setproctitle.setproctitle(self.app.make_proc_name(self.type))

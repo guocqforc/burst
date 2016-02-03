@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import time
 from twisted.internet.protocol import Protocol, Factory, connectionDone
 
 from ..utils import safe_call
@@ -22,6 +23,9 @@ class WorkerConnection(Protocol):
 
     # 状态
     _status = None
+    # 任务开始时间
+    _job_begin_time = None
+
     # 正在处理的任务
     _doing_job = None
     # 读取缓冲
@@ -118,3 +122,19 @@ class WorkerConnection(Protocol):
         if self._status == constants.WORKER_STATUS_IDLE:
             # 没有正在处理的任务
             self._doing_job = None
+            self._job_begin_time = None
+
+    def _on_job_begin(self):
+        """
+        当作业开始
+        :return:
+        """
+        self._job_begin_time = time.time()
+
+    def _on_job_end(self):
+        """
+        当作业结束
+        :return:
+        """
+        now = time.time()
+        past_time = now - self._job_begin_time

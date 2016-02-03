@@ -36,6 +36,12 @@ class Burst(RoutesMixin, AppEventsMixin):
 
     blueprints = None
 
+    # 管理员，可以连接proxy获取数据
+    # 管理员访问地址如 (127.0.0.1, 22222)
+    admin_address = None
+    admin_username = None
+    admin_password = None
+
     def __init__(self, box_class, group_conf, group_router):
         """
         构造函数

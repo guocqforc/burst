@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from twisted.internet.protocol import Protocol, Factory
+from twisted.internet.protocol import Protocol, Factory, connectionDone
 
 from ..utils import safe_call, ip_str_to_int
 from ..log import logger
@@ -30,8 +30,13 @@ class ClientConnection(Protocol):
         self._read_buffer = ''
 
     def connectionMade(self):
+
+        self.factory.proxy.client_connections_count += 1
         # 转换string为int
         self._client_ip_num = ip_str_to_int(self.transport.client[0])
+
+    def connectionLost(self, reason=connectionDone):
+        self.factory.proxy.client_connections_count -= 1
 
     def dataReceived(self, data):
         """

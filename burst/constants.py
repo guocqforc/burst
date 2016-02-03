@@ -7,8 +7,13 @@ WORKER_STATUS_IDLE = 1
 WORKER_STATUS_BUSY = 2
 
 # 系统返回码
+# 命令字不合法
 RET_INVALID_CMD = -10000
+# 系统内部异常
 RET_INTERNAL = -10001
+
+# admin用户验证失败
+RET_ADIMN_AUTH_FAIL = -20000
 
 # 默认backlog
 PROXY_BACKLOG = 256
@@ -27,6 +32,10 @@ CONN_TIMEOUT = 3
 CMD_WORKER_TASK_ASSIGN = 100
 # 任务完成
 CMD_WORKER_TASK_DONE = 200
+
+# 管理员命令
+# 获取运行状态统计
+CMD_ADMIN_SERVER_STAT = 20000
 
 # proxy<->worker之间通信的address模板
 IPC_ADDRESS_TPL = NAME + '_%s.sock'
