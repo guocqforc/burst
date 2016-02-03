@@ -24,22 +24,14 @@ class StatCounter(object):
     def trans_to_counter_value(self, value):
         """
         把时间计算为一个可以统计分布的数值
-        首位 < 5，则变成5
-        首位 > 5，则变成10
-        即
-        100，会变为500，即小于500
-        600，会变成1000，即小于10000
         :return:
         """
 
-        if value == 0:
-            # 0 不用做处理
-            return 0
-
-        first_num = int(str(value)[0])
-        replace_num = 5 if first_num < 5 else 10
-
-        return value * replace_num / first_num
+        for dst_value in (10, 50, 100, 500, 1000, 5000):
+            if value < dst_value:
+                return dst_value
+        else:
+            return 'more'
 
     def add_job_time(self, job_time):
         """
