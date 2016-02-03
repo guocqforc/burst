@@ -52,7 +52,7 @@ def run():
         print 'fail. rsp_box.ret=%s' % rsp_box.ret
         return
     else:
-        print json.loads(rsp_box.body)
+        print json.dumps(json.loads(rsp_box.body), indent=4)
 
 
 if __name__ == '__main__':

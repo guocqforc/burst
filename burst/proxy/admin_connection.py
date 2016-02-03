@@ -90,7 +90,7 @@ class AdminConnection(Protocol):
 
                 # 正在处理的
                 pending_jobs_queue = self.factory.proxy.job_dispatcher.group_queue.queue_dict
-                pending_jobs = dict([(group_id, len(queue)) for group_id, queue in pending_jobs_queue.items()])
+                pending_jobs = dict([(group_id, queue.qsize()) for group_id, queue in pending_jobs_queue.items()])
 
                 rsp_body = dict(
                     clients=self.factory.proxy.stat_counter.clients,
@@ -104,7 +104,7 @@ class AdminConnection(Protocol):
                         busy=busy_workers,
                     ),
                     pending_jobs=pending_jobs,
-                    job_times=dict(self.factory.proxy.stat_counter.job_time_counter),
+                    job_times=dict(self.factory.proxy.stat_counter.jobs_time_counter),
                 )
 
                 rsp = box.map(dict(
