@@ -10,7 +10,7 @@ from burst import constants
 
 def build_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--host', help='burst admin host', action='store', required=True)
+    parser.add_argument('-t', '--host', help='burst admin host', action='store', default='127.0.0.1')
     parser.add_argument('-P', '--port', type=int, help='burst admin port', action='store', required=True)
     parser.add_argument('-u', '--username', help='username', action='store', default=None)
     parser.add_argument('-p', '--password', help='password', action='store', default=None)
