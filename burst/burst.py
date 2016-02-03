@@ -4,6 +4,7 @@ import sys
 import os
 import json
 from collections import Counter
+import socket
 from log import logger
 from mixins import RoutesMixin, AppEventsMixin
 import constants
@@ -63,7 +64,7 @@ class Burst(RoutesMixin, AppEventsMixin):
     def register_blueprint(self, blueprint):
         blueprint.register_to_app(self)
 
-    def run(self, host=None, port=None):
+    def run(self, host, port, socket_type=socket.SOCK_STREAM):
         self._validate_cmds()
 
         # 只要没有这个环境变量，就是主进程
@@ -77,7 +78,7 @@ class Burst(RoutesMixin, AppEventsMixin):
             burst_env = json.loads(str_burst_env)
             if burst_env['type'] == constants.PROC_TYPE_PROXY:
                 # proxy
-                Proxy(self, host, port).run()
+                Proxy(self, host, port, socket_type).run()
             else:
                 # worker
                 Worker(self, burst_env['group_id']).run()

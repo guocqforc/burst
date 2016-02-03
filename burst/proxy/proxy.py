@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import signal
+import socket
 # linux 默认就是epoll
 from twisted.internet import reactor
 import setproctitle
@@ -29,7 +30,7 @@ class Proxy(object):
     # 任务调度器
     job_dispatcher = None
 
-    def __init__(self, app, host, port):
+    def __init__(self, app, host, port, socket_type):
         """
         构造函数
         :return:
@@ -37,6 +38,7 @@ class Proxy(object):
         self.app = app
         self.host = host
         self.port = port
+        self.socket_type = socket_type
 
         self.job_dispatcher = JobDispatcher()
 
@@ -48,14 +50,18 @@ class Proxy(object):
 
         # 启动监听worker
         for group_id in self.app.group_conf:
-            address = self.app.ipc_address_tpl % group_id
+            ipc_address = self.app.ipc_address_tpl % group_id
 
             # 给内部worker通信用的
-            reactor.listenUNIX(address, self.worker_connection_factory_class(self, group_id))
+            reactor.listenUNIX(ipc_address, self.worker_connection_factory_class(self, group_id))
 
         # 启动对外监听
-        reactor.listenTCP(self.port, self.client_connection_factory_class(self),
-                          backlog=self.app.proxy_backlog, interface=self.host)
+        if self.socket_type == socket.SOCK_STREAM:
+            reactor.listenTCP(self.port, self.client_connection_factory_class(self),
+                              backlog=self.app.proxy_backlog, interface=self.host)
+        else:
+            reactor.listenUDP(self.port, self.client_connection_factory_class(self),
+                              interface=self.host)
 
         try:
             reactor.run(installSignalHandlers=False)
