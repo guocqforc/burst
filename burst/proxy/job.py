@@ -8,16 +8,16 @@ import weakref
 from ..log import logger
 
 
-class Task(object):
+class Job(object):
 
-    # 封装好的task_box
-    task_box = None
+    # 封装好的job_box
+    job_box = None
 
     # 客户端连接的弱引用
     _client_conn_ref = None
 
-    def __init__(self, task_box, client_conn):
-        self.task_box = task_box
+    def __init__(self, job_box, client_conn):
+        self.job_box = job_box
         self.client_conn = client_conn
 
     @property

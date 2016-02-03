@@ -3,4 +3,4 @@
 from .client_connection import ClientConnectionFactory
 from .worker_connection import WorkerConnectionFactory
 from .proxy import Proxy
-from .task_box import TaskBox
+from .job_box import JobBox

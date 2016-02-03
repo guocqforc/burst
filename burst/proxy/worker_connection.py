@@ -5,7 +5,7 @@ from twisted.internet.protocol import Protocol, Factory, connectionDone
 from ..utils import safe_call
 from ..log import logger
 from .. import constants
-from .task_box import TaskBox
+from .job_box import JobBox
 
 
 class WorkerConnectionFactory(Factory):
@@ -23,7 +23,7 @@ class WorkerConnection(Protocol):
     # 状态
     _status = None
     # 正在处理的任务
-    _doing_task = None
+    _doing_job = None
     # 读取缓冲
     _read_buffer = None
 
@@ -40,12 +40,12 @@ class WorkerConnection(Protocol):
         self._read_buffer = ''
 
     def connectionMade(self):
-        # 建立连接就直接去申请task
-        self._try_alloc_task()
+        # 建立连接就直接去申请job
+        self._try_alloc_job()
 
     def connectionLost(self, reason=connectionDone):
         # 要删除掉对应的worker
-        self.factory.proxy.task_dispatcher.remove_worker(self)
+        self.factory.proxy.job_dispatcher.remove_worker(self)
 
     def dataReceived(self, data):
         """
@@ -57,15 +57,15 @@ class WorkerConnection(Protocol):
 
         while self._read_buffer:
             # 因为box后面还是要用的
-            task_box = TaskBox()
-            ret = task_box.unpack(self._read_buffer)
+            job_box = JobBox()
+            ret = job_box.unpack(self._read_buffer)
             if ret == 0:
                 # 说明要继续收
                 return
             elif ret > 0:
                 # 收好了
                 self._read_buffer = self._read_buffer[ret:]
-                safe_call(self._on_read_complete, task_box)
+                safe_call(self._on_read_complete, job_box)
                 continue
             else:
                 # 数据已经混乱了，全部丢弃
@@ -73,39 +73,39 @@ class WorkerConnection(Protocol):
                 self._read_buffer = ''
                 return
 
-    def _on_read_complete(self, task_box):
+    def _on_read_complete(self, job_box):
         """
         完整数据接收完成
-        :param task_box: 解析之后的task_box
+        :param job_box: 解析之后的job_box
         :return:
         """
 
-        if task_box.cmd == constants.CMD_WORKER_TASK_DONE:
+        if job_box.cmd == constants.CMD_WORKER_TASK_DONE:
             # 如果有数据，就要先处理
-            if task_box.body:
+            if job_box.body:
                 # 要转发数据给原来的用户
                 # 要求连接存在，并且连接还处于连接中
-                if self._doing_task.client_conn and self._doing_task.client_conn.connected:
-                    self._doing_task.client_conn.transport.write(task_box.body)
+                if self._doing_job.client_conn and self._doing_job.client_conn.connected:
+                    self._doing_job.client_conn.transport.write(job_box.body)
 
-            self._try_alloc_task()
+            self._try_alloc_job()
 
-    def _try_alloc_task(self):
+    def _try_alloc_job(self):
         # 无论有没有任务，都会标记自己空闲
-        task = self.factory.proxy.task_dispatcher.alloc_task(self)
-        if task:
+        job = self.factory.proxy.job_dispatcher.alloc_job(self)
+        if job:
             # 如果能申请成功，就继续执行
-            self.assign_task(task)
+            self.assign_job(job)
 
-    def assign_task(self, task):
+    def assign_job(self, job):
         """
         分配任务
-        :param task:
+        :param job:
         :return:
         """
-        self._doing_task = task
+        self._doing_job = job
         # 发送
-        self.transport.write(task.task_box.pack())
+        self.transport.write(job.job_box.pack())
 
     @property
     def status(self):
@@ -117,4 +117,4 @@ class WorkerConnection(Protocol):
 
         if self._status == constants.WORKER_STATUS_IDLE:
             # 没有正在处理的任务
-            self._doing_task = None
+            self._doing_job = None

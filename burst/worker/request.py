@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from ..proxy import TaskBox
+from ..proxy import JobBox
 from .. import constants
 from ..log import logger
 from ..utils import ip_int_to_str
@@ -14,20 +14,20 @@ class Request(object):
 
     conn = None
     # 封装的传输box，外面不需要理解
-    task_box = None
+    job_box = None
     box = None
     is_valid = False
     blueprint = None
     route_rule = None
 
-    def __init__(self, conn, task_box):
+    def __init__(self, conn, job_box):
         self.conn = conn
-        self.task_box = task_box
+        self.job_box = job_box
         # 赋值
         self.is_valid = self._parse_raw_data()
 
     def _parse_raw_data(self):
-        if not self.task_box.body:
+        if not self.job_box.body:
             return True
 
         try:
@@ -36,7 +36,7 @@ class Request(object):
             logger.error('parse raw_data fail. e: %s, request: %s', e, self)
             return False
 
-        if self.box.unpack(self.task_box.body) > 0:
+        if self.box.unpack(self.job_box.body) > 0:
             self._parse_route_rule()
             return True
         else:
@@ -71,10 +71,10 @@ class Request(object):
     @property
     def client_ip(self):
         """
-        客户端连接IP，外面不需要了解task_box
+        客户端连接IP，外面不需要了解job_box
         :return:
         """
-        return ip_int_to_str(self.task_box.client_ip_num)
+        return ip_int_to_str(self.job_box.client_ip_num)
 
     @property
     def cmd(self):
@@ -109,12 +109,12 @@ class Request(object):
         elif isinstance(data, dict):
             data = self.box.map(data).pack()
 
-        task_box = TaskBox(dict(
+        job_box = JobBox(dict(
             cmd=constants.CMD_WORKER_TASK_DONE,
             body=data or '',
         ))
 
-        return self.conn.write(task_box.pack())
+        return self.conn.write(job_box.pack())
 
     def __repr__(self):
         return 'cmd: %r, endpoint: %s, box: %r' % (self.cmd, self.endpoint, self.box)

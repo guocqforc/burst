@@ -13,5 +13,5 @@ HEADER_ATTRS = OrderedDict([
     ])
 
 
-class TaskBox(Box):
+class JobBox(Box):
     header_attrs = HEADER_ATTRS

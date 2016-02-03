@@ -7,7 +7,7 @@ import setproctitle
 
 from ..log import logger
 from . import ClientConnectionFactory, WorkerConnectionFactory
-from task_dispatcher import TaskDispatcher
+from job_dispatcher import JobDispatcher
 from .. import constants
 
 
@@ -27,7 +27,7 @@ class Proxy(object):
     port = None
 
     # 任务调度器
-    task_dispatcher = None
+    job_dispatcher = None
 
     def __init__(self, app, host, port):
         """
@@ -38,7 +38,7 @@ class Proxy(object):
         self.host = host
         self.port = port
 
-        self.task_dispatcher = TaskDispatcher()
+        self.job_dispatcher = JobDispatcher()
 
     def run(self):
         setproctitle.setproctitle(self.app.make_proc_name(self.type))

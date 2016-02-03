@@ -7,7 +7,7 @@ from unix_client import UnixClient
 import time
 from .. import constants
 from ..log import logger
-from ..proxy import TaskBox
+from ..proxy import JobBox
 
 
 class Connection(object):
@@ -17,7 +17,7 @@ class Connection(object):
     def __init__(self, worker, address, conn_timeout):
         self.worker = worker
         # 直接创建即可
-        self.client = UnixClient(TaskBox, address, conn_timeout)
+        self.client = UnixClient(JobBox, address, conn_timeout)
 
     def run(self):
         thread.start_new_thread(self._monitor_job_timeout, ())
