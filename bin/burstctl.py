@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import json
+import time
 import argparse
 from netkit.box import Box
 from netkit.contrib.tcp_client import TcpClient
@@ -16,7 +17,27 @@ def build_parser():
     parser.add_argument('-p', '--password', help='password', action='store', default=None)
     parser.add_argument('-c', '--cmd', type=int, help='cmd', action='store', default=constants.CMD_ADMIN_SERVER_STAT)
     parser.add_argument('-o', '--timeout', type=int, help='connect/send/receive timeout', action='store', default=10)
+    parser.add_argument('-l', '--loop', type=int, help='loop times, <=0 means infinite loop', action='store', default=1)
     return parser
+
+
+def send_and_recv(tcp_client, box):
+    tcp_client.write(box)
+
+    rsp_box = tcp_client.read()
+
+    if not rsp_box:
+        print 'disconnected.'
+        return False
+
+    if rsp_box.ret != 0:
+        print 'fail. rsp_box.ret=%s' % rsp_box.ret
+        return False
+    else:
+        print '/' + '-' * 80
+        print json.dumps(json.loads(rsp_box.body), indent=4)
+        print '-' * 80 + '/'
+        return True
 
 
 def run():
@@ -44,15 +65,16 @@ def run():
         )
     ))
 
-    tcp_client.write(box)
+    loop_times = 0
+    while True:
+        loop_times += 1
+        if loop_times > args.loop > 0:
+            break
 
-    rsp_box = tcp_client.read()
+        if not send_and_recv(tcp_client, box):
+            break
 
-    if rsp_box.ret != 0:
-        print 'fail. rsp_box.ret=%s' % rsp_box.ret
-        return
-    else:
-        print json.dumps(json.loads(rsp_box.body), indent=4)
+        time.sleep(1)
 
 
 if __name__ == '__main__':
