@@ -74,7 +74,10 @@ def run():
         if not send_and_recv(tcp_client, box):
             break
 
-        time.sleep(1)
+        try:
+            time.sleep(1)
+        except KeyboardInterrupt:
+            break
 
 
 if __name__ == '__main__':
