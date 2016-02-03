@@ -85,12 +85,14 @@ class AdminConnection(Protocol):
             ))
         else:
             if box.cmd == constants.CMD_ADMIN_SERVER_STAT:
-                idle_workers = len(self.factory.proxy.job_dispatcher.idle_workers_dict)
-                busy_workers = len(self.factory.proxy.job_dispatcher.busy_workers_dict)
+                idle_workers = dict([(group_id, len(workers)) for group_id, workers in
+                                     self.factory.proxy.job_dispatcher.idle_workers_dict.items()])
+                busy_workers = dict([(group_id, len(workers)) for group_id, workers in
+                                     self.factory.proxy.job_dispatcher.busy_workers_dict.items()])
 
-                # 正在处理的
-                pending_jobs_queue = self.factory.proxy.job_dispatcher.group_queue.queue_dict
-                pending_jobs = dict([(group_id, queue.qsize()) for group_id, queue in pending_jobs_queue.items()])
+                # 正在处理的jobs
+                pending_jobs = dict([(group_id, queue.qsize()) for group_id, queue in
+                                     self.factory.proxy.job_dispatcher.group_queue.queue_dict.items()])
 
                 rsp_body = dict(
                     clients=self.factory.proxy.stat_counter.clients,
@@ -98,13 +100,10 @@ class AdminConnection(Protocol):
                     client_rsp=self.factory.proxy.stat_counter.client_rsp,
                     worker_req=self.factory.proxy.stat_counter.worker_req,
                     worker_rsp=self.factory.proxy.stat_counter.worker_rsp,
-                    workers=dict(
-                        all=idle_workers + busy_workers,
-                        idle=idle_workers,
-                        busy=busy_workers,
-                    ),
+                    idle_workers=idle_workers,
+                    busy_workers=busy_workers,
                     pending_jobs=pending_jobs,
-                    job_times=dict(self.factory.proxy.stat_counter.jobs_time_counter),
+                    jobs_time=dict(self.factory.proxy.stat_counter.jobs_time_counter),
                 )
 
                 rsp = box.map(dict(
