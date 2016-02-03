@@ -30,7 +30,7 @@ class Proxy(object):
     # 任务调度器
     job_dispatcher = None
 
-    def __init__(self, app, host, port, socket_type):
+    def __init__(self, app, host, port):
         """
         构造函数
         :return:
@@ -38,7 +38,6 @@ class Proxy(object):
         self.app = app
         self.host = host
         self.port = port
-        self.socket_type = socket_type
 
         self.job_dispatcher = JobDispatcher()
 
@@ -56,12 +55,8 @@ class Proxy(object):
             reactor.listenUNIX(ipc_address, self.worker_connection_factory_class(self, group_id))
 
         # 启动对外监听
-        if self.socket_type == socket.SOCK_STREAM:
-            reactor.listenTCP(self.port, self.client_connection_factory_class(self),
-                              backlog=self.app.proxy_backlog, interface=self.host)
-        else:
-            reactor.listenUDP(self.port, self.client_connection_factory_class(self),
-                              interface=self.host)
+        reactor.listenTCP(self.port, self.client_connection_factory_class(self),
+                          backlog=self.app.proxy_backlog, interface=self.host)
 
         try:
             reactor.run(installSignalHandlers=False)
