@@ -10,8 +10,8 @@ from burst import constants
 
 def build_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-h', '--host', help='burst admin host', action='store', required=True)
-    parser.add_argument('-t', '--port', type=int, help='burst admin port', action='store', required=True)
+    parser.add_argument('-t', '--host', help='burst admin host', action='store', required=True)
+    parser.add_argument('-P', '--port', type=int, help='burst admin port', action='store', required=True)
     parser.add_argument('-u', '--username', help='username', action='store', default=None)
     parser.add_argument('-p', '--password', help='password', action='store', default=None)
     parser.add_argument('-c', '--cmd', type=int, help='cmd', action='store', default=constants.CMD_ADMIN_SERVER_STAT)
