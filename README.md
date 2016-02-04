@@ -8,3 +8,4 @@ server framework. master, proxy and worker
 ### TODO
 
 1. proxy支持多个监听地址
+2. 支持修改worker数量后，优雅重启worker
