@@ -52,8 +52,8 @@ class Connection(object):
         while self.worker.enable and self.closed():
             if not self._connect():
                 logger.error('connect fail, address: %s, sleep %ss',
-                             self.client.address, constants.TRY_CONNECT_INTERVAL)
-                time.sleep(constants.TRY_CONNECT_INTERVAL)
+                             self.client.address, constants.WORKER_TRY_CONNECT_INTERVAL)
+                time.sleep(constants.WORKER_TRY_CONNECT_INTERVAL)
 
         if not self.worker.enable:
             # 安全退出
