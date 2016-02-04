@@ -54,6 +54,10 @@ class Proxy(object):
         # 主进程
         self._handle_proc_signals()
 
+        ipc_directory = os.path.dirname(self.app.ipc_address_tpl)
+        if not os.path.exists(ipc_directory):
+            os.makedirs(ipc_directory)
+
         # 启动监听worker
         for group_id in self.app.group_conf:
             ipc_address = self.app.ipc_address_tpl % group_id

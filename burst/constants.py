@@ -27,7 +27,7 @@ CHILD_ENV_KEY = 'BURST_ENV'
 JOBS_TIME_BENCHMARK = (10, 50, 100, 500, 1000, 5000)
 
 # proxy<->worker之间通信的address模板
-IPC_ADDRESS_TPL = NAME + '_%s.sock'
+IPC_ADDRESS_TPL = '%s_ipc/' % NAME + '%s.sock'
 
 
 # 默认backlog
