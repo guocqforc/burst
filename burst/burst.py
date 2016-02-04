@@ -42,6 +42,10 @@ class Burst(RoutesMixin, AppEventsMixin):
     admin_username = None
     admin_password = None
 
+    # 统计相关
+    # 作业时间统计标准
+    jobs_time_benchmark = constants.JOBS_TIME_BENCHMARK
+
     def __init__(self, box_class, group_conf, group_router):
         """
         构造函数

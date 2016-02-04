@@ -67,11 +67,11 @@ def run():
 
     loop_times = 0
     while True:
-        loop_times += 1
-        if loop_times > args.loop > 0:
+        if not send_and_recv(tcp_client, box):
             break
 
-        if not send_and_recv(tcp_client, box):
+        loop_times += 1
+        if loop_times >= args.loop > 0:
             break
 
         try:

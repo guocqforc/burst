@@ -46,7 +46,7 @@ class Proxy(object):
         self.port = port
 
         self.job_dispatcher = JobDispatcher()
-        self.stat_counter = StatCounter()
+        self.stat_counter = StatCounter(self.app.jobs_time_benchmark)
 
     def run(self):
         setproctitle.setproctitle(self.app.make_proc_name(self.type))

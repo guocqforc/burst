@@ -20,6 +20,11 @@ class StatCounter(object):
     worker_rsp = 0
     # 作业完成时间统计
     jobs_time_counter = Counter()
+    # 作业时间统计标准
+    jobs_time_benchmark = None
+
+    def __init__(self, jobs_time_benchmark):
+        self.jobs_time_benchmark = jobs_time_benchmark
 
     def add_job_time(self, job_time):
         """
@@ -34,7 +39,7 @@ class StatCounter(object):
             :return:
             """
 
-            for dst_value in (10, 50, 100, 500, 1000, 5000):
+            for dst_value in self.jobs_time_benchmark:
                 if value < dst_value:
                     return dst_value
             else:

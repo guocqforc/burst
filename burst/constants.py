@@ -45,3 +45,5 @@ PROC_TYPE_MASTER = 'master'
 PROC_TYPE_PROXY = 'proxy'
 PROC_TYPE_WORKER = 'worker'
 
+# 作业时间统计标准
+JOBS_TIME_BENCHMARK = (10, 50, 100, 500, 1000, 5000)
