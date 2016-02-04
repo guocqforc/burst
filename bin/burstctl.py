@@ -4,6 +4,7 @@
 import json
 import time
 import argparse
+from collections import OrderedDict
 from netkit.box import Box
 from netkit.contrib.tcp_client import TcpClient
 from burst import constants
@@ -50,7 +51,32 @@ class BurstCtl(object):
             self.output('fail. rsp_box.ret=%s' % rsp_box.ret)
             return False
 
-        self.output(json.dumps(json.loads(rsp_box.body), indent=4))
+        body_dict = json.loads(rsp_box.body)
+
+        output_items = []
+        for key in ('clients', 'busy_workers', 'idle_workers', 'pending_jobs',
+                    'client_req', 'client_rsp', 'worker_req', 'worker_rsp'):
+
+            output_items.append((key, body_dict.get(key)))
+
+        def jobs_time_cmp_func(item1, item2):
+            k1 = item1[0]
+            k2 = item2[0]
+            if k1 == 'more':
+                return 1
+            if k2 == 'more':
+                return -1
+
+            return cmp(int(k1), int(k2))
+
+        jobs_time_items = sorted(body_dict['jobs_time'].items(), cmp=jobs_time_cmp_func)
+
+        output_items.append(('jobs_time', OrderedDict(jobs_time_items)))
+
+        output_dict = OrderedDict(output_items)
+
+        # OrderedDict在通过json打印的时候，会保持原来的顺序
+        self.output(json.dumps(output_dict, indent=4))
 
         return True
 
