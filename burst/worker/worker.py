@@ -40,7 +40,7 @@ class Worker(object):
 
         try:
             address = self.app.ipc_address_tpl % self.group_id
-            conn = self.connection_class(self, address, self.app.conn_timeout)
+            conn = self.connection_class(self, address, self.app.worker_conn_timeout)
             conn.run()
         except KeyboardInterrupt:
             pass

@@ -25,8 +25,8 @@ class Burst(RoutesMixin, AppEventsMixin):
     group_conf = None
     group_router = None
 
-    # 网络连接超时(秒)
-    conn_timeout = constants.WORKER_CONN_TIMEOUT
+    # worker<->proxy网络连接超时(秒)
+    worker_conn_timeout = constants.WORKER_CONN_TIMEOUT
     # 处理job超时(秒). 超过后worker会自杀. None 代表永不超时
     job_timeout = None
     # 停止子进程超时(秒). 使用 TERM 进行停止时，如果超时未停止会发送KILL信号
