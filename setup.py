@@ -7,7 +7,7 @@ setup(
     platforms='any',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),
     install_requires=['setproctitle', 'twisted', 'events', 'netkit'],
-    scripts=['bin/burstctl.py'],
+    scripts=['burst/bin/burstctl.py'],
     url="https://github.com/dantezhu/burst",
     license="MIT",
     author="dantezhu",
