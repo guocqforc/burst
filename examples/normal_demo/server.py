@@ -71,5 +71,6 @@ def index(request):
 
 
 app.register_blueprint(user.bp)
+app.name = 'normal_demo'
 app.admin_address = ('127.0.0.1', 7778)
 app.run('127.0.0.1', 7777)
