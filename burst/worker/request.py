@@ -19,6 +19,10 @@ class Request(object):
     is_valid = False
     blueprint = None
     route_rule = None
+    # 是否中断处理，即不调用view_func，主要用在before_request中
+    interrupted = False
+    # 中断后要写入的数据
+    interrupt_data = None
 
     def __init__(self, conn, job_box):
         self.conn = conn
@@ -98,7 +102,7 @@ class Request(object):
 
     def write(self, data):
         """
-        写回，业务代码中请不要调用
+        写回响应，业务代码中请勿调用
         如果处理函数没有return数据的话，data可能为None，此时相当于直接进行ask_for_job
         :param data: 可以是dict也可以是box
         :return:
@@ -115,6 +119,16 @@ class Request(object):
         ))
 
         return self.conn.write(job_box.pack())
+
+    def interrupt(self, data=None):
+        """
+        中断处理
+        不能在这里直接write数据，是因为write之后就会告知proxy申请job，而业务层很可能误调用多次
+        :param data: 要响应的数据，不传即不响应。多次调用，以最后一次为准。
+        :return:
+        """
+        self.interrupted = True
+        self.interrupt_data = data
 
     def __repr__(self):
         return 'cmd: %r, endpoint: %s, box: %r' % (self.cmd, self.endpoint, self.box)
