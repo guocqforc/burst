@@ -14,7 +14,9 @@ class Request(object):
 
     conn = None
     # 封装的任务box，外面不需要理解
-    task_box = None
+    # 之所以起名字叫session，是因为里面带了连接相关的信息，比如client_ip。
+    # 这一点maple会更加明显一些
+    session = None
     box = None
     is_valid = False
     blueprint = None
@@ -26,12 +28,12 @@ class Request(object):
 
     def __init__(self, conn, task_box):
         self.conn = conn
-        self.task_box = task_box
+        self.session = task_box
         # 赋值
         self.is_valid = self._parse_raw_data()
 
     def _parse_raw_data(self):
-        if not self.task_box.body:
+        if not self.session.body:
             return True
 
         try:
@@ -40,7 +42,7 @@ class Request(object):
             logger.error('parse raw_data fail. e: %s, request: %s', e, self)
             return False
 
-        if self.box.unpack(self.task_box.body) > 0:
+        if self.box.unpack(self.session.body) > 0:
             self._parse_route_rule()
             return True
         else:
@@ -78,7 +80,7 @@ class Request(object):
         客户端连接IP，外面不需要了解task_box
         :return:
         """
-        return ip_int_to_str(self.task_box.client_ip_num)
+        return ip_int_to_str(self.session.client_ip_num)
 
     @property
     def cmd(self):
