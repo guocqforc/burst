@@ -44,7 +44,7 @@ class Connection(object):
                 past_time = time.time() - work_progress['begin_time']
                 if self.worker.app.work_timeout is not None and past_time > self.worker.app.work_timeout:
                     # 说明worker的处理时间已经太长了
-                    logger.error('task is timeout: %s / %s, request: %s',
+                    logger.error('work timeout: %s / %s, request: %s',
                                  past_time, self.worker.app.work_timeout, work_progress['request'])
                     # 强制从子线程退出worker
                     os._exit(-1)
