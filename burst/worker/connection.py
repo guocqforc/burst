@@ -20,7 +20,7 @@ class Connection(object):
         self.client = UnixClient(JobBox, address, conn_timeout)
 
     def run(self):
-        thread.start_new_thread(self._monitor_job_timeout, ())
+        thread.start_new_thread(self._monitor_work_timeout, ())
         while 1:
             try:
                 self._handle()
@@ -29,7 +29,7 @@ class Connection(object):
             except:
                 logger.error('exc occur.', exc_info=True)
 
-    def _monitor_job_timeout(self):
+    def _monitor_work_timeout(self):
         """
         监控job的耗时
         :return:
@@ -41,10 +41,10 @@ class Connection(object):
             job_info = self.job_info
             if job_info:
                 past_time = time.time() - job_info['begin_time']
-                if self.worker.app.job_timeout is not None and past_time > self.worker.app.job_timeout:
+                if self.worker.app.work_timeout is not None and past_time > self.worker.app.work_timeout:
                     # 说明worker的处理时间已经太长了
                     logger.error('job is timeout: %s / %s, request: %s',
-                                 past_time, self.worker.app.job_timeout, job_info['request'])
+                                 past_time, self.worker.app.work_timeout, job_info['request'])
                     # 强制从子线程退出worker
                     os._exit(-1)
 
