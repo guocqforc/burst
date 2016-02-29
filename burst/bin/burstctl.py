@@ -54,12 +54,12 @@ class BurstCtl(object):
         body_dict = json.loads(rsp_box.body)
 
         output_items = []
-        for key in ('clients', 'busy_workers', 'idle_workers', 'pending_jobs',
+        for key in ('clients', 'busy_workers', 'idle_workers', 'pending_tasks',
                     'client_req', 'client_rsp', 'worker_req', 'worker_rsp'):
 
             output_items.append((key, body_dict.get(key)))
 
-        def jobs_time_cmp_func(item1, item2):
+        def tasks_time_cmp_func(item1, item2):
             k1 = item1[0]
             k2 = item2[0]
             if k1 == 'more':
@@ -69,9 +69,9 @@ class BurstCtl(object):
 
             return cmp(int(k1), int(k2))
 
-        jobs_time_items = sorted(body_dict['jobs_time'].items(), cmp=jobs_time_cmp_func)
+        tasks_time_items = sorted(body_dict['tasks_time'].items(), cmp=tasks_time_cmp_func)
 
-        output_items.append(('jobs_time', OrderedDict(jobs_time_items)))
+        output_items.append(('tasks_time', OrderedDict(tasks_time_items)))
 
         output_dict = OrderedDict(output_items)
 

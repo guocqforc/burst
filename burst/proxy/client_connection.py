@@ -4,8 +4,8 @@ from twisted.internet.protocol import Protocol, Factory, connectionDone
 
 from ..utils import safe_call, ip_str_to_int
 from ..log import logger
-from job import Job
-from job_box import JobBox
+from task import Task
+from task_box import TaskBox
 from .. import constants
 
 
@@ -79,12 +79,12 @@ class ClientConnection(Protocol):
         # 获取映射的group_id
         group_id = self.factory.proxy.app.group_router(box)
 
-        # 打包成内部通信的job_box
-        job_box = JobBox(dict(
+        # 打包成内部通信的task_box
+        task_box = TaskBox(dict(
             cmd=constants.CMD_WORKER_TASK_ASSIGN,
             client_ip_num=self._client_ip_num,
             body=data,
         ))
 
-        job = Job(job_box, self)
-        self.factory.proxy.job_dispatcher.add_job(group_id, job)
+        task = Task(task_box, self)
+        self.factory.proxy.task_dispatcher.add_task(group_id, task)

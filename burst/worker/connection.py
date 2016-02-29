@@ -7,17 +7,17 @@ from unix_client import UnixClient
 import time
 from .. import constants
 from ..log import logger
-from ..proxy import JobBox
+from ..proxy import TaskBox
 
 
 class Connection(object):
 
-    job_info = None
+    task_info = None
 
     def __init__(self, worker, address, conn_timeout):
         self.worker = worker
         # 直接创建即可
-        self.client = UnixClient(JobBox, address, conn_timeout)
+        self.client = UnixClient(TaskBox, address, conn_timeout)
 
     def run(self):
         thread.start_new_thread(self._monitor_work_timeout, ())
@@ -31,20 +31,20 @@ class Connection(object):
 
     def _monitor_work_timeout(self):
         """
-        监控job的耗时
+        监控task的耗时
         :return:
         """
 
         while self.worker.enable:
             time.sleep(1)
 
-            job_info = self.job_info
-            if job_info:
-                past_time = time.time() - job_info['begin_time']
+            task_info = self.task_info
+            if task_info:
+                past_time = time.time() - task_info['begin_time']
                 if self.worker.app.work_timeout is not None and past_time > self.worker.app.work_timeout:
                     # 说明worker的处理时间已经太长了
-                    logger.error('job is timeout: %s / %s, request: %s',
-                                 past_time, self.worker.app.work_timeout, job_info['request'])
+                    logger.error('task is timeout: %s / %s, request: %s',
+                                 past_time, self.worker.app.work_timeout, task_info['request'])
                     # 强制从子线程退出worker
                     os._exit(-1)
 
@@ -137,13 +137,13 @@ class Connection(object):
         """
         request = self.worker.request_class(self, data)
 
-        # 设置job开始处理的时间和信息
-        self.job_info = dict(
+        # 设置task开始处理的时间和信息
+        self.task_info = dict(
             begin_time=time.time(),
             request=request,
         )
         self._handle_request(request)
-        self.job_info = None
+        self.task_info = None
 
     def _handle_request(self, request):
         """

@@ -6,7 +6,7 @@ from twisted.internet.protocol import Protocol, Factory, connectionDone
 from ..utils import safe_call
 from ..log import logger
 from .. import constants
-from .job_box import JobBox
+from .task_box import TaskBox
 
 
 class WorkerConnectionFactory(Factory):
@@ -24,10 +24,10 @@ class WorkerConnection(Protocol):
     # 状态
     _status = None
     # 任务开始时间
-    _job_begin_time = None
+    _task_begin_time = None
 
     # 正在处理的任务
-    _doing_job = None
+    _doing_task = None
     # 读取缓冲
     _read_buffer = None
 
@@ -44,12 +44,12 @@ class WorkerConnection(Protocol):
         self._read_buffer = ''
 
     def connectionMade(self):
-        # 建立连接就直接去申请job
-        self._try_alloc_job()
+        # 建立连接就直接去申请task
+        self._try_alloc_task()
 
     def connectionLost(self, reason=connectionDone):
         # 要删除掉对应的worker
-        self.factory.proxy.job_dispatcher.remove_worker(self)
+        self.factory.proxy.task_dispatcher.remove_worker(self)
 
     def dataReceived(self, data):
         """
@@ -61,15 +61,15 @@ class WorkerConnection(Protocol):
 
         while self._read_buffer:
             # 因为box后面还是要用的
-            job_box = JobBox()
-            ret = job_box.unpack(self._read_buffer)
+            task_box = TaskBox()
+            ret = task_box.unpack(self._read_buffer)
             if ret == 0:
                 # 说明要继续收
                 return
             elif ret > 0:
                 # 收好了
                 self._read_buffer = self._read_buffer[ret:]
-                safe_call(self._on_read_complete, job_box)
+                safe_call(self._on_read_complete, task_box)
                 continue
             else:
                 # 数据已经混乱了，全部丢弃
@@ -77,44 +77,44 @@ class WorkerConnection(Protocol):
                 self._read_buffer = ''
                 return
 
-    def _on_read_complete(self, job_box):
+    def _on_read_complete(self, task_box):
         """
         完整数据接收完成
-        :param job_box: 解析之后的job_box
+        :param task_box: 解析之后的task_box
         :return:
         """
 
-        if job_box.cmd == constants.CMD_WORKER_TASK_DONE:
-            self._on_job_end()
+        if task_box.cmd == constants.CMD_WORKER_TASK_DONE:
+            self._on_task_end()
 
             # 如果有数据，就要先处理
-            if job_box.body:
+            if task_box.body:
                 # 要转发数据给原来的用户
                 # 要求连接存在，并且连接还处于连接中
-                if self._doing_job.client_conn and self._doing_job.client_conn.connected:
-                    self._doing_job.client_conn.transport.write(job_box.body)
+                if self._doing_task.client_conn and self._doing_task.client_conn.connected:
+                    self._doing_task.client_conn.transport.write(task_box.body)
 
                     self.factory.proxy.stat_counter.client_rsp += 1
 
-            self._try_alloc_job()
+            self._try_alloc_task()
 
-    def _try_alloc_job(self):
+    def _try_alloc_task(self):
         # 无论有没有任务，都会标记自己空闲
-        job = self.factory.proxy.job_dispatcher.alloc_job(self)
-        if job:
+        task = self.factory.proxy.task_dispatcher.alloc_task(self)
+        if task:
             # 如果能申请成功，就继续执行
-            self.assign_job(job)
+            self.assign_task(task)
 
-    def assign_job(self, job):
+    def assign_task(self, task):
         """
         分配任务
-        :param job:
+        :param task:
         :return:
         """
-        self._doing_job = job
+        self._doing_task = task
         # 发送
-        self.transport.write(job.job_box.pack())
-        self._on_job_begin()
+        self.transport.write(task.task_box.pack())
+        self._on_task_begin()
 
     @property
     def status(self):
@@ -126,24 +126,24 @@ class WorkerConnection(Protocol):
 
         if self._status == constants.WORKER_STATUS_IDLE:
             # 没有正在处理的任务
-            self._doing_job = None
-            self._job_begin_time = None
+            self._doing_task = None
+            self._task_begin_time = None
 
-    def _on_job_begin(self):
+    def _on_task_begin(self):
         """
         当作业开始
         :return:
         """
         self.factory.proxy.stat_counter.worker_req += 1
-        self._job_begin_time = time.time()
+        self._task_begin_time = time.time()
 
-    def _on_job_end(self):
+    def _on_task_end(self):
         """
         当作业结束
         :return:
         """
         now = time.time()
-        past_time_ms = int((now - self._job_begin_time) * 1000)
+        past_time_ms = int((now - self._task_begin_time) * 1000)
 
-        self.factory.proxy.stat_counter.add_job_time(past_time_ms)
+        self.factory.proxy.stat_counter.add_task_time(past_time_ms)
         self.factory.proxy.stat_counter.worker_rsp += 1

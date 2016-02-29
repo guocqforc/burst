@@ -10,7 +10,7 @@ from ..log import logger
 from client_connection import ClientConnectionFactory
 from worker_connection import WorkerConnectionFactory
 from admin_connection import AdminConnectionFactory
-from job_dispatcher import JobDispatcher
+from task_dispatcher import TaskDispatcher
 from stat_counter import StatCounter
 from .. import constants
 
@@ -32,7 +32,7 @@ class Proxy(object):
     port = None
 
     # 任务调度器
-    job_dispatcher = None
+    task_dispatcher = None
     # 统计
     stat_counter = None
 
@@ -45,8 +45,8 @@ class Proxy(object):
         self.host = host
         self.port = port
 
-        self.job_dispatcher = JobDispatcher()
-        self.stat_counter = StatCounter(self.app.jobs_time_benchmark)
+        self.task_dispatcher = TaskDispatcher()
+        self.stat_counter = StatCounter(self.app.tasks_time_benchmark)
 
     def run(self):
         setproctitle.setproctitle(self.app.make_proc_name(self.type))

@@ -11,7 +11,7 @@ RET_INTERNAL = -10001
 RET_ADIMN_AUTH_FAIL = -20000
 
 # 内部使用的命令字
-# 分配任务. 如果body里面带数据，说明是要写回；如果没有数据，说明只是要分配job
+# 分配任务. 如果body里面带数据，说明是要写回；如果没有数据，说明只是要分配task
 CMD_WORKER_TASK_ASSIGN = 100
 # 任务完成
 CMD_WORKER_TASK_DONE = 200
@@ -24,7 +24,7 @@ CMD_ADMIN_SERVER_STAT = 20000
 CHILD_ENV_KEY = 'BURST_ENV'
 
 # 作业时间统计标准
-JOBS_TIME_BENCHMARK = (10, 50, 100, 500, 1000, 5000)
+TASKS_TIME_BENCHMARK = (10, 50, 100, 500, 1000, 5000)
 
 # proxy<->worker之间通信的address模板
 IPC_ADDRESS_TPL = '%s_ipc/' % NAME + '%s.sock'

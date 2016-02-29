@@ -27,7 +27,7 @@ class Burst(RoutesMixin, AppEventsMixin):
 
     # worker<->proxy网络连接超时(秒)
     worker_conn_timeout = constants.WORKER_CONN_TIMEOUT
-    # 处理job超时(秒). 超过后worker会自杀. None 代表永不超时
+    # 处理task超时(秒). 超过后worker会自杀. None 代表永不超时
     work_timeout = None
     # 停止子进程超时(秒). 使用 TERM 进行停止时，如果超时未停止会发送KILL信号
     stop_timeout = None
@@ -44,7 +44,7 @@ class Burst(RoutesMixin, AppEventsMixin):
 
     # 统计相关
     # 作业时间统计标准
-    jobs_time_benchmark = constants.JOBS_TIME_BENCHMARK
+    tasks_time_benchmark = constants.TASKS_TIME_BENCHMARK
 
     def __init__(self, box_class, group_conf, group_router):
         """
