@@ -13,7 +13,7 @@ class Request(object):
     """
 
     conn = None
-    # 封装的传输box，外面不需要理解
+    # 封装的任务box，外面不需要理解
     task_box = None
     box = None
     is_valid = False
