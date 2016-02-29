@@ -12,7 +12,8 @@ from ..proxy import TaskBox
 
 class Connection(object):
 
-    task_info = None
+    # 工作进展
+    work_progress = None
 
     def __init__(self, worker, address, conn_timeout):
         self.worker = worker
@@ -38,13 +39,13 @@ class Connection(object):
         while self.worker.enable:
             time.sleep(1)
 
-            task_info = self.task_info
-            if task_info:
-                past_time = time.time() - task_info['begin_time']
+            work_progress = self.work_progress
+            if work_progress:
+                past_time = time.time() - work_progress['begin_time']
                 if self.worker.app.work_timeout is not None and past_time > self.worker.app.work_timeout:
                     # 说明worker的处理时间已经太长了
                     logger.error('task is timeout: %s / %s, request: %s',
-                                 past_time, self.worker.app.work_timeout, task_info['request'])
+                                 past_time, self.worker.app.work_timeout, work_progress['request'])
                     # 强制从子线程退出worker
                     os._exit(-1)
 
@@ -138,12 +139,12 @@ class Connection(object):
         request = self.worker.request_class(self, data)
 
         # 设置task开始处理的时间和信息
-        self.task_info = dict(
+        self.work_progress = dict(
             begin_time=time.time(),
             request=request,
         )
         self._handle_request(request)
-        self.task_info = None
+        self.work_progress = None
 
     def _handle_request(self, request):
         """
