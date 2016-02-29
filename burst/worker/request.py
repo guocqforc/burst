@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from ..proxy import JobBox
+from ..proxy import TaskBox
 from .. import constants
 from ..log import logger
 from ..utils import ip_int_to_str
@@ -13,8 +13,8 @@ class Request(object):
     """
 
     conn = None
-    # 封装的传输box，外面不需要理解
-    job_box = None
+    # 封装的任务box，外面不需要理解
+    task_box = None
     box = None
     is_valid = False
     blueprint = None
@@ -24,14 +24,14 @@ class Request(object):
     # 中断后要写入的数据
     interrupt_data = None
 
-    def __init__(self, conn, job_box):
+    def __init__(self, conn, task_box):
         self.conn = conn
-        self.job_box = job_box
+        self.task_box = task_box
         # 赋值
         self.is_valid = self._parse_raw_data()
 
     def _parse_raw_data(self):
-        if not self.job_box.body:
+        if not self.task_box.body:
             return True
 
         try:
@@ -40,7 +40,7 @@ class Request(object):
             logger.error('parse raw_data fail. e: %s, request: %s', e, self)
             return False
 
-        if self.box.unpack(self.job_box.body) > 0:
+        if self.box.unpack(self.task_box.body) > 0:
             self._parse_route_rule()
             return True
         else:
@@ -75,10 +75,10 @@ class Request(object):
     @property
     def client_ip(self):
         """
-        客户端连接IP，外面不需要了解job_box
+        客户端连接IP，外面不需要了解task_box
         :return:
         """
-        return ip_int_to_str(self.job_box.client_ip_num)
+        return ip_int_to_str(self.task_box.client_ip_num)
 
     @property
     def cmd(self):
@@ -103,7 +103,7 @@ class Request(object):
     def write(self, data):
         """
         写回响应，业务代码中请勿调用
-        如果处理函数没有return数据的话，data可能为None，此时相当于直接进行ask_for_job
+        如果处理函数没有return数据的话，data可能为None，此时相当于直接进行ask_for_task
         :param data: 可以是dict也可以是box
         :return:
         """
@@ -113,17 +113,17 @@ class Request(object):
         elif isinstance(data, dict):
             data = self.box.map(data).pack()
 
-        job_box = JobBox(dict(
+        task_box = TaskBox(dict(
             cmd=constants.CMD_WORKER_TASK_DONE,
             body=data or '',
         ))
 
-        return self.conn.write(job_box.pack())
+        return self.conn.write(task_box.pack())
 
     def interrupt(self, data=None):
         """
         中断处理
-        不能在这里直接write数据，是因为write之后就会告知proxy申请job，而业务层很可能误调用多次
+        不能在这里直接write数据，是因为write之后就会告知proxy申请task，而业务层很可能误调用多次
         :param data: 要响应的数据，不传即不响应。多次调用，以最后一次为准。
         :return:
         """

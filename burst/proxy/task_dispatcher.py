@@ -6,7 +6,7 @@ from burst import constants
 from burst.proxy.group_queue import GroupQueue
 
 
-class JobDispatcher(object):
+class TaskDispatcher(object):
     """
     任务管理
     主要包括: 消息来了之后的分发
@@ -39,7 +39,7 @@ class JobDispatcher(object):
             self.idle_workers_dict[worker.group_id].remove(worker)
             return
 
-    def add_job(self, group_id, item):
+    def add_task(self, group_id, item):
         """
         添加任务
         当新消息来得时候，应该先检查有没有空闲的worker，如果没有的话，才放入消息队列
@@ -58,15 +58,15 @@ class JobDispatcher(object):
         self.busy_workers_dict[group_id].add(worker)
 
         # 让worker去处理任务吧
-        worker.assign_job(item)
+        worker.assign_task(item)
 
-    def alloc_job(self, worker):
+    def alloc_task(self, worker):
         """
         尝试获取新任务
         :return: 获取的新任务
         """
-        job = self.group_queue.get(worker.group_id)
-        dst_status = constants.WORKER_STATUS_BUSY if job else constants.WORKER_STATUS_IDLE
+        task = self.group_queue.get(worker.group_id)
+        dst_status = constants.WORKER_STATUS_BUSY if task else constants.WORKER_STATUS_IDLE
 
         if worker.status != dst_status:
             # 说明状态有变化，需要调整队列
@@ -74,7 +74,7 @@ class JobDispatcher(object):
             # 同步状态
             self._sync_worker_status(worker)
 
-        return job
+        return task
 
     def _sync_worker_status(self, worker):
         """

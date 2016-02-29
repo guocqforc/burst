@@ -86,13 +86,13 @@ class AdminConnection(Protocol):
         else:
             if box.cmd == constants.CMD_ADMIN_SERVER_STAT:
                 idle_workers = dict([(group_id, len(workers)) for group_id, workers in
-                                     self.factory.proxy.job_dispatcher.idle_workers_dict.items()])
+                                     self.factory.proxy.task_dispatcher.idle_workers_dict.items()])
                 busy_workers = dict([(group_id, len(workers)) for group_id, workers in
-                                     self.factory.proxy.job_dispatcher.busy_workers_dict.items()])
+                                     self.factory.proxy.task_dispatcher.busy_workers_dict.items()])
 
-                # 正在处理的jobs
-                pending_jobs = dict([(group_id, queue.qsize()) for group_id, queue in
-                                     self.factory.proxy.job_dispatcher.group_queue.queue_dict.items()])
+                # 正在处理的tasks
+                pending_tasks = dict([(group_id, queue.qsize()) for group_id, queue in
+                                     self.factory.proxy.task_dispatcher.group_queue.queue_dict.items()])
 
                 rsp_body = dict(
                     clients=self.factory.proxy.stat_counter.clients,
@@ -102,8 +102,8 @@ class AdminConnection(Protocol):
                     worker_rsp=self.factory.proxy.stat_counter.worker_rsp,
                     idle_workers=idle_workers,
                     busy_workers=busy_workers,
-                    pending_jobs=pending_jobs,
-                    jobs_time=dict(self.factory.proxy.stat_counter.jobs_time_counter),
+                    pending_tasks=pending_tasks,
+                    tasks_time=dict(self.factory.proxy.stat_counter.tasks_time_counter),
                 )
 
                 rsp = box.map(dict(

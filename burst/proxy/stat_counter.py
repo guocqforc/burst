@@ -19,17 +19,17 @@ class StatCounter(object):
     # worker回应数
     worker_rsp = 0
     # 作业完成时间统计
-    jobs_time_counter = Counter()
+    tasks_time_counter = Counter()
     # 作业时间统计标准
-    jobs_time_benchmark = None
+    tasks_time_benchmark = None
 
-    def __init__(self, jobs_time_benchmark):
-        self.jobs_time_benchmark = jobs_time_benchmark
+    def __init__(self, tasks_time_benchmark):
+        self.tasks_time_benchmark = tasks_time_benchmark
 
-    def add_job_time(self, job_time):
+    def add_task_time(self, task_time):
         """
         添加一个新的时间
-        :param job_time:
+        :param task_time:
         :return:
         """
 
@@ -39,11 +39,11 @@ class StatCounter(object):
             :return:
             """
 
-            for dst_value in self.jobs_time_benchmark:
+            for dst_value in self.tasks_time_benchmark:
                 if value < dst_value:
                     return dst_value
             else:
                 return 'more'
 
-        counter_value = trans_to_counter_value(job_time)
-        self.jobs_time_counter[counter_value] += 1
+        counter_value = trans_to_counter_value(task_time)
+        self.tasks_time_counter[counter_value] += 1
