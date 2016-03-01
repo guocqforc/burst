@@ -15,26 +15,27 @@ from master import Master
 class Burst(RoutesMixin, AppEventsMixin):
 
     # 配置都放到 burst 里，而和proxy或者worker直接相关的类，则放到自己的部分
+    ############################## configurable begin ##############################
 
     # 进程名字
     name = constants.NAME
 
     box_class = None
-    proxy_backlog = constants.PROXY_BACKLOG
-
     group_conf = None
     group_router = None
+
+    # proxy的backlog
+    proxy_backlog = constants.PROXY_BACKLOG
 
     # worker<->proxy网络连接超时(秒)
     worker_conn_timeout = constants.WORKER_CONN_TIMEOUT
     # 处理task超时(秒). 超过后worker会自杀. None 代表永不超时
     work_timeout = None
+
     # 停止子进程超时(秒). 使用 TERM 进行停止时，如果超时未停止会发送KILL信号
     stop_timeout = None
     # proxy<->worker之间通信的address模板
     ipc_address_tpl = constants.IPC_ADDRESS_TPL
-
-    blueprints = None
 
     # 管理员，可以连接proxy获取数据
     # 管理员访问地址如 (127.0.0.1, 22222)
@@ -45,6 +46,10 @@ class Burst(RoutesMixin, AppEventsMixin):
     # 统计相关
     # 作业时间统计标准
     tasks_time_benchmark = constants.TASKS_TIME_BENCHMARK
+
+    ############################## configurable end   ##############################
+
+    blueprints = None
 
     def __init__(self, box_class, group_conf, group_router):
         """

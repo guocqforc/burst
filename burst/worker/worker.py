@@ -36,7 +36,7 @@ class Worker(object):
         ))
 
         self._handle_proc_signals()
-        self._before_worker_run()
+        self._on_worker_run()
 
         try:
             address = self.app.ipc_address_tpl % self.group_id
@@ -47,7 +47,7 @@ class Worker(object):
         except:
             logger.error('exc occur.', exc_info=True)
 
-    def _before_worker_run(self):
+    def _on_worker_run(self):
         self.app.events.create_worker(self)
         for bp in self.app.blueprints:
             bp.events.create_app_worker(self)

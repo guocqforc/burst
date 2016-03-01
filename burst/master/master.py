@@ -38,9 +38,9 @@ class Master(object):
 
         self._handle_proc_signals()
 
-        self._fork_workers()
+        self._spawn_workers()
 
-    def _fork_workers(self):
+    def _spawn_workers(self):
         def start_child_process(proc_env):
             # 要传入group_id
             worker_env = copy.deepcopy(os.environ)
