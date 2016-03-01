@@ -12,10 +12,13 @@ class Request(object):
     请求
     """
 
+    # 业务层需要访问的对象，消息内容
+    box = None
+
+    # connection
     conn = None
     # 封装的任务box，外面不需要理解
     task_box = None
-    box = None
     is_valid = False
     blueprint = None
     route_rule = None
