@@ -22,13 +22,10 @@ handler.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-app = Burst(Box)
-app.config.from_object(__name__)
 
+# 配置得放到config.from_object前面
 NAME = 'normal_demo'
-
 ADMIN_ADDRESS = ('127.0.0.1', 7778)
-
 GROUP_CONF = {
     1: {
         'count': 2,
@@ -38,6 +35,9 @@ GROUP_CONF = {
     },
 }
 GROUP_ROUTER = lambda box: 1 if box.cmd == 1 else 10
+
+app = Burst(Box)
+app.config.from_object(__name__)
 
 
 @app.create_worker
