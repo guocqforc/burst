@@ -14,7 +14,8 @@ import thread
 from ..share.log import logger
 from ..share.utils import safe_call
 from ..share.unix_client import UnixClient
-from burst.share import constants
+from ..share.thread_timer import ThreadTimer
+from ..share import constants
 
 
 class Master(object):
@@ -28,8 +29,8 @@ class Master(object):
 
     enable = True
 
-    # 等待重启所有workers
-    waiting_restart_workers = False
+    # 等待重启所有workers的timer
+    restart_workers_timer = None
 
     # proxy进程列表
     proxy_process = None
@@ -156,7 +157,7 @@ class Master(object):
                     proc_env = p.proc_env
                     self.worker_processes[idx] = None
 
-                    if self.enable and not self.waiting_restart_workers:
+                    if self.enable and self.restart_workers_timer is None:
                         # 如果还要继续服务
                         p = self._start_child_process(proc_env)
                         self.worker_processes[idx] = p
@@ -164,9 +165,10 @@ class Master(object):
             if not filter(lambda x: x, self.worker_processes):
                 # 没活着的了worker了
 
-                if self.waiting_restart_workers:
+                if self.restart_workers_timer is not None:
                     # 如果是在等待重启，就直接重启了
-                    self.waiting_restart_workers = False
+                    self.restart_workers_timer.clear()
+                    self.restart_workers_timer = None
                     self._spawn_workers()
                     continue
                 else:
@@ -187,15 +189,22 @@ class Master(object):
             if p:
                 p.send_signal(signal.SIGTERM)
 
-        # if self.app.config['STOP_TIMEOUT'] is not None:
-        #    signal.alarm(self.app.config['STOP_TIMEOUT'])
+        def final_kill_workers():
+            """
+            如果到时间还没停止，那就只能强制kill了
+            """
+            for p in self.worker_processes:
+                if p:
+                    p.send_signal(signal.SIGKILL)
+
+        self.restart_workers_timer = ThreadTimer()
+        self.restart_workers_timer.set(self.app.config['STOP_TIMEOUT'], final_kill_workers)
 
     def _restart_workers(self):
         """
         restart是要先完全stop的
         :return:
         """
-        self.waiting_restart_workers = True
 
         self._stop_workers()
 
