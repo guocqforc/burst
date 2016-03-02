@@ -4,8 +4,8 @@ import os
 import socket
 import thread
 import time
+from netkit.contrib.tcp_client import TcpClient
 
-from ..share.unix_client import UnixClient
 from ..share import constants
 from ..share.log import logger
 from ..share.task_box import TaskBox
@@ -19,7 +19,7 @@ class Connection(object):
     def __init__(self, worker, address, conn_timeout):
         self.worker = worker
         # 直接创建即可
-        self.client = UnixClient(TaskBox, address, conn_timeout)
+        self.client = TcpClient(TaskBox, address=address, timeout=conn_timeout, socket_type=socket.AF_UNIX)
 
     def run(self):
         thread.start_new_thread(self._monitor_work_timeout, ())

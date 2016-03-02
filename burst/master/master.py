@@ -5,15 +5,16 @@ import copy
 import json
 import sys
 import subprocess
+import socket
 import time
 import signal
 import setproctitle
 from netkit.box import Box
+from netkit.contrib.tcp_client import TcpClient
 import thread
 
 from ..share.log import logger
 from ..share.utils import safe_call
-from ..share.unix_client import UnixClient
 from ..share.thread_timer import ThreadTimer
 from ..share import constants
 
@@ -63,7 +64,7 @@ class Master(object):
         连接到proxy，因为有些命令要发过来
         :return:
         """
-        client = UnixClient(Box, self.app.config['MASTER_IPC_ADDRESS'])
+        client = TcpClient(Box, address=self.app.config['MASTER_IPC_ADDRESS'], socket_type=socket.AF_UNIX)
 
         while True:
             try:
