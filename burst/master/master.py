@@ -160,7 +160,7 @@ class Master(object):
             # 如果是终端直接CTRL-C，子进程自然会在父进程之后收到INT信号，不需要再写代码发送
             # 如果直接kill -INT $parent_pid，子进程不会自动收到INT
             # 所以这里可能会导致重复发送的问题，重复发送会导致一些子进程异常，所以在子进程内部有做重复处理判断。
-            for p in self.worker_processes:
+            for p in self.worker_processes + [self.proxy_process]:
                 if p:
                     p.send_signal(signum)
 
@@ -171,7 +171,7 @@ class Master(object):
         def final_kill_handler(signum, frame):
             if not self.enable:
                 # 只有满足了not enable，才发送term命令
-                for p in self.worker_processes:
+                for p in self.worker_processes + [self.proxy_process]:
                     if p:
                         p.send_signal(signal.SIGKILL)
 
@@ -181,7 +181,7 @@ class Master(object):
             """
             self.enable = False
 
-            for p in self.worker_processes:
+            for p in self.worker_processes + [self.proxy_process]:
                 if p:
                     p.send_signal(signal.SIGTERM)
 
