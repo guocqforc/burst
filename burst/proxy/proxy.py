@@ -46,7 +46,7 @@ class Proxy(object):
         self.port = port
 
         self.task_dispatcher = TaskDispatcher()
-        self.stat_counter = StatCounter(self.app.tasks_time_benchmark)
+        self.stat_counter = StatCounter(self.app.config['TASKS_TIME_BENCHMARK'])
 
     def run(self):
         setproctitle.setproctitle(self.app.make_proc_name(self.type))
@@ -54,13 +54,13 @@ class Proxy(object):
         # 主进程
         self._handle_proc_signals()
 
-        ipc_directory = os.path.dirname(self.app.ipc_address_tpl)
+        ipc_directory = os.path.dirname(self.app.config['IPC_ADDRESS_TPL'])
         if not os.path.exists(ipc_directory):
             os.makedirs(ipc_directory)
 
         # 启动监听worker
-        for group_id in self.app.group_conf:
-            ipc_address = self.app.ipc_address_tpl % group_id
+        for group_id in self.app.config['GROUP_CONF']:
+            ipc_address = self.app.config['IPC_ADDRESS_TPL'] % group_id
 
             # 防止之前异常导致遗留
             if os.path.exists(ipc_address):
@@ -71,12 +71,12 @@ class Proxy(object):
 
         # 启动对外监听
         reactor.listenTCP(self.port, self.client_connection_factory_class(self),
-                          backlog=self.app.proxy_backlog, interface=self.host)
+                          backlog=self.app.config['PROXY_BACKLOG'], interface=self.host)
 
         # 启动admin服务
-        if self.app.admin_address:
-            reactor.listenTCP(self.app.admin_address[1], self.admin_connection_factory_class(self),
-                              interface=self.app.admin_address[0])
+        if self.app.config['ADMIN_ADDRESS']:
+            reactor.listenTCP(self.app.config['ADMIN_ADDRESS'][1], self.admin_connection_factory_class(self),
+                              interface=self.app.config['ADMIN_ADDRESS'][0])
 
         try:
             reactor.run(installSignalHandlers=False)

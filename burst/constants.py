@@ -23,29 +23,54 @@ CMD_ADMIN_SERVER_STAT = 20000
 # 子进程城的环境变量
 CHILD_ENV_KEY = 'BURST_ENV'
 
-# 作业时间统计标准
-TASKS_TIME_BENCHMARK = (10, 50, 100, 500, 1000, 5000)
-
-# proxy<->worker之间通信的address模板
-IPC_ADDRESS_TPL = '%s_ipc/' % NAME + '%s.sock'
-
-
-# 默认backlog
-PROXY_BACKLOG = 256
-
 
 # worker的状态
 WORKER_STATUS_IDLE = 1
 WORKER_STATUS_BUSY = 2
 
-# worker重连等待时间
-WORKER_TRY_CONNECT_INTERVAL = 1
-
-# 网络连接超时(秒)，包括 connect once，read once，write once
-WORKER_CONN_TIMEOUT = 3
-
-
 # 进程类型
 PROC_TYPE_MASTER = 'master'
 PROC_TYPE_PROXY = 'proxy'
 PROC_TYPE_WORKER = 'worker'
+
+
+# 默认配置
+DEFAULT_CONFIG = {
+    # 进程配置(必填):
+    #    {
+    #        $group_id: {
+    #            count: 10,
+    #        }
+    #    }
+    'GROUP_CONF': None,
+    # 通过box路由group_id(必填):
+    #    def group_router(box):
+    #        return group_id
+    'GROUP_ROUTER': None,
+
+    # 停止子进程超时(秒). 使用 TERM 进行停止时，如果超时未停止会发送KILL信号
+    'STOP_TIMEOUT': None,
+
+    # proxy<->worker之间通信的address模板
+    'IPC_ADDRESS_TPL': '%s_ipc/' % NAME + '%s.sock',
+
+    # proxy的backlog
+    'PROXY_BACKLOG': 256,
+
+    # worker<->proxy网络连接超时(秒), 包括 connect once，read once，write once
+    'WORKER_CONN_TIMEOUT': 3,
+    # 处理task超时(秒). 超过后worker会自杀. None 代表永不超时
+    'WORK_TIMEOUT': None,
+    # worker重连等待时间
+    'WORKER_TRY_CONNECT_INTERVAL': 1,
+
+    # 管理员，可以连接proxy获取数据
+    # 管理员访问地址如 (127.0.0.1, 22222)
+    'ADMIN_ADDRESS': None,
+    'ADMIN_USERNAME': None,
+    'ADMIN_PASSWORD': None,
+
+    # 统计相关
+    # 作业时间统计标准
+    'TASKS_TIME_BENCHMARK': (10, 50, 100, 500, 1000, 5000),
+}

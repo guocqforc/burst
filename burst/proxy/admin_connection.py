@@ -63,7 +63,8 @@ class AdminConnection(Protocol):
         :return:
         """
 
-        return (self.factory.proxy.app.admin_username or '', self.factory.proxy.app.admin_password or '') == (
+        return (self.factory.proxy.app.config['ADMIN_USERNAME'] or '',
+                self.factory.proxy.app.config['ADMIN_PASSWORD'] or '') == (
             username or '', password or ''
         )
 

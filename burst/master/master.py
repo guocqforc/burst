@@ -59,7 +59,7 @@ class Master(object):
         p = start_child_process(proc_env)
         self.processes.append(p)
 
-        for group_id, group_info in self.app.group_conf.items():
+        for group_id, group_info in self.app.config['GROUP_CONF'].items():
             proc_env = dict(
                 type=constants.PROC_TYPE_WORKER,
                 group_id=group_id,
@@ -101,8 +101,8 @@ class Master(object):
                     p.send_signal(signum)
 
             # https://docs.python.org/2/library/signal.html#signal.alarm
-            if self.app.stop_timeout is not None:
-                signal.alarm(self.app.stop_timeout)
+            if self.app.config['STOP_TIMEOUT'] is not None:
+                signal.alarm(self.app.config['STOP_TIMEOUT'])
 
         def final_kill_handler(signum, frame):
             if not self.enable:
@@ -121,8 +121,8 @@ class Master(object):
                 if p:
                     p.send_signal(signal.SIGTERM)
 
-            if self.app.stop_timeout is not None:
-                signal.alarm(self.app.stop_timeout)
+            if self.app.config['STOP_TIMEOUT'] is not None:
+                signal.alarm(self.app.config['STOP_TIMEOUT'])
 
         def safe_reload_handler(signum, frame):
             """

@@ -77,7 +77,7 @@ class ClientConnection(Protocol):
         self.factory.proxy.stat_counter.client_req += 1
 
         # 获取映射的group_id
-        group_id = self.factory.proxy.app.group_router(box)
+        group_id = self.factory.proxy.app.config['GROUP_ROUTER'](box)
 
         # 打包成内部通信的task_box
         task_box = TaskBox(dict(

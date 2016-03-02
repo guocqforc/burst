@@ -10,6 +10,7 @@ import constants
 from proxy import Proxy
 from worker import Worker
 from master import Master
+from config import ConfigAttribute, Config
 
 
 class Burst(RoutesMixin, AppEventsMixin):
@@ -18,61 +19,27 @@ class Burst(RoutesMixin, AppEventsMixin):
     ############################## configurable begin ##############################
 
     # 进程名字
-    name = constants.NAME
+    name = ConfigAttribute('NAME')
+    debug = ConfigAttribute('DEBUG')
 
     box_class = None
-    group_conf = None
-    group_router = None
-
-    # proxy的backlog
-    proxy_backlog = constants.PROXY_BACKLOG
-
-    # worker<->proxy网络连接超时(秒)
-    worker_conn_timeout = constants.WORKER_CONN_TIMEOUT
-    # 处理task超时(秒). 超过后worker会自杀. None 代表永不超时
-    work_timeout = None
-
-    # 停止子进程超时(秒). 使用 TERM 进行停止时，如果超时未停止会发送KILL信号
-    stop_timeout = None
-    # proxy<->worker之间通信的address模板
-    ipc_address_tpl = constants.IPC_ADDRESS_TPL
-
-    # 管理员，可以连接proxy获取数据
-    # 管理员访问地址如 (127.0.0.1, 22222)
-    admin_address = None
-    admin_username = None
-    admin_password = None
-
-    # 统计相关
-    # 作业时间统计标准
-    tasks_time_benchmark = constants.TASKS_TIME_BENCHMARK
 
     ############################## configurable end   ##############################
 
+    config = None
     blueprints = None
 
-    def __init__(self, box_class, group_conf, group_router):
+    def __init__(self, box_class):
         """
         构造函数
         :param box_class: box类
-        :param group_conf: 进程配置，格式如下:
-            {
-                $group_id: {
-                    count: 10,
-                }
-            }
-        :param group_router: 通过box路由group_id:
-            def group_router(box):
-                return group_id
         :return:
         """
         RoutesMixin.__init__(self)
         AppEventsMixin.__init__(self)
 
         self.box_class = box_class
-        self.group_conf = group_conf
-        self.group_router = group_router
-
+        self.config = Config(defaults=constants.DEFAULT_CONFIG)
         self.blueprints = list()
 
     def register_blueprint(self, blueprint):
@@ -87,8 +54,8 @@ class Burst(RoutesMixin, AppEventsMixin):
         if not str_burst_env:
             # 主进程
             logger.info('Running server on %s:%s', host, port)
-            if self.admin_address:
-                logger.info('Running admin server on %s:%s', self.admin_address[0], self.admin_address[1])
+            if self.config['ADMIN_ADDRESS']:
+                logger.info('Running admin server on %s:%s', self.config['ADMIN_ADDRESS'][0], self.config['ADMIN_ADDRESS'][1])
             Master(self).run()
         else:
             burst_env = json.loads(str_burst_env)
