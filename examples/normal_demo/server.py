@@ -22,14 +22,22 @@ handler.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-app = Burst(Box, {
+app = Burst(Box)
+app.config.from_object(__name__)
+
+NAME = 'normal_demo'
+
+ADMIN_ADDRESS = ('127.0.0.1', 7778)
+
+GROUP_CONF = {
     1: {
         'count': 2,
     },
     10: {
         'count': 2,
     },
-}, lambda box: 1 if box.cmd == 1 else 10)
+}
+GROUP_ROUTER = lambda box: 1 if box.cmd == 1 else 10
 
 
 @app.create_worker
@@ -71,6 +79,4 @@ def index(request):
 
 
 app.register_blueprint(user.bp)
-app.name = 'normal_demo'
-app.admin_address = ('127.0.0.1', 7778)
 app.run('127.0.0.1', 7777)

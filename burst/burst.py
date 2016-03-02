@@ -18,11 +18,9 @@ class Burst(RoutesMixin, AppEventsMixin):
     # 配置都放到 burst 里，而和proxy或者worker直接相关的类，则放到自己的部分
     ############################## configurable begin ##############################
 
-    # 进程名字
-    name = ConfigAttribute('NAME')
-    debug = ConfigAttribute('DEBUG')
-
     box_class = None
+
+    debug = ConfigAttribute('DEBUG')
 
     ############################## configurable end   ##############################
 
@@ -73,7 +71,7 @@ class Burst(RoutesMixin, AppEventsMixin):
         :return:
         """
         proc_name = '[%s %s:%s] %s' % (
-            self.name,
+            self.app.config['NAME'],
             constants.NAME,
             subtitle,
             ' '.join([sys.executable] + sys.argv)
