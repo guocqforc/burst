@@ -10,21 +10,21 @@ from netkit.box import Box
 from netkit.contrib.tcp_client import TcpClient
 
 from burst.share import constants
+from burst.share.utils import parse_address_uri
 
 
 class BurstCtl(object):
 
-    host = None
-    port = None
+    address_uri = None
+
     timeout = None
     username = None
     password = None
 
     tcp_client = None
 
-    def __init__(self, host, port, timeout, username, password, extra=None):
-        self.host = host
-        self.port = port
+    def __init__(self, address_uri, timeout, username, password, extra=None):
+        self.address_uri = address_uri
         self.timeout = timeout
         self.username = username
         self.password = password
@@ -49,7 +49,10 @@ class BurstCtl(object):
         print '-' * 80 + '/'
 
     def start(self):
-        self.tcp_client = TcpClient(Box, self.host, self.port, self.timeout)
+
+        socket_type, address = parse_address_uri(self.address_uri)
+
+        self.tcp_client = TcpClient(Box, address=address, timeout=self.timeout, socket_type=socket_type)
 
         try:
             self.tcp_client.connect()
@@ -226,16 +229,15 @@ def change_group(host, port, timeout, username, password, group, count):
 
 
 @cli.command()
-@click.option('-t', '--host', help='burst admin host', default='127.0.0.1')
-@click.option('-P', '--port', type=int, help='burst admin port', required=True)
+@click.option('-a', '--address', help='burst admin address', default='unix://admin.sock')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
-def reload_workers(host, port, timeout, username, password):
+def reload_workers(host, address, username, password):
     """
     热更新workers
     """
-    ctl = BurstCtl(host, port, timeout, username, password)
+    ctl = BurstCtl(host, address, username, password)
     ctl.start()
     ctl.handle_reload_workers()
 

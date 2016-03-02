@@ -48,3 +48,27 @@ def ip_str_to_int(ip_str):
     import struct
 
     return struct.unpack("!I", socket.inet_aton(ip_str))[0]
+
+
+def parse_address_uri(uri):
+    """
+    解析uri为可用的address，目前只检测 tcp 和 unix
+    :param uri: tcp://127.0.0.1:5555, unix:///data/release/ipc.sock
+    :return: (socket_type, address)
+    """
+    import re
+    import socket
+
+    result = re.match(r'(\w+)://(.*)', uri)
+
+    if len(result.groups()) != 2:
+        # 说明失败了
+        return None, None, None
+
+    if result.group(1) == 'tcp':
+        return socket.AF_INET, result.group(2)
+    elif result.group(1) == 'unix':
+        return socket.AF_UNIX, result.group(2)
+    else:
+        return None, None
+

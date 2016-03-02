@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 
 import signal
+import socket
 import os
 # linux 默认就是epoll
 from twisted.internet import reactor
 import setproctitle
 
-from ..share.log import logger
 from connection.client_connection import ClientConnectionFactory
 from connection.worker_connection import WorkerConnectionFactory
 from connection.admin_connection import AdminConnectionFactory
 from connection.master_connection import MasterConnectionFactory
 from task_dispatcher import TaskDispatcher
 from stat_counter import StatCounter
-from burst.share import constants
+from ..share import constants
+from ..share.utils import parse_address_uri
+from ..share.log import logger
 
 
 class Proxy(object):
@@ -82,9 +84,15 @@ class Proxy(object):
                           backlog=self.app.config['PROXY_BACKLOG'], interface=self.host)
 
         # 启动admin服务
-        if self.app.config['ADMIN_ADDRESS']:
-            reactor.listenTCP(self.app.config['ADMIN_ADDRESS'][1], self.admin_connection_factory_class(self),
-                              interface=self.app.config['ADMIN_ADDRESS'][0])
+        if self.app.config['ADMIN_ADDRESS_URI']:
+            socket_type, address = parse_address_uri(self.app.config['ADMIN_ADDRESS_URI'])
+            if socket_type == socket.AF_INET:
+                reactor.listenTCP(address[1], self.admin_connection_factory_class(self),
+                                  interface=address[0])
+            elif socket_type == socket.AF_UNIX:
+                reactor.listenUNIX(address, self.admin_connection_factory_class(self))
+            else:
+                logger.error('invalid socket_type. uri: %s', self.app.config['ADMIN_ADDRESS_URI'])
 
         try:
             reactor.run(installSignalHandlers=False)
