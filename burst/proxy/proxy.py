@@ -66,7 +66,10 @@ class Proxy(object):
             os.makedirs(ipc_directory)
 
         # 启动监听master
-        reactor.listenUNIX(self.app.config['MASTER_IPC_ADDRESS'], self.master_connection_factory_class(self))
+        master_ipc_address = self.app.config['MASTER_IPC_ADDRESS']
+        if os.path.exists(master_ipc_address):
+            os.remove(master_ipc_address)
+        reactor.listenUNIX(master_ipc_address, self.master_connection_factory_class(self))
 
         # 启动监听worker
         for group_id in self.app.config['GROUP_CONFIG']:
@@ -84,15 +87,20 @@ class Proxy(object):
                           backlog=self.app.config['PROXY_BACKLOG'], interface=self.host)
 
         # 启动admin服务
-        if self.app.config['ADMIN_ADDRESS_URI']:
-            socket_type, address = parse_address_uri(self.app.config['ADMIN_ADDRESS_URI'])
+        admin_address_uri = self.app.config['ADMIN_ADDRESS_URI']
+        if os.path.exists(admin_address_uri):
+            os.remove(admin_address_uri)
+
+        if admin_address_uri:
+            socket_type, address = parse_address_uri(admin_address_uri)
+            print socket_type, address
             if socket_type == socket.AF_INET:
                 reactor.listenTCP(address[1], self.admin_connection_factory_class(self),
                                   interface=address[0])
             elif socket_type == socket.AF_UNIX:
                 reactor.listenUNIX(address, self.admin_connection_factory_class(self))
             else:
-                logger.error('invalid socket_type. uri: %s', self.app.config['ADMIN_ADDRESS_URI'])
+                logger.error('invalid socket_type. uri: %s', admin_address_uri)
 
         try:
             reactor.run(installSignalHandlers=False)

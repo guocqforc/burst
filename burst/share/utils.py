@@ -66,7 +66,7 @@ def parse_address_uri(uri):
         return None, None, None
 
     if result.group(1) == 'tcp':
-        return socket.AF_INET, result.group(2)
+        return socket.AF_INET, result.group(2).split(':')
     elif result.group(1) == 'unix':
         return socket.AF_UNIX, result.group(2)
     else:

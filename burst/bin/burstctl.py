@@ -196,34 +196,32 @@ def cli():
 
 
 @cli.command()
-@click.option('-t', '--host', help='burst admin host', default='127.0.0.1')
-@click.option('-P', '--port', type=int, help='burst admin port', required=True)
+@click.option('-a', '--address', help='burst admin address', default='unix://admin.sock')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
 @click.option('--loop', type=int, help='loop times, <=0 means infinite loop', default=-1)
-def stat(host, port, timeout, username, password, loop):
+def stat(address, timeout, username, password, loop):
     """
     统计
     """
-    ctl = BurstCtl(host, port, timeout, username, password)
+    ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
     ctl.handle_stat(loop)
 
 
 @cli.command()
-@click.option('-t', '--host', help='burst admin host', default='127.0.0.1')
-@click.option('-P', '--port', type=int, help='burst admin port', required=True)
+@click.option('-a', '--address', help='burst admin address', default='unix://admin.sock')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
 @click.option('--group', help='group id', required=True, type=int)
 @click.option('--count', help='workers count ', required=True, type=int)
-def change_group(host, port, timeout, username, password, group, count):
+def change_group(address, timeout, username, password, group, count):
     """
     修改group配置，比如worker数
     """
-    ctl = BurstCtl(host, port, timeout, username, password)
+    ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
     ctl.handle_change_group(group, count)
 
@@ -233,11 +231,11 @@ def change_group(host, port, timeout, username, password, group, count):
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
-def reload_workers(host, address, username, password):
+def reload_workers(address, timeout, username, password):
     """
     热更新workers
     """
-    ctl = BurstCtl(host, address, username, password)
+    ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
     ctl.handle_reload_workers()
 

@@ -32,8 +32,6 @@ GROUP_CONFIG = {
 
 GROUP_ROUTER = lambda box: 1 if box.cmd == 1 else 10
 
-ADMIN_ADDRESS_URI = ('127.0.0.1', 7778)
-
 app = Burst(Box)
 app.config.from_object(__name__)
 

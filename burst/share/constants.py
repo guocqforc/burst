@@ -91,7 +91,7 @@ DEFAULT_CONFIG = {
 
     # 管理员，可以连接proxy获取数据
     # 管理员访问地址URI
-    'ADMIN_ADDRESS_URI': 'tcp://%s_ipc/admin.sock' % NAME,
+    'ADMIN_ADDRESS_URI': 'unix://%s_ipc/admin.sock' % NAME,
     'ADMIN_USERNAME': None,
     'ADMIN_PASSWORD': None,
 
