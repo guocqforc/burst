@@ -4,8 +4,9 @@ import sys
 import os
 import json
 from collections import Counter
+
 from log import logger
-from mixins import RoutesMixin, AppEventsMixin
+from burst.share.mixins import RoutesMixin, AppEventsMixin
 import constants
 from proxy import Proxy
 from worker import Worker

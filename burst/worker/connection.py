@@ -3,8 +3,9 @@
 import os
 import socket
 import thread
-from unix_client import UnixClient
 import time
+
+from burst.share.unix_client import UnixClient
 from .. import constants
 from ..log import logger
 from ..proxy import TaskBox

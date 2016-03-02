@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import functools
-from .log import logger
+from burst.log import logger
 
 
 def safe_call(func, *args, **kwargs):

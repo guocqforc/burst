@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
-from twisted.internet.protocol import Protocol, Factory
-from netkit.box import Box
 import json
 
-from ..utils import safe_call
+from twisted.internet.protocol import Protocol, Factory
+from netkit.box import Box
+
+from ..share.utils import safe_call
 from ..log import logger
 from .. import constants
 

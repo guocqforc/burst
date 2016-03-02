@@ -39,7 +39,7 @@ class Worker(object):
         self._on_worker_run()
 
         try:
-            address = self.app.config['IPC_ADDRESS_TPL'] % self.group_id
+            address = self.app.config['WORKER_IPC_ADDRESS_TPL'] % self.group_id
             conn = self.connection_class(self, address, self.app.config['WORKER_CONN_TIMEOUT'])
             conn.run()
         except KeyboardInterrupt:

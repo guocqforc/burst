@@ -4,7 +4,7 @@
 from ..proxy import TaskBox
 from .. import constants
 from ..log import logger
-from ..utils import ip_int_to_str
+from ..share.utils import ip_int_to_str
 
 
 class Request(object):

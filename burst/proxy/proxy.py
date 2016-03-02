@@ -36,6 +36,9 @@ class Proxy(object):
     # 统计
     stat_counter = None
 
+    # master的连接，因为一定只有一个，所以就一个变量即可
+    master_conn = None
+
     def __init__(self, app, host, port):
         """
         构造函数
@@ -54,13 +57,13 @@ class Proxy(object):
         # 主进程
         self._handle_proc_signals()
 
-        ipc_directory = os.path.dirname(self.app.config['IPC_ADDRESS_TPL'])
+        ipc_directory = os.path.dirname(self.app.config['WORKER_IPC_ADDRESS_TPL'])
         if not os.path.exists(ipc_directory):
             os.makedirs(ipc_directory)
 
         # 启动监听worker
         for group_id in self.app.config['GROUP_CONFIG']:
-            ipc_address = self.app.config['IPC_ADDRESS_TPL'] % group_id
+            ipc_address = self.app.config['WORKER_IPC_ADDRESS_TPL'] % group_id
 
             # 防止之前异常导致遗留
             if os.path.exists(ipc_address):

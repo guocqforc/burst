@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import functools
+
 from events import Events
 
-from utils import safe_func
+from ..share.utils import safe_func
 
 
 class RoutesMixin(object):

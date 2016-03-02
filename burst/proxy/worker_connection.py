@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 
 import time
+
 from twisted.internet.protocol import Protocol, Factory, connectionDone
 
-from ..utils import safe_call
+from ..share.utils import safe_call
 from ..log import logger
 from .. import constants
 from .task_box import TaskBox
