@@ -21,8 +21,6 @@ class Burst(RoutesMixin, AppEventsMixin):
     box_class = None
 
     debug = ConfigAttribute('DEBUG')
-    host = ConfigAttribute('HOST')
-    port = ConfigAttribute('PORT')
 
     ############################## configurable end   ##############################
 
@@ -49,10 +47,14 @@ class Burst(RoutesMixin, AppEventsMixin):
         self._validate_cmds()
 
         if host is not None:
-            self.host = host
+            self.config.update({
+                'HOST': host,
+            })
 
         if port is not None:
-            self.port = port
+            self.config.update({
+                'PORT': port,
+            })
 
         if debug is not None:
             self.debug = debug
@@ -63,7 +65,7 @@ class Burst(RoutesMixin, AppEventsMixin):
         if not str_burst_env:
             # 主进程
             logger.info('Running server on %s:%s, debug: %s',
-                        self.host, self.port, self.debug
+                        self.config['HOST'], self.config['PORT'], self.debug
                         )
             if self.config['ADMIN_ADDRESS']:
                 logger.info('Running admin server on %s:%s',
@@ -74,7 +76,7 @@ class Burst(RoutesMixin, AppEventsMixin):
             burst_env = json.loads(str_burst_env)
             if burst_env['type'] == constants.PROC_TYPE_PROXY:
                 # proxy
-                Proxy(self, self.host, self.port).run()
+                Proxy(self, self.config['HOST'], self.config['PORT']).run()
             else:
                 # worker
                 Worker(self, burst_env['group_id']).run()
