@@ -28,8 +28,11 @@ class Master(object):
 
     enable = True
 
-    # 子进程列表
-    processes = None
+    # proxy进程列表
+    proxy_process = None
+
+    # worker进程列表
+    worker_processes = None
 
     def __init__(self, app):
         """
@@ -37,17 +40,19 @@ class Master(object):
         :return:
         """
         self.app = app
-        self.processes = []
+        self.worker_processes = []
 
     def run(self):
         setproctitle.setproctitle(self.app.make_proc_name(self.type))
 
         self._handle_proc_signals()
 
-        # 没办法，只能在这启动
+        self._spawn_proxy()
+        self._spawn_workers()
+
         thread.start_new(self._connect_to_proxy, ())
 
-        self._spawn_workers()
+        self._monitor_child_processes()
 
     def _connect_to_proxy(self):
         """
@@ -99,25 +104,24 @@ class Master(object):
             else:
                 self.app.config['GROUP_CONFIG']['count'] = count
 
-    def _spawn_workers(self):
-        def start_child_process(proc_env):
-            # 要传入group_id
-            worker_env = copy.deepcopy(os.environ)
-            worker_env.update({
-                self.app.config['CHILD_PROCESS_ENV_KEY']: json.dumps(proc_env)
-            })
+    def _start_child_process(self, proc_env):
+        worker_env = copy.deepcopy(os.environ)
+        worker_env.update({
+            self.app.config['CHILD_PROCESS_ENV_KEY']: json.dumps(proc_env)
+        })
 
-            args = [sys.executable] + sys.argv
-            inner_p = subprocess.Popen(args, env=worker_env)
-            inner_p.proc_env = proc_env
-            return inner_p
+        args = [sys.executable] + sys.argv
+        inner_p = subprocess.Popen(args, env=worker_env)
+        inner_p.proc_env = proc_env
+        return inner_p
 
+    def _spawn_proxy(self):
         proc_env = dict(
             type=constants.PROC_TYPE_PROXY
         )
-        p = start_child_process(proc_env)
-        self.processes.append(p)
+        self.proxy_process = self._start_child_process(proc_env)
 
+    def _spawn_workers(self):
         for group_id, group_info in self.app.config['GROUP_CONFIG'].items():
             proc_env = dict(
                 type=constants.PROC_TYPE_WORKER,
@@ -126,22 +130,23 @@ class Master(object):
 
             # 进程个数
             for it in xrange(0, group_info['count']):
-                p = start_child_process(proc_env)
-                self.processes.append(p)
+                p = self._start_child_process(proc_env)
+                self.worker_processes.append(p)
 
+    def _monitor_child_processes(self):
         while 1:
-            for idx, p in enumerate(self.processes):
+            for idx, p in enumerate(self.worker_processes):
                 if p and p.poll() is not None:
                     # 说明退出了
                     proc_env = p.proc_env
-                    self.processes[idx] = None
+                    self.worker_processes[idx] = None
 
                     if self.enable:
                         # 如果还要继续服务
-                        p = start_child_process(proc_env)
-                        self.processes[idx] = p
+                        p = self._start_child_process(proc_env)
+                        self.worker_processes[idx] = p
 
-            if not filter(lambda x: x, self.processes):
+            if not filter(lambda x: x, self.worker_processes):
                 # 没活着的了
                 break
 
@@ -155,7 +160,7 @@ class Master(object):
             # 如果是终端直接CTRL-C，子进程自然会在父进程之后收到INT信号，不需要再写代码发送
             # 如果直接kill -INT $parent_pid，子进程不会自动收到INT
             # 所以这里可能会导致重复发送的问题，重复发送会导致一些子进程异常，所以在子进程内部有做重复处理判断。
-            for p in self.processes:
+            for p in self.worker_processes:
                 if p:
                     p.send_signal(signum)
 
@@ -166,7 +171,7 @@ class Master(object):
         def final_kill_handler(signum, frame):
             if not self.enable:
                 # 只有满足了not enable，才发送term命令
-                for p in self.processes:
+                for p in self.worker_processes:
                     if p:
                         p.send_signal(signal.SIGKILL)
 
@@ -176,7 +181,7 @@ class Master(object):
             """
             self.enable = False
 
-            for p in self.processes:
+            for p in self.worker_processes:
                 if p:
                     p.send_signal(signal.SIGTERM)
 
@@ -187,7 +192,7 @@ class Master(object):
             """
             让所有子进程重新加载
             """
-            for p in self.processes:
+            for p in self.worker_processes:
                 if p:
                     p.send_signal(signal.SIGHUP)
 
