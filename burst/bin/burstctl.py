@@ -3,7 +3,7 @@
 
 import json
 import time
-import argparse
+import click
 from collections import OrderedDict
 from netkit.box import Box
 from netkit.contrib.tcp_client import TcpClient
@@ -12,12 +12,20 @@ from burst import constants
 
 class BurstCtl(object):
 
-    args = None
+    host = None
+    port = None
+    timeout = None
+    username = None
+    password = None
 
     tcp_client = None
 
-    def __init__(self, args):
-        self.args = args
+    def __init__(self, host, port, timeout, username, password, extra=None):
+        self.host = host
+        self.port = port
+        self.timeout = timeout
+        self.username = username
+        self.password = password
 
     def make_send_box(self, cmd, username, password):
         return Box(dict(
@@ -37,8 +45,8 @@ class BurstCtl(object):
         print s
         print '-' * 80 + '/'
 
-    def process_stat(self):
-        send_box = self.make_send_box(constants.CMD_ADMIN_SERVER_STAT, self.args.username, self.args.password)
+    def _handle_stat_once(self):
+        send_box = self.make_send_box(constants.CMD_ADMIN_SERVER_STAT, self.username, self.password)
         self.tcp_client.write(send_box)
 
         rsp_box = self.tcp_client.read()
@@ -80,8 +88,8 @@ class BurstCtl(object):
 
         return True
 
-    def run(self):
-        self.tcp_client = TcpClient(Box, self.args.host, self.args.port, self.args.timeout)
+    def start(self):
+        self.tcp_client = TcpClient(Box, self.host, self.port, self.timeout)
 
         try:
             self.tcp_client.connect()
@@ -89,39 +97,30 @@ class BurstCtl(object):
             self.output('connect fail: %s' % e)
             return False
 
+        return True
+
+    def handle_stat(self, loop):
+        """
+        :param loop:
+        :return:
+        """
         loop_times = 0
 
         while True:
 
-            result = False
-            if self.args.cmd == 'stat':
-                result = self.process_stat()
+            result = self._handle_stat_once()
 
             if not result:
                 break
 
             loop_times += 1
-            if loop_times >= self.args.loop > 0:
+            if loop_times >= loop > 0:
                 break
 
             try:
                 time.sleep(1)
             except KeyboardInterrupt:
                 break
-
-        return True
-
-
-def build_parser():
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-t', '--host', help='burst admin host', action='store', default='127.0.0.1')
-    parser.add_argument('-P', '--port', type=int, help='burst admin port', action='store', required=True)
-    parser.add_argument('-u', '--username', help='username', action='store', default=None)
-    parser.add_argument('-p', '--password', help='password', action='store', default=None)
-    parser.add_argument('-c', '--cmd', help='cmd', action='store', default='stat', choices=('stat',))
-    parser.add_argument('-o', '--timeout', type=int, help='connect/send/receive timeout', action='store', default=10)
-    parser.add_argument('-l', '--loop', type=int, help='loop times, <=0 means infinite loop', action='store', default=-1)
-    return parser
 
 
 def send_and_recv(tcp_client, box):
@@ -143,11 +142,23 @@ def send_and_recv(tcp_client, box):
         return True
 
 
-def main():
-    args = build_parser().parse_args()
-    ctl = BurstCtl(args)
-    ctl.run()
+@click.group()
+def cli():
+    pass
+
+
+@cli.command()
+@click.option('-t', '--host', help='burst admin host', default='127.0.0.1')
+@click.option('-P', '--port', type=int, help='burst admin port', required=True)
+@click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
+@click.option('-u', '--username', help='username', default=None)
+@click.option('-p', '--password', help='password', default=None)
+@click.option('-l', '--loop', type=int, help='loop times, <=0 means infinite loop', default=-1)
+def stat(host, port, timeout, username, password, loop):
+    ctl = BurstCtl(host, port, timeout, username, password)
+    ctl.start()
+    ctl.handle_stat(loop)
+
 
 if __name__ == '__main__':
-    main()
-
+    cli()
