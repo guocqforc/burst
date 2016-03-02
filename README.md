@@ -7,5 +7,5 @@ server framework. master, proxy and worker
 
 ### TODO
 
-1. 支持修改worker数量后，优雅重启worker. 目前可行方案是通过burst ctl，但是ctl是连接到了proxy，貌似还不行
+1. <del>支持修改worker数量后，优雅重启worker. 目前可行方案是通过burst ctl，但是ctl是连接到了proxy，貌似还不行</del>
 2. 考虑group_conf和group_router怎么更好的重新载入
