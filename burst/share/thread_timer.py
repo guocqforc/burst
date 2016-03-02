@@ -40,6 +40,12 @@ class ThreadTimer(object):
         timer.daemon = True
         timer.start()
 
+    def is_set(self):
+        """
+        是否被设置了timer
+        """
+        return self.timer is not None
+
     def clear(self):
         """
         直接把现在的清空

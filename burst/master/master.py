@@ -44,6 +44,7 @@ class Master(object):
         :return:
         """
         self.app = app
+        self.restart_workers_timer = ThreadTimer()
 
     def run(self):
         setproctitle.setproctitle(self.app.make_proc_name(self.type))
@@ -157,7 +158,7 @@ class Master(object):
                     proc_env = p.proc_env
                     self.worker_processes[idx] = None
 
-                    if self.enable and self.restart_workers_timer is None:
+                    if self.enable and not self.restart_workers_timer.is_set():
                         # 如果还要继续服务
                         p = self._start_child_process(proc_env)
                         self.worker_processes[idx] = p
@@ -165,10 +166,9 @@ class Master(object):
             if not filter(lambda x: x, self.worker_processes):
                 # 没活着的了worker了
 
-                if self.restart_workers_timer is not None:
+                if self.restart_workers_timer.is_set():
                     # 如果是在等待重启，就直接重启了
                     self.restart_workers_timer.clear()
-                    self.restart_workers_timer = None
                     self._spawn_workers()
                     continue
                 else:
@@ -183,8 +183,6 @@ class Master(object):
         :return:
         """
 
-        self.enable = False
-
         for p in self.worker_processes:
             if p:
                 p.send_signal(signal.SIGTERM)
@@ -197,7 +195,6 @@ class Master(object):
                 if p:
                     p.send_signal(signal.SIGKILL)
 
-        self.restart_workers_timer = ThreadTimer()
         self.restart_workers_timer.set(self.app.config['STOP_TIMEOUT'], final_kill_workers)
 
     def _restart_workers(self):
