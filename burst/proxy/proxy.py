@@ -59,7 +59,7 @@ class Proxy(object):
             os.makedirs(ipc_directory)
 
         # 启动监听worker
-        for group_id in self.app.config['GROUP_CONF']:
+        for group_id in self.app.config['GROUP_CONFIG']:
             ipc_address = self.app.config['IPC_ADDRESS_TPL'] % group_id
 
             # 防止之前异常导致遗留

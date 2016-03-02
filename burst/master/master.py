@@ -59,7 +59,7 @@ class Master(object):
         p = start_child_process(proc_env)
         self.processes.append(p)
 
-        for group_id, group_info in self.app.config['GROUP_CONF'].items():
+        for group_id, group_info in self.app.config['GROUP_CONFIG'].items():
             proc_env = dict(
                 type=constants.PROC_TYPE_WORKER,
                 group_id=group_id,

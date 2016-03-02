@@ -21,14 +21,19 @@ handler.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-app = Burst(Box, {
+GROUP_CONFIG = {
     1: {
         'count': 10,
     },
     10: {
         'count': 2,
     },
-}, lambda box: 1 if box.cmd == 1 else 10)
+}
+
+GROUP_ROUTER = lambda box: 1 if box.cmd == 1 else 10
+
+app = Burst(Box)
+app.config.from_object(__name__)
 
 
 @app.route(1)

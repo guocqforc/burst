@@ -41,7 +41,7 @@ DEFAULT_CONFIG = {
     #            count: 10,
     #        }
     #    }
-    'GROUP_CONF': {
+    'GROUP_CONFIG': {
         1: {
             'count': 1,
         }
