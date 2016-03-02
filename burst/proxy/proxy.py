@@ -10,6 +10,7 @@ from ..share.log import logger
 from connection.client_connection import ClientConnectionFactory
 from connection.worker_connection import WorkerConnectionFactory
 from connection.admin_connection import AdminConnectionFactory
+from connection.master_connection import MasterConnectionFactory
 from task_dispatcher import TaskDispatcher
 from stat_counter import StatCounter
 from burst.share import constants
@@ -25,6 +26,7 @@ class Proxy(object):
     client_connection_factory_class = ClientConnectionFactory
     worker_connection_factory_class = WorkerConnectionFactory
     admin_connection_factory_class = AdminConnectionFactory
+    master_connection_factory_class = MasterConnectionFactory
 
     app = None
 
@@ -60,6 +62,9 @@ class Proxy(object):
         ipc_directory = os.path.dirname(self.app.config['WORKER_IPC_ADDRESS_TPL'])
         if not os.path.exists(ipc_directory):
             os.makedirs(ipc_directory)
+
+        # 启动监听master
+        reactor.listenUNIX(self.app.config['MASTER_IPC_ADDRESS'], self.master_connection_factory_class(self))
 
         # 启动监听worker
         for group_id in self.app.config['GROUP_CONFIG']:

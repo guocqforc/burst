@@ -8,7 +8,7 @@ import time
 from ..share.unix_client import UnixClient
 from ..share import constants
 from ..share.log import logger
-from ..proxy import TaskBox
+from ..share.task_box import TaskBox
 
 
 class Connection(object):

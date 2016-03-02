@@ -12,6 +12,7 @@ from netkit.box import Box
 import thread
 
 from ..share.log import logger
+from ..share.utils import safe_call
 from ..share.unix_client import UnixClient
 from burst.share import constants
 
@@ -58,24 +59,23 @@ class Master(object):
         while True:
             try:
                 client.connect()
-            except Exception, e:
+            except KeyboardInterrupt:
+                break
+            except:
                 # 只要连接失败
-                logger.error('exc occur.', exc_info=True)
+                logger.error('connect fail. address: %s', self.app.config['MASTER_IPC_ADDRESS'])
                 time.sleep(1)
                 continue
 
             # 读取的数据
             box = client.read()
             if not box:
-                logger.info('master to proxy connection closed.')
+                logger.info('connection closed.')
                 continue
 
-            logger.info('data(proxy->master): %s', box)
+            logger.info('data received: %s', box)
 
-            try:
-                self._handle_proxy_data(box)
-            except:
-                logger.error('exc occur.', exc_info=True)
+            safe_call(self._handle_proxy_data, box)
 
     def _handle_proxy_data(self, box):
         """

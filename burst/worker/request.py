@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from ..proxy import TaskBox
+from ..share.task_box import TaskBox
 from ..share import constants
 from ..share.log import logger
 from ..share.utils import ip_int_to_str

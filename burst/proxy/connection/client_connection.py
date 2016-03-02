@@ -5,7 +5,7 @@ from twisted.internet.protocol import Protocol, Factory, connectionDone
 from ...share.utils import safe_call, ip_str_to_int
 from ...share.log import logger
 from ..task import Task
-from ..task_box import TaskBox
+from ...share.task_box import TaskBox
 from ...share import constants
 
 
