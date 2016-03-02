@@ -21,7 +21,6 @@ handler.setFormatter(logging.Formatter(LOG_FORMAT))
 logger.addHandler(handler)
 logger.setLevel(logging.DEBUG)
 
-DEBUG = False
 GROUP_CONFIG = {
     1: {
         'count': 10,
