@@ -45,4 +45,4 @@ def index(request):
     )
 
 
-app.run('127.0.0.1', 7777)
+app.run()
