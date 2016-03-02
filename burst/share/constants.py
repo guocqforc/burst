@@ -22,8 +22,10 @@ CMD_WORKER_TASK_DONE = 200
 # 获取运行状态统计
 CMD_ADMIN_SERVER_STAT = 20000
 
-# 修改group配置，比如worker数量
+# 修改group配置，比如worker数量。workers会自动restart
 CMD_ADMIN_CHANGE_GROUP = 21000
+# 重启workers
+CMD_ADMIN_RELOAD_WORKERS = 21001
 
 
 # worker的状态

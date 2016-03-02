@@ -114,7 +114,10 @@ class AdminConnection(Protocol):
                     body=json.dumps(rsp_body)
                 ))
 
-            elif box.cmd == constants.CMD_ADMIN_CHANGE_GROUP:
+            elif box.cmd in (
+                    constants.CMD_ADMIN_CHANGE_GROUP,
+                    constants.CMD_ADMIN_RELOAD_WORKERS
+            ):
                 if self.factory.proxy.master_conn and self.factory.proxy.master_conn.transport:
                     self.factory.proxy.master_conn.transport.write(box.pack())
 

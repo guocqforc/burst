@@ -28,6 +28,9 @@ class Master(object):
 
     enable = True
 
+    # 等待重启所有workers
+    waiting_restart_workers = False
+
     # proxy进程列表
     proxy_process = None
 
@@ -40,7 +43,6 @@ class Master(object):
         :return:
         """
         self.app = app
-        self.worker_processes = []
 
     def run(self):
         setproctitle.setproctitle(self.app.make_proc_name(self.type))
@@ -101,8 +103,13 @@ class Master(object):
                 self.app.config['GROUP_CONFIG'] = dict(
                     count=count
                 )
+
+                self._restart_workers()
             else:
                 self.app.config['GROUP_CONFIG']['count'] = count
+
+        elif box.cmd == constants.CMD_ADMIN_RELOAD_WORKERS:
+            self._reload_workers()
 
     def _start_child_process(self, proc_env):
         worker_env = copy.deepcopy(os.environ)
@@ -122,6 +129,8 @@ class Master(object):
         self.proxy_process = self._start_child_process(proc_env)
 
     def _spawn_workers(self):
+        self.worker_processes = []
+
         for group_id, group_info in self.app.config['GROUP_CONFIG'].items():
             proc_env = dict(
                 type=constants.PROC_TYPE_WORKER,
@@ -135,23 +144,68 @@ class Master(object):
 
     def _monitor_child_processes(self):
         while 1:
+            if self.proxy_process and self.proxy_process.poll() is not None:
+                proc_env = self.proxy_process.proc_env
+                if self.enable:
+                    self.proxy_process = self._start_child_process(proc_env)
+
             for idx, p in enumerate(self.worker_processes):
                 if p and p.poll() is not None:
                     # 说明退出了
                     proc_env = p.proc_env
                     self.worker_processes[idx] = None
 
-                    if self.enable:
+                    if self.enable and not self.waiting_restart_workers:
                         # 如果还要继续服务
                         p = self._start_child_process(proc_env)
                         self.worker_processes[idx] = p
 
             if not filter(lambda x: x, self.worker_processes):
-                # 没活着的了
-                break
+                # 没活着的了worker了
+
+                if self.waiting_restart_workers:
+                    # 如果是在等待重启，就直接重启了
+                    self.waiting_restart_workers = False
+                    self._spawn_workers()
+                    continue
+                else:
+                    break
 
             # 时间短点，退出的快一些
             time.sleep(0.1)
+
+    def _stop_workers(self):
+        """
+        安全停止所有workers
+        :return:
+        """
+
+        self.enable = False
+
+        for p in self.worker_processes:
+            if p:
+                p.send_signal(signal.SIGTERM)
+
+        # if self.app.config['STOP_TIMEOUT'] is not None:
+        #    signal.alarm(self.app.config['STOP_TIMEOUT'])
+
+    def _restart_workers(self):
+        """
+        restart是要先完全stop的
+        :return:
+        """
+        self.waiting_restart_workers = True
+
+        self._stop_workers()
+
+    def _reload_workers(self):
+        """
+        reload是热更新，停一个，起一个
+        :return:
+        """
+        for p in self.worker_processes:
+            if p:
+                p.send_signal(signal.SIGHUP)
 
     def _handle_proc_signals(self):
         def exit_handler(signum, frame):
@@ -192,9 +246,7 @@ class Master(object):
             """
             让所有子进程重新加载
             """
-            for p in self.worker_processes:
-                if p:
-                    p.send_signal(signal.SIGHUP)
+            self._reload_workers()
 
         # INT, QUIT为强制结束
         signal.signal(signal.SIGINT, exit_handler)

@@ -105,6 +105,25 @@ class BurstCtl(object):
 
         self.output('succ.')
 
+    def handle_reload_workers(self):
+        send_box = self.make_send_box(
+            constants.CMD_ADMIN_RELOAD_WORKERS,
+            self.username, self.password,
+        )
+        self.tcp_client.write(send_box)
+
+        rsp_box = self.tcp_client.read()
+
+        if not rsp_box:
+            self.output('disconnected.')
+            return False
+
+        if rsp_box.ret != 0:
+            self.output('fail. rsp_box.ret=%s' % rsp_box.ret)
+            return False
+
+        self.output('succ.')
+
     def _handle_stat_once(self):
         send_box = self.make_send_box(constants.CMD_ADMIN_SERVER_STAT, self.username, self.password)
         self.tcp_client.write(send_box)
@@ -181,6 +200,9 @@ def cli():
 @click.option('-p', '--password', help='password', default=None)
 @click.option('--loop', type=int, help='loop times, <=0 means infinite loop', default=-1)
 def stat(host, port, timeout, username, password, loop):
+    """
+    统计
+    """
     ctl = BurstCtl(host, port, timeout, username, password)
     ctl.start()
     ctl.handle_stat(loop)
@@ -195,9 +217,27 @@ def stat(host, port, timeout, username, password, loop):
 @click.option('--group', help='group id', required=True, type=int)
 @click.option('--count', help='workers count ', required=True, type=int)
 def change_group(host, port, timeout, username, password, group, count):
+    """
+    修改group配置，比如worker数
+    """
     ctl = BurstCtl(host, port, timeout, username, password)
     ctl.start()
     ctl.handle_change_group(group, count)
+
+
+@cli.command()
+@click.option('-t', '--host', help='burst admin host', default='127.0.0.1')
+@click.option('-P', '--port', type=int, help='burst admin port', required=True)
+@click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
+@click.option('-u', '--username', help='username', default=None)
+@click.option('-p', '--password', help='password', default=None)
+def reload_workers(host, port, timeout, username, password):
+    """
+    热更新workers
+    """
+    ctl = BurstCtl(host, port, timeout, username, password)
+    ctl.start()
+    ctl.handle_reload_workers()
 
 if __name__ == '__main__':
     cli()
