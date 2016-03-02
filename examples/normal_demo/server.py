@@ -79,4 +79,4 @@ def index(request):
 
 
 app.register_blueprint(user.bp)
-app.run('127.0.0.1', 7777)
+app.run()

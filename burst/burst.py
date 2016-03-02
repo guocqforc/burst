@@ -21,6 +21,8 @@ class Burst(RoutesMixin, AppEventsMixin):
     box_class = None
 
     debug = ConfigAttribute('DEBUG')
+    host = ConfigAttribute('HOST')
+    port = ConfigAttribute('PORT')
 
     ############################## configurable end   ##############################
 
@@ -43,15 +45,26 @@ class Burst(RoutesMixin, AppEventsMixin):
     def register_blueprint(self, blueprint):
         blueprint.register_to_app(self)
 
-    def run(self, host, port):
+    def run(self, host=None, port=None, debug=None):
         self._validate_cmds()
+
+        if host is not None:
+            self.host = host
+
+        if port is not None:
+            self.port = port
+
+        if debug is not None:
+            self.debug = debug
 
         # 只要没有这个环境变量，就是主进程
         str_burst_env = os.getenv(self.config['CHILD_PROCESS_ENV_KEY'])
 
         if not str_burst_env:
             # 主进程
-            logger.info('Running server on %s:%s', host, port)
+            logger.info('Running server on %s:%s, debug: %s',
+                        self.host, self.port, self.debug
+                        )
             if self.config['ADMIN_ADDRESS']:
                 logger.info('Running admin server on %s:%s',
                             self.config['ADMIN_ADDRESS'][0], self.config['ADMIN_ADDRESS'][1]
@@ -61,7 +74,7 @@ class Burst(RoutesMixin, AppEventsMixin):
             burst_env = json.loads(str_burst_env)
             if burst_env['type'] == constants.PROC_TYPE_PROXY:
                 # proxy
-                Proxy(self, host, port).run()
+                Proxy(self, self.host, self.port).run()
             else:
                 # worker
                 Worker(self, burst_env['group_id']).run()

@@ -32,6 +32,14 @@ PROC_TYPE_WORKER = 'worker'
 
 # 默认配置
 DEFAULT_CONFIG = {
+    # 监听IP
+    'HOST': '127.0.0.1',
+    # 监听端口
+    'PORT': 9900,
+
+    # 是否调试模式
+    'DEBUG:': False,
+
     # 进程名
     'NAME': NAME,
 
