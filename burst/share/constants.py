@@ -9,6 +9,8 @@ RET_INVALID_CMD = -10000
 RET_INTERNAL = -10001
 # admin用户验证失败
 RET_ADIMN_AUTH_FAIL = -20000
+# master连接未连接
+RET_MASTER_NOT_CONNECTED = -21000
 
 # 内部使用的命令字
 # 分配任务. 如果body里面带数据，说明是要写回；如果没有数据，说明只是要分配task

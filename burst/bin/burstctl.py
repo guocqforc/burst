@@ -84,7 +84,7 @@ class BurstCtl(object):
 
     def handle_change_group(self, group_id, count):
         send_box = self.make_send_box(
-            constants.CMD_ADMIN_SERVER_STAT,
+            constants.CMD_ADMIN_CHANGE_GROUP,
             self.username, self.password,
             payload=dict(
                 group_id=group_id,
@@ -192,8 +192,8 @@ def stat(host, port, timeout, username, password, loop):
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
-@click.option('--group', help='group id', required=True)
-@click.option('--count', help='workers count ', required=True)
+@click.option('--group', help='group id', required=True, type=int)
+@click.option('--count', help='workers count ', required=True, type=int)
 def change_group(host, port, timeout, username, password, group, count):
     ctl = BurstCtl(host, port, timeout, username, password)
     ctl.start()

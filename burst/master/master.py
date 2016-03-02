@@ -90,7 +90,7 @@ class Master(object):
             count = jdata['payload']['count']
 
             # 不能设置成个奇怪的值就麻烦了
-            assert isinstance(count, int)
+            assert isinstance(count, int), 'data: %s' % box.body
 
             if group_id not in self.app.config['GROUP_CONFIG']:
                 self.app.config['GROUP_CONFIG'] = dict(

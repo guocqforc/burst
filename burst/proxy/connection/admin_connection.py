@@ -118,6 +118,14 @@ class AdminConnection(Protocol):
                 if self.factory.proxy.master_conn and self.factory.proxy.master_conn.transport:
                     self.factory.proxy.master_conn.transport.write(box.pack())
 
+                    rsp = box.map(dict(
+                        ret=0
+                    ))
+                else:
+                    rsp = box.map(dict(
+                        ret=constants.RET_MASTER_NOT_CONNECTED
+                    ))
+
         if rsp:
             self.transport.write(rsp.pack())
 
