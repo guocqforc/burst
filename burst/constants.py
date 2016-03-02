@@ -39,17 +39,21 @@ DEFAULT_CONFIG = {
     # 进程名
     'NAME': NAME,
 
-    # 进程配置(必填):
+    # 分组进程配置:
     #    {
     #        $group_id: {
     #            count: 10,
     #        }
     #    }
-    'GROUP_CONF': None,
-    # 通过box路由group_id(必填):
+    'GROUP_CONF': {
+        1: {
+            'count': 1,
+        }
+    },
+    # 通过box路由group_id:
     #    def group_router(box):
     #        return group_id
-    'GROUP_ROUTER': None,
+    'GROUP_ROUTER': lambda box: 1,
 
     # 停止子进程超时(秒). 使用 TERM 进行停止时，如果超时未停止会发送KILL信号
     'STOP_TIMEOUT': None,
