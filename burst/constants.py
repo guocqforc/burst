@@ -36,6 +36,9 @@ PROC_TYPE_WORKER = 'worker'
 
 # 默认配置
 DEFAULT_CONFIG = {
+    # 进程名
+    'NAME': NAME,
+
     # 进程配置(必填):
     #    {
     #        $group_id: {
