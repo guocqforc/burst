@@ -6,7 +6,7 @@ from netkit.stream import Stream
 
 class UnixClient(object):
     """
-    封装过的tcp client
+    封装过的unix socket client
     """
 
     box_class = None
