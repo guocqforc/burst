@@ -63,12 +63,16 @@ def parse_address_uri(uri):
 
     if len(result.groups()) != 2:
         # 说明失败了
-        return None, None, None
+        return None, None
 
     if result.group(1) == 'tcp':
-        return socket.AF_INET, result.group(2).split(':')
+        host, port = result.group(2).split(':')
+        port = int(port)
+        return socket.AF_INET, (host, port)
+
     elif result.group(1) == 'unix':
         return socket.AF_UNIX, result.group(2)
+
     else:
         return None, None
 
