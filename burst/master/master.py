@@ -73,7 +73,7 @@ class Master(object):
                 logger.info('connection closed.')
                 continue
 
-            logger.info('data received: %s', box)
+            logger.info('box: %s', box)
 
             safe_call(self._handle_proxy_data, box)
 
