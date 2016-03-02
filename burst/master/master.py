@@ -100,13 +100,14 @@ class Master(object):
             assert isinstance(count, int), 'data: %s' % box.body
 
             if group_id not in self.app.config['GROUP_CONFIG']:
-                self.app.config['GROUP_CONFIG'] = dict(
+                self.app.config['GROUP_CONFIG'][group_id] = dict(
                     count=count
                 )
 
-                self._restart_workers()
             else:
-                self.app.config['GROUP_CONFIG']['count'] = count
+                self.app.config['GROUP_CONFIG'][group_id]['count'] = count
+
+            self._restart_workers()
 
         elif box.cmd == constants.CMD_ADMIN_RELOAD_WORKERS:
             self._reload_workers()
