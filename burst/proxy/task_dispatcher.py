@@ -2,7 +2,7 @@
 
 from collections import defaultdict
 
-from burst import constants
+from burst.share import constants
 from burst.proxy.group_queue import GroupQueue
 
 

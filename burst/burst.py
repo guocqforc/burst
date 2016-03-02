@@ -5,13 +5,13 @@ import os
 import json
 from collections import Counter
 
-from log import logger
-from burst.share.mixins import RoutesMixin, AppEventsMixin
-import constants
+from share.log import logger
+from share.mixins import RoutesMixin, AppEventsMixin
+from share import constants
 from proxy import Proxy
 from worker import Worker
 from master import Master
-from config import ConfigAttribute, Config
+from share.config import ConfigAttribute, Config
 
 
 class Burst(RoutesMixin, AppEventsMixin):

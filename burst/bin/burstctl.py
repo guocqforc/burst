@@ -3,11 +3,13 @@
 
 import json
 import time
-import click
 from collections import OrderedDict
+
+import click
 from netkit.box import Box
 from netkit.contrib.tcp_client import TcpClient
-from burst import constants
+
+from burst.share import constants
 
 
 class BurstCtl(object):
@@ -27,7 +29,7 @@ class BurstCtl(object):
         self.username = username
         self.password = password
 
-    def make_send_box(self, cmd, username, password):
+    def make_send_box(self, cmd, username, password, payload=None):
         return Box(dict(
             cmd=cmd,
             body=json.dumps(
@@ -35,7 +37,8 @@ class BurstCtl(object):
                     auth=dict(
                         username=username,
                         password=password,
-                    )
+                    ),
+                    payload=payload,
                 )
             )
         ))
@@ -44,6 +47,63 @@ class BurstCtl(object):
         print '/' + '-' * 80
         print s
         print '-' * 80 + '/'
+
+    def start(self):
+        self.tcp_client = TcpClient(Box, self.host, self.port, self.timeout)
+
+        try:
+            self.tcp_client.connect()
+        except Exception, e:
+            self.output('connect fail: %s' % e)
+            return False
+
+        return True
+
+    def handle_stat(self, loop):
+        """
+        :param loop:
+        :return:
+        """
+        loop_times = 0
+
+        while True:
+
+            result = self._handle_stat_once()
+
+            if not result:
+                break
+
+            loop_times += 1
+            if loop_times >= loop > 0:
+                break
+
+            try:
+                time.sleep(1)
+            except KeyboardInterrupt:
+                break
+
+    def handle_change_group(self, group_id, count):
+        send_box = self.make_send_box(
+            constants.CMD_ADMIN_SERVER_STAT,
+            self.username, self.password,
+            payload=dict(
+                group_id=group_id,
+                count=count,
+            )
+        )
+        self.tcp_client.write(send_box)
+
+        rsp_box = self.tcp_client.read()
+
+        if not rsp_box:
+            self.output('disconnected.')
+            return False
+
+        if rsp_box.ret != 0:
+            self.output('fail. rsp_box.ret=%s' % rsp_box.ret)
+            return False
+
+        self.output('succ.')
 
     def _handle_stat_once(self):
         send_box = self.make_send_box(constants.CMD_ADMIN_SERVER_STAT, self.username, self.password)
@@ -88,40 +148,6 @@ class BurstCtl(object):
 
         return True
 
-    def start(self):
-        self.tcp_client = TcpClient(Box, self.host, self.port, self.timeout)
-
-        try:
-            self.tcp_client.connect()
-        except Exception, e:
-            self.output('connect fail: %s' % e)
-            return False
-
-        return True
-
-    def handle_stat(self, loop):
-        """
-        :param loop:
-        :return:
-        """
-        loop_times = 0
-
-        while True:
-
-            result = self._handle_stat_once()
-
-            if not result:
-                break
-
-            loop_times += 1
-            if loop_times >= loop > 0:
-                break
-
-            try:
-                time.sleep(1)
-            except KeyboardInterrupt:
-                break
-
 
 def send_and_recv(tcp_client, box):
     tcp_client.write(box)
@@ -153,12 +179,25 @@ def cli():
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
-@click.option('-l', '--loop', type=int, help='loop times, <=0 means infinite loop', default=-1)
+@click.option('--loop', type=int, help='loop times, <=0 means infinite loop', default=-1)
 def stat(host, port, timeout, username, password, loop):
     ctl = BurstCtl(host, port, timeout, username, password)
     ctl.start()
     ctl.handle_stat(loop)
 
+
+@cli.command()
+@click.option('-t', '--host', help='burst admin host', default='127.0.0.1')
+@click.option('-P', '--port', type=int, help='burst admin port', required=True)
+@click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
+@click.option('-u', '--username', help='username', default=None)
+@click.option('-p', '--password', help='password', default=None)
+@click.option('--group', help='group id', required=True)
+@click.option('--count', help='workers count ', required=True)
+def change_group(host, port, timeout, username, password, group, count):
+    ctl = BurstCtl(host, port, timeout, username, password)
+    ctl.start()
+    ctl.handle_change_group(group, count)
 
 if __name__ == '__main__':
     cli()

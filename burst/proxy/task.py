@@ -5,7 +5,8 @@
 """
 
 import weakref
-from ..log import logger
+
+from ..share.log import logger
 
 
 class Task(object):

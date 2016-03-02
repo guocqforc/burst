@@ -2,8 +2,8 @@
 
 
 from ..proxy import TaskBox
-from .. import constants
-from ..log import logger
+from ..share import constants
+from ..share.log import logger
 from ..share.utils import ip_int_to_str
 
 

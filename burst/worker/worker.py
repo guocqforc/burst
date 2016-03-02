@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 
 import signal
-from .connection import Connection
 import setproctitle
 
-from ..log import logger
+from .connection import Connection
+from ..share.log import logger
 from .request import Request
-from .. import constants
+from ..share import constants
 
 
 class Worker(object):

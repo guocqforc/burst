@@ -3,11 +3,12 @@
 import json
 
 from twisted.internet.protocol import Protocol, Factory
+
 from netkit.box import Box
 
-from ..share.utils import safe_call
-from ..log import logger
-from .. import constants
+from ...share.utils import safe_call
+from ...share.log import logger
+from ...share import constants
 
 
 class AdminConnectionFactory(Factory):
@@ -111,6 +112,10 @@ class AdminConnection(Protocol):
                 rsp = box.map(dict(
                     body=json.dumps(rsp_body)
                 ))
+
+            elif box.cmd == constants.CMD_ADMIN_CHANGE_GROUP:
+                if self.factory.proxy.master_conn and self.factory.proxy.master_conn.transport:
+                    self.factory.proxy.master_conn.transport.write(box.pack())
 
         if rsp:
             self.transport.write(rsp.pack())

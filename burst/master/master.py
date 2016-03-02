@@ -8,7 +8,12 @@ import subprocess
 import time
 import signal
 import setproctitle
-from .. import constants
+from netkit.box import Box
+import thread
+
+from ..share.log import logger
+from ..share.unix_client import UnixClient
+from burst.share import constants
 
 
 class Master(object):
@@ -38,7 +43,61 @@ class Master(object):
 
         self._handle_proc_signals()
 
+        # 没办法，只能在这启动
+        thread.start_new(self._connect_to_proxy, ())
+
         self._spawn_workers()
+
+    def _connect_to_proxy(self):
+        """
+        连接到proxy，因为有些命令要发过来
+        :return:
+        """
+        client = UnixClient(Box, self.app.config['MASTER_IPC_ADDRESS'])
+
+        while True:
+            try:
+                client.connect()
+            except Exception, e:
+                # 只要连接失败
+                logger.error('exc occur.', exc_info=True)
+                time.sleep(1)
+                continue
+
+            # 读取的数据
+            box = client.read()
+            if not box:
+                logger.info('master to proxy connection closed.')
+                continue
+
+            logger.info('data(proxy->master): %s', box)
+
+            try:
+                self._handle_proxy_data(box)
+            except:
+                logger.error('exc occur.', exc_info=True)
+
+    def _handle_proxy_data(self, box):
+        """
+        处理从proxy过来的box
+        :param box:
+        :return:
+        """
+
+        if box.cmd == constants.CMD_ADMIN_CHANGE_GROUP:
+            jdata = json.loads(box.body)
+            group_id = jdata['payload']['group_id']
+            count = jdata['payload']['count']
+
+            # 不能设置成个奇怪的值就麻烦了
+            assert isinstance(count, int)
+
+            if group_id not in self.app.config['GROUP_CONFIG']:
+                self.app.config['GROUP_CONFIG'] = dict(
+                    count=count
+                )
+            else:
+                self.app.config['GROUP_CONFIG']['count'] = count
 
     def _spawn_workers(self):
         def start_child_process(proc_env):

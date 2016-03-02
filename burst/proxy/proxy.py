@@ -6,13 +6,13 @@ import os
 from twisted.internet import reactor
 import setproctitle
 
-from ..log import logger
-from client_connection import ClientConnectionFactory
-from worker_connection import WorkerConnectionFactory
-from admin_connection import AdminConnectionFactory
+from ..share.log import logger
+from connection.client_connection import ClientConnectionFactory
+from connection.worker_connection import WorkerConnectionFactory
+from connection.admin_connection import AdminConnectionFactory
 from task_dispatcher import TaskDispatcher
 from stat_counter import StatCounter
-from .. import constants
+from burst.share import constants
 
 
 class Proxy(object):

@@ -4,10 +4,10 @@ import time
 
 from twisted.internet.protocol import Protocol, Factory, connectionDone
 
-from ..share.utils import safe_call
-from ..log import logger
-from .. import constants
-from .task_box import TaskBox
+from ...share.utils import safe_call
+from ...share.log import logger
+from ...share import constants
+from ..task_box import TaskBox
 
 
 class WorkerConnectionFactory(Factory):

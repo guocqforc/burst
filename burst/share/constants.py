@@ -15,9 +15,13 @@ RET_ADIMN_AUTH_FAIL = -20000
 CMD_WORKER_TASK_ASSIGN = 100
 # 任务完成
 CMD_WORKER_TASK_DONE = 200
+
 # 管理员命令
 # 获取运行状态统计
 CMD_ADMIN_SERVER_STAT = 20000
+
+# 修改group配置，比如worker数量
+CMD_ADMIN_CHANGE_GROUP = 21000
 
 
 # worker的状态
@@ -62,8 +66,8 @@ DEFAULT_CONFIG = {
     # 停止子进程超时(秒). 使用 TERM 进行停止时，如果超时未停止会发送KILL信号
     'STOP_TIMEOUT': None,
 
-    # master<->worker之间通信的address模板
-    'MASTER_IPC_ADDRESS_TPL': NAME + '_ipc/' + 'master.sock',
+    # master<->worker之间通信的address
+    'MASTER_IPC_ADDRESS': NAME + '_ipc/' + 'master.sock',
 
     # proxy<->worker之间通信的address模板
     'WORKER_IPC_ADDRESS_TPL': NAME + '_ipc/' + '%s.sock',
