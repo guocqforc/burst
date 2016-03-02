@@ -20,10 +20,6 @@ CMD_WORKER_TASK_DONE = 200
 CMD_ADMIN_SERVER_STAT = 20000
 
 
-# 子进程城的环境变量
-CHILD_ENV_KEY = 'BURST_ENV'
-
-
 # worker的状态
 WORKER_STATUS_IDLE = 1
 WORKER_STATUS_BUSY = 2
@@ -70,6 +66,9 @@ DEFAULT_CONFIG = {
     'WORK_TIMEOUT': None,
     # worker重连等待时间
     'WORKER_TRY_CONNECT_INTERVAL': 1,
+
+    # 子进程标识进程类型的环境变量
+    'CHILD_PROCESS_ENV_KEY': 'BURST_ENV',
 
     # 管理员，可以连接proxy获取数据
     # 管理员访问地址如 (127.0.0.1, 22222)

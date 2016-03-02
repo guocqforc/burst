@@ -47,7 +47,7 @@ class Burst(RoutesMixin, AppEventsMixin):
         self._validate_cmds()
 
         # 只要没有这个环境变量，就是主进程
-        str_burst_env = os.getenv(constants.CHILD_ENV_KEY)
+        str_burst_env = os.getenv(self.config['CHILD_PROCESS_ENV_KEY'])
 
         if not str_burst_env:
             # 主进程

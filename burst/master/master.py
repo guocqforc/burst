@@ -45,7 +45,7 @@ class Master(object):
             # 要传入group_id
             worker_env = copy.deepcopy(os.environ)
             worker_env.update({
-                constants.CHILD_ENV_KEY: json.dumps(proc_env)
+                self.app.config['CHILD_PROCESS_ENV_KEY']: json.dumps(proc_env)
             })
 
             args = [sys.executable] + sys.argv
