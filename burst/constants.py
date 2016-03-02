@@ -63,7 +63,7 @@ DEFAULT_CONFIG = {
     'STOP_TIMEOUT': None,
 
     # proxy<->worker之间通信的address模板
-    'IPC_ADDRESS_TPL': '%s_ipc/' % NAME + '%s.sock',
+    'IPC_ADDRESS_TPL': NAME + '_ipc/' + '%s.sock',
 
     # proxy的backlog
     'PROXY_BACKLOG': 256,
