@@ -14,7 +14,6 @@ from connection.master_connection import MasterConnectionFactory
 from task_dispatcher import TaskDispatcher
 from stat_counter import StatCounter
 from ..share import constants
-from ..share.utils import parse_address_uri
 from ..share.log import logger
 
 
