@@ -185,32 +185,14 @@ class BurstCtl(object):
         return True
 
 
-def send_and_recv(tcp_client, box):
-    tcp_client.write(box)
-
-    rsp_box = tcp_client.read()
-
-    if not rsp_box:
-        print 'disconnected.'
-        return False
-
-    if rsp_box.ret != 0:
-        print 'fail. rsp_box.ret=%s' % rsp_box.ret
-        return False
-    else:
-        print '/' + '-' * 80
-        print json.dumps(json.loads(rsp_box.body), indent=4)
-        print '-' * 80 + '/'
-        return True
-
-
 @click.group()
 def cli():
     pass
 
 
 @cli.command()
-@click.option('-a', '--address', help='burst admin address', default='unix://admin.sock')
+@click.option('-a', '--address', default='file://admin.sock',
+              help='burst admin address. file://admin.sock or 127.0.0.1:9910')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
@@ -225,7 +207,8 @@ def stat(address, timeout, username, password, loop):
 
 
 @cli.command()
-@click.option('-a', '--address', help='burst admin address', default='unix://admin.sock')
+@click.option('-a', '--address', default='file://admin.sock',
+              help='burst admin address. file://admin.sock or 127.0.0.1:9910')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
