@@ -25,7 +25,7 @@ logger.setLevel(logging.DEBUG)
 
 # 配置得放到config.from_object前面
 NAME = 'normal_demo'
-ADMIN_ADDRESS_URI = 'tcp://127.0.0.1:7778'
+ADMIN_ADDRESS = ('127.0.0.1', 7778)
 GROUP_CONFIG = {
     1: {
         'count': 2,

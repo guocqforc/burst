@@ -90,8 +90,8 @@ DEFAULT_CONFIG = {
     'CHILD_PROCESS_ENV_KEY': 'BURST_ENV',
 
     # 管理员，可以连接proxy获取数据
-    # 管理员访问地址URI
-    'ADMIN_ADDRESS_URI': 'unix://%s_ipc/admin.sock' % NAME,
+    # 管理员访问地址: '%s_ipc/admin.sock' % NAME or ('127.0.0.1', 9910)
+    'ADMIN_ADDRESS': '%s_ipc/admin.sock' % NAME,
     'ADMIN_USERNAME': None,
     'ADMIN_PASSWORD': None,
 
