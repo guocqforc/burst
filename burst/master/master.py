@@ -5,7 +5,6 @@ import copy
 import json
 import sys
 import subprocess
-import socket
 import time
 import signal
 import setproctitle
@@ -64,7 +63,7 @@ class Master(object):
         连接到proxy，因为有些命令要发过来
         :return:
         """
-        client = TcpClient(Box, address=self.app.config['MASTER_IPC_ADDRESS'], socket_type=socket.AF_UNIX)
+        client = TcpClient(Box, address=self.app.config['MASTER_IPC_ADDRESS'])
 
         while True:
             try:

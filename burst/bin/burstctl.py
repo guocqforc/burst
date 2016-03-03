@@ -10,7 +10,6 @@ from netkit.box import Box
 from netkit.contrib.tcp_client import TcpClient
 
 from burst.share import constants
-from burst.share.utils import parse_address_uri
 
 
 class BurstCtl(object):
@@ -50,9 +49,9 @@ class BurstCtl(object):
 
     def start(self):
 
-        socket_type, address = parse_address_uri(self.address_uri)
+        address = self.parse_address_uri(self.address_uri)
 
-        self.tcp_client = TcpClient(Box, address=address, timeout=self.timeout, socket_type=socket_type)
+        self.tcp_client = TcpClient(Box, address=address, timeout=self.timeout)
 
         try:
             self.tcp_client.connect()
@@ -126,6 +125,21 @@ class BurstCtl(object):
             return False
 
         self.output('succ.')
+
+    def parse_address_uri(self, uri):
+        """
+        解析uri为可用的address
+        :param uri: 127.0.0.1:5555, file:///data/release/ipc.sock
+        :return: address
+        """
+
+        if uri.startswith('file://'):
+            # 文件
+            return uri.replace('file://', '')
+        else:
+            host, port = uri.split(':')
+            port = int(port)
+            return (host, port)
 
     def _handle_stat_once(self):
         send_box = self.make_send_box(constants.CMD_ADMIN_SERVER_STAT, self.username, self.password)
@@ -227,7 +241,8 @@ def change_group(address, timeout, username, password, group, count):
 
 
 @cli.command()
-@click.option('-a', '--address', help='burst admin address', default='unix://admin.sock')
+@click.option('-a', '--address', default='file://admin.sock',
+              help='burst admin address. file://admin.sock or 127.0.0.1:9910')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)

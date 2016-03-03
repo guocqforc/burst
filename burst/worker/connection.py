@@ -19,7 +19,7 @@ class Connection(object):
     def __init__(self, worker, address, conn_timeout):
         self.worker = worker
         # 直接创建即可
-        self.client = TcpClient(TaskBox, address=address, timeout=conn_timeout, socket_type=socket.AF_UNIX)
+        self.client = TcpClient(TaskBox, address=address, timeout=conn_timeout)
 
     def run(self):
         thread.start_new_thread(self._monitor_work_timeout, ())
