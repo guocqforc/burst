@@ -2,8 +2,8 @@
 
 from collections import defaultdict
 
-from burst.share import constants
-from burst.proxy.group_queue import GroupQueue
+from ..share import constants
+from group_queue import GroupQueue
 
 
 class TaskDispatcher(object):

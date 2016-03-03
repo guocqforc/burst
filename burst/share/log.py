@@ -2,6 +2,6 @@
 
 import logging
 
-from burst.share import constants
+import constants
 
 logger = logging.getLogger(constants.NAME)
