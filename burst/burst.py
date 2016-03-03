@@ -20,6 +20,9 @@ class Burst(RoutesMixin, AppEventsMixin):
     ############################## configurable begin ##############################
 
     box_class = None
+    master_class = Master
+    proxy_class = Proxy
+    worker_class = Worker
 
     debug = ConfigAttribute('DEBUG')
 
@@ -70,15 +73,15 @@ class Burst(RoutesMixin, AppEventsMixin):
                         )
             if self.config['ADMIN_ADDRESS']:
                 logger.info('Running admin server on %s', self.config['ADMIN_ADDRESS'])
-            Master(self).run()
+            self.master_class(self).run()
         else:
             burst_env = json.loads(str_burst_env)
             if burst_env['type'] == constants.PROC_TYPE_PROXY:
                 # proxy
-                Proxy(self, self.config['HOST'], self.config['PORT']).run()
+                self.proxy_class(self, self.config['HOST'], self.config['PORT']).run()
             else:
                 # worker
-                Worker(self, burst_env['group_id']).run()
+                self.worker_class(self, burst_env['group_id']).run()
 
     def make_proc_name(self, subtitle):
         """
