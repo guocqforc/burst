@@ -51,7 +51,7 @@ DEFAULT_CONFIG = {
     # 进程名
     'NAME': NAME,
 
-    # 分组进程配置:
+    # 分组进程配置(group_id务必为数字):
     #    {
     #        $group_id: {
     #            count: 10,
@@ -71,10 +71,10 @@ DEFAULT_CONFIG = {
     'STOP_TIMEOUT': None,
 
     # master<->worker之间通信的address
-    'MASTER_IPC_ADDRESS': NAME + '_ipc/' + 'master.sock',
+    'MASTER_IPC_ADDRESS': NAME + '_ipc/master.sock',
 
     # proxy<->worker之间通信的address模板
-    'WORKER_IPC_ADDRESS_TPL': NAME + '_ipc/' + '%s.sock',
+    'WORKER_IPC_ADDRESS_TPL': NAME + '_ipc/%s.sock',
 
     # proxy的backlog
     'PROXY_BACKLOG': 256,
@@ -90,8 +90,8 @@ DEFAULT_CONFIG = {
     'CHILD_PROCESS_ENV_KEY': 'BURST_ENV',
 
     # 管理员，可以连接proxy获取数据
-    # 管理员访问地址: '%s_ipc/admin.sock' % NAME or ('127.0.0.1', 9910)
-    'ADMIN_ADDRESS': '%s_ipc/admin.sock' % NAME,
+    # 管理员访问地址: NAME + '_ipc/admin.sock' or ('127.0.0.1', 9910)
+    'ADMIN_ADDRESS': NAME + '_ipc/admin.sock',
     'ADMIN_USERNAME': None,
     'ADMIN_PASSWORD': None,
 

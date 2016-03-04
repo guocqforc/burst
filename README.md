@@ -4,6 +4,7 @@ server framework. master, proxy and worker
 
 是否使用twisted的一个很大原因是，如果用twisted的话，mac下就可以直接用了。否则就要手写epoll。
 
+group_id务必为数字类型，否则burstctl无法正确处理.
 
 ### TODO
 
