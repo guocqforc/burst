@@ -24,8 +24,12 @@ CMD_ADMIN_SERVER_STAT = 20000
 
 # 修改group配置，比如worker数量。workers会自动restart
 CMD_ADMIN_CHANGE_GROUP = 21000
-# 重启workers
+# 重新加载workers
 CMD_ADMIN_RELOAD_WORKERS = 21001
+# 重启workers，与RELOAD不同，是先全部停止，再启动
+CMD_ADMIN_RESTART_WORKERS = 21002
+# 停止整个server
+CMD_ADMIN_STOP = 21003
 
 
 # worker的状态
