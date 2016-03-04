@@ -113,6 +113,10 @@ class Master(object):
 
         elif box.cmd == constants.CMD_ADMIN_RELOAD_WORKERS:
             self._reload_workers()
+        elif box.cmd == constants.CMD_ADMIN_RESTART_WORKERS:
+            self._restart_workers()
+        elif box.cmd == constants.CMD_ADMIN_STOP:
+            self._safe_stop()
 
     def _start_child_process(self, proc_env):
         worker_env = copy.deepcopy(os.environ)
@@ -177,7 +181,7 @@ class Master(object):
             # 时间短点，退出的快一些
             time.sleep(0.1)
 
-    def _stop_workers(self):
+    def _restart_workers(self):
         """
         安全停止所有workers
         :return:
@@ -197,14 +201,6 @@ class Master(object):
 
         self.restart_workers_timer.set(self.app.config['STOP_TIMEOUT'], final_kill_workers)
 
-    def _restart_workers(self):
-        """
-        restart是要先完全stop的
-        :return:
-        """
-
-        self._stop_workers()
-
     def _reload_workers(self):
         """
         reload是热更新，停一个，起一个
@@ -213,6 +209,21 @@ class Master(object):
         for p in self.worker_processes:
             if p:
                 p.send_signal(signal.SIGHUP)
+
+    def _safe_stop(self):
+        """
+        安全停止所有子进程，并最终退出
+        如果退出失败，要最终kill -9
+        :return:
+        """
+        self.enable = False
+
+        for p in self.worker_processes + [self.proxy_process]:
+            if p:
+                p.send_signal(signal.SIGTERM)
+
+        if self.app.config['STOP_TIMEOUT'] is not None:
+            signal.alarm(self.app.config['STOP_TIMEOUT'])
 
     def _handle_proc_signals(self):
         def exit_handler(signum, frame):
@@ -240,14 +251,7 @@ class Master(object):
             """
             等所有子进程结束，父进程也退出
             """
-            self.enable = False
-
-            for p in self.worker_processes + [self.proxy_process]:
-                if p:
-                    p.send_signal(signal.SIGTERM)
-
-            if self.app.config['STOP_TIMEOUT'] is not None:
-                signal.alarm(self.app.config['STOP_TIMEOUT'])
+            self._safe_stop()
 
         def safe_reload_handler(signum, frame):
             """
