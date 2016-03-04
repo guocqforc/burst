@@ -289,7 +289,7 @@ def restart_workers(address, timeout, username, password):
     """
     ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
-    ctl.handle_reload_workers()
+    ctl.handle_restart_workers()
 
 
 @cli.command()
@@ -304,7 +304,7 @@ def stop(address, timeout, username, password):
     """
     ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
-    ctl.handle_reload_workers()
+    ctl.handle_stop()
 
 if __name__ == '__main__':
     cli()
