@@ -67,6 +67,7 @@ class BurstCtl(object):
         :param loop:
         :return:
         """
+        last_result = None
         loop_times = 0
 
         while True:
@@ -76,7 +77,18 @@ class BurstCtl(object):
             if not result:
                 break
 
-            self.output(json.dumps(result, indent=4))
+            if diff:
+                if last_result is not None:
+                    output_result = self._diff_dicts(last_result, result)
+                else:
+                    output_result = None
+
+                last_result = result
+            else:
+                output_result = result
+
+            if output_result is not None:
+                self.output(json.dumps(self._sort_stat_dict(output_result), indent=4))
 
             loop_times += 1
             if loop_times >= loop > 0:
@@ -182,22 +194,10 @@ class BurstCtl(object):
             port = int(port)
             return (host, port)
 
-    def _get_stat_once(self):
-        send_box = self.make_send_box(constants.CMD_ADMIN_SERVER_STAT, self.username, self.password)
-        self.tcp_client.write(send_box)
-
-        rsp_box = self.tcp_client.read()
-
-        if not rsp_box:
-            self.output('disconnected.')
-            return False
-
-        if rsp_box.ret != 0:
-            self.output('fail. rsp_box.ret=%s' % rsp_box.ret)
-            return False
-
-        body_dict = json.loads(rsp_box.body)
-
+    def _sort_stat_dict(self, body_dict):
+        """
+        对统计的结果进行排序
+        """
         output_items = []
         for key in ('clients', 'busy_workers', 'idle_workers', 'pending_tasks',
                     'client_req', 'client_rsp', 'worker_req', 'worker_rsp'):
@@ -220,6 +220,61 @@ class BurstCtl(object):
 
         # OrderedDict在通过json打印的时候，会保持原来的顺序
         return OrderedDict(output_items)
+
+    def _get_stat_once(self):
+        send_box = self.make_send_box(constants.CMD_ADMIN_SERVER_STAT, self.username, self.password)
+        self.tcp_client.write(send_box)
+
+        rsp_box = self.tcp_client.read()
+
+        if not rsp_box:
+            self.output('disconnected.')
+            return False
+
+        if rsp_box.ret != 0:
+            self.output('fail. rsp_box.ret=%s' % rsp_box.ret)
+            return False
+
+        return json.loads(rsp_box.body)
+
+    def _diff_dicts(self, old_dict, new_dict):
+        """
+        对两个dict的数据进行差值处理
+        """
+
+        result_dict = dict()
+
+        key_list = set(old_dict.keys()) | set(new_dict.keys())
+
+        for key in key_list:
+            if key not in old_dict:
+                # 一定在new_dict里
+                value = new_dict[key]
+                if isinstance(value, dict):
+                    result_dict[key] = self._diff_dicts(dict(), value)
+                else:
+                    result_dict[key] = value
+
+            elif key not in new_dict:
+                # 一定在old_dict里
+                value = old_dict[key]
+                if isinstance(value, dict):
+                    result_dict[key] = self._diff_dicts(value, dict())
+                else:
+                    result_dict[key] = -value
+
+            else:
+                old_value = old_dict[key]
+                new_value = new_dict[key]
+
+                assert type(old_value) == type(new_value)
+
+                if isinstance(old_value, dict):
+                    result_dict[key] = self._diff_dicts(old_value, new_value)
+                else:
+                    result_dict[key] = new_value - old_value
+
+        return result_dict
 
 
 @click.group()
