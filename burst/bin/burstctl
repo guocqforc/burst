@@ -9,6 +9,7 @@ import click
 from netkit.box import Box
 from netkit.contrib.tcp_client import TcpClient
 
+import burst
 from burst.share import constants
 
 
@@ -226,6 +227,15 @@ class BurstCtl(object):
 @click.group()
 def cli():
     pass
+
+
+@cli.command()
+def version():
+    """
+    打印版本号
+    :return:
+    """
+    print burst.__version__
 
 
 @cli.command()
