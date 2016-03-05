@@ -8,10 +8,8 @@ from collections import Counter
 from share.log import logger
 from share.mixins import RoutesMixin, AppEventsMixin
 from share import constants
-from proxy import Proxy
-from worker import Worker
-from master import Master
 from share.config import ConfigAttribute, Config
+from share.utils import import_module_or_string
 
 
 class Burst(RoutesMixin, AppEventsMixin):
@@ -19,10 +17,14 @@ class Burst(RoutesMixin, AppEventsMixin):
     # 配置都放到 burst 里，而和proxy或者worker直接相关的类，则放到自己的部分
     ############################## configurable begin ##############################
 
-    box_class = None
-    master_class = Master
-    proxy_class = Proxy
-    worker_class = Worker
+    box_class = ConfigAttribute('BOX_CLASS',
+                                get_converter=import_module_or_string)
+    master_class = ConfigAttribute('MASTER_CLASS',
+                                   get_converter=import_module_or_string)
+    proxy_class = ConfigAttribute('PROXY_CLASS',
+                                  get_converter=import_module_or_string)
+    worker_class = ConfigAttribute('WORKER_CLASS',
+                                   get_converter=import_module_or_string)
 
     debug = ConfigAttribute('DEBUG')
 
@@ -31,16 +33,14 @@ class Burst(RoutesMixin, AppEventsMixin):
     config = None
     blueprints = None
 
-    def __init__(self, box_class):
+    def __init__(self):
         """
         构造函数
-        :param box_class: box类
         :return:
         """
         RoutesMixin.__init__(self)
         AppEventsMixin.__init__(self)
 
-        self.box_class = box_class
         self.config = Config(defaults=constants.DEFAULT_CONFIG)
         self.blueprints = list()
 

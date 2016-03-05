@@ -49,3 +49,12 @@ def ip_str_to_int(ip_str):
 
     return struct.unpack("!I", socket.inet_aton(ip_str))[0]
 
+
+def import_module_or_string(src):
+    """
+    按照模块导入或者字符串导入
+    :param src:
+    :return:
+    """
+    from config import import_string
+    return import_string(src) if isinstance(src, (str, unicode)) else src

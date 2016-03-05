@@ -44,9 +44,6 @@ PROC_TYPE_WORKER = 'worker'
 
 # 默认配置
 DEFAULT_CONFIG = {
-    # 是否调试模式
-    'DEBUG': False,
-
     # 监听IP
     'HOST': '127.0.0.1',
     # 监听端口
@@ -54,6 +51,21 @@ DEFAULT_CONFIG = {
 
     # 进程名
     'NAME': NAME,
+
+    # 是否调试模式
+    'DEBUG': False,
+
+    # box class
+    'BOX_CLASS': 'netkit.box.Box',
+
+    # master class
+    'MASTER_CLASS': 'burst.master.Master',
+
+    # proxy class
+    'PROXY_CLASS': 'burst.proxy.Proxy',
+
+    # worker class
+    'WORKER_CLASS': 'burst.worker.Worker',
 
     # 分组进程配置(group_id务必为数字):
     #    {

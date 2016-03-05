@@ -36,7 +36,7 @@ GROUP_CONFIG = {
 }
 GROUP_ROUTER = lambda box: 1 if box.cmd == 1 else 10
 
-app = Burst(Box)
+app = Burst()
 app.config.from_object(__name__)
 
 
