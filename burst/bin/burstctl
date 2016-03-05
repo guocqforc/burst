@@ -232,8 +232,7 @@ def cli():
 @cli.command()
 def version():
     """
-    打印版本号
-    :return:
+    版本号
     """
     print burst.__version__
 
@@ -247,7 +246,7 @@ def version():
 @click.option('--loop', type=int, help='loop times, <=0 means infinite loop', default=-1)
 def stat(address, timeout, username, password, loop):
     """
-    统计
+    查看统计
     """
     ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
@@ -264,7 +263,7 @@ def stat(address, timeout, username, password, loop):
 @click.option('--count', help='workers count ', required=True, type=int)
 def change_group(address, timeout, username, password, group, count):
     """
-    修改group配置，比如worker数
+    修改group配置，比如workers数量
     """
     ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
@@ -279,7 +278,7 @@ def change_group(address, timeout, username, password, group, count):
 @click.option('-p', '--password', help='password', default=None)
 def reload_workers(address, timeout, username, password):
     """
-    热更新workers
+    更新workers
     """
     ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
@@ -294,8 +293,7 @@ def reload_workers(address, timeout, username, password):
 @click.option('-p', '--password', help='password', default=None)
 def restart_workers(address, timeout, username, password):
     """
-    重启workers
-    与reload不同，会等待所有workers退出之后，再开始启动新workers
+    重启workers. 与reload不同，会等待所有workers退出之后，再开始启动新workers
     """
     ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
