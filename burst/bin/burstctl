@@ -62,7 +62,7 @@ class BurstCtl(object):
 
         return True
 
-    def handle_stat(self, loop):
+    def handle_stat(self, loop, diff):
         """
         :param loop:
         :return:
@@ -71,10 +71,12 @@ class BurstCtl(object):
 
         while True:
 
-            result = self._handle_stat_once()
+            result = self._get_stat_once()
 
             if not result:
                 break
+
+            self.output(json.dumps(result, indent=4))
 
             loop_times += 1
             if loop_times >= loop > 0:
@@ -180,7 +182,7 @@ class BurstCtl(object):
             port = int(port)
             return (host, port)
 
-    def _handle_stat_once(self):
+    def _get_stat_once(self):
         send_box = self.make_send_box(constants.CMD_ADMIN_SERVER_STAT, self.username, self.password)
         self.tcp_client.write(send_box)
 
@@ -216,12 +218,8 @@ class BurstCtl(object):
 
         output_items.append(('tasks_time', OrderedDict(tasks_time_items)))
 
-        output_dict = OrderedDict(output_items)
-
         # OrderedDict在通过json打印的时候，会保持原来的顺序
-        self.output(json.dumps(output_dict, indent=4))
-
-        return True
+        return OrderedDict(output_items)
 
 
 @click.group()
@@ -244,13 +242,14 @@ def version():
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
 @click.option('--loop', type=int, help='loop times, <=0 means infinite loop', default=-1)
-def stat(address, timeout, username, password, loop):
+@click.option('--diff', type=bool, help='show diff values between 1 seconds', default=False)
+def stat(address, timeout, username, password, loop, diff):
     """
     查看统计
     """
     ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
-    ctl.handle_stat(loop)
+    ctl.handle_stat(loop, diff)
 
 
 @cli.command()
