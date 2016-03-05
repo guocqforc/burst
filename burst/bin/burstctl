@@ -297,7 +297,7 @@ def version():
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
 @click.option('--loop', type=int, help='loop times, <=0 means infinite loop', default=-1)
-@click.option('--diff', type=bool, help='show diff values between 1 seconds', default=False)
+@click.option('--diff', is_flag=True, help='show diff values between 1 seconds', default=False)
 def stat(address, timeout, username, password, loop, diff):
     """
     查看统计
