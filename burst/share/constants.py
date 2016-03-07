@@ -87,7 +87,7 @@ DEFAULT_CONFIG = {
     'STOP_TIMEOUT': None,
 
     # 进程间通信存储目录
-    'IPC_ADDRESS_DIRECTORY': NAME + '_ipc',
+    'IPC_ADDRESS_DIRECTORY': 'socks',
 
     # master<->worker之间通信的address
     'MASTER_ADDRESS': 'master.sock',
