@@ -17,8 +17,8 @@ class Request(object):
 
     # connection
     conn = None
-    # 封装的任务box，外面不需要理解
-    task_box = None
+    # 封装的task，外面不需要理解
+    task = None
     is_valid = False
     blueprint = None
     route_rule = None
@@ -27,14 +27,14 @@ class Request(object):
     # 中断后要写入的数据
     interrupt_data = None
 
-    def __init__(self, conn, task_box):
+    def __init__(self, conn, task):
         self.conn = conn
-        self.task_box = task_box
+        self.task = task
         # 赋值
         self.is_valid = self._parse_raw_data()
 
     def _parse_raw_data(self):
-        if not self.task_box.body:
+        if not self.task.body:
             return True
 
         try:
@@ -43,7 +43,7 @@ class Request(object):
             logger.error('parse raw_data fail. e: %s, request: %s', e, self)
             return False
 
-        if self.box.unpack(self.task_box.body) > 0:
+        if self.box.unpack(self.task.body) > 0:
             self._parse_route_rule()
             return True
         else:
@@ -81,7 +81,7 @@ class Request(object):
         客户端连接IP，外面不需要了解task_box
         :return:
         """
-        return ip_int_to_str(self.task_box.client_ip_num)
+        return ip_int_to_str(self.task.client_ip_num)
 
     @property
     def cmd(self):
@@ -116,12 +116,12 @@ class Request(object):
         elif isinstance(data, dict):
             data = self.box.map(data).pack()
 
-        task_box = TaskBox(dict(
+        task = TaskBox(dict(
             cmd=constants.CMD_WORKER_TASK_DONE,
             body=data or '',
         ))
 
-        return self.conn.write(task_box.pack())
+        return self.conn.write(task.pack())
 
     def interrupt(self, data=None):
         """
