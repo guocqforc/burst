@@ -57,7 +57,8 @@ class ClientConnection(Protocol):
                 return
             elif ret > 0:
                 # 收好了
-                box.__raw_data = self._read_buffer[:ret]
+                # 不能使用双下划线，会导致别的地方取的时候变为 _Gateway__raw_data，很奇怪
+                box._raw_data = self._read_buffer[:ret]
                 self._read_buffer = self._read_buffer[ret:]
                 safe_call(self._on_read_complete, box)
                 continue
@@ -82,7 +83,7 @@ class ClientConnection(Protocol):
         task = Task(dict(
             cmd=constants.CMD_WORKER_TASK_ASSIGN,
             client_ip_num=self._client_ip_num,
-            body=box.__raw_data,
+            body=box._raw_data,
         ))
 
         task_container = TaskContainer(task, self)
