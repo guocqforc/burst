@@ -57,9 +57,8 @@ class ClientConnection(Protocol):
                 return
             elif ret > 0:
                 # 收好了
-                box_data = self._read_buffer[:ret]
                 self._read_buffer = self._read_buffer[ret:]
-                safe_call(self._on_read_complete, box_data, box)
+                safe_call(self._on_read_complete, box)
                 continue
             else:
                 # 数据已经混乱了，全部丢弃
@@ -67,10 +66,9 @@ class ClientConnection(Protocol):
                 self._read_buffer = ''
                 return
 
-    def _on_read_complete(self, data, box):
+    def _on_read_complete(self, box):
         """
         完整数据接收完成
-        :param data: 原始数据
         :param box: 解析之后的box
         :return:
         """
@@ -83,7 +81,7 @@ class ClientConnection(Protocol):
         task = Task(dict(
             cmd=constants.CMD_WORKER_TASK_ASSIGN,
             client_ip_num=self._client_ip_num,
-            body=data,
+            body=box.unpack_buf,
         ))
 
         task_container = TaskContainer(task, self)
