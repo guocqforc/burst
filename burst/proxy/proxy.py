@@ -60,19 +60,19 @@ class Proxy(object):
         # 主进程
         self._handle_proc_signals()
 
-        ipc_directory = os.path.dirname(self.app.config['WORKER_IPC_ADDRESS_TPL'])
+        ipc_directory = self.app.config['IPC_ADDRESS_DIRECTORY']
         if not os.path.exists(ipc_directory):
             os.makedirs(ipc_directory)
 
         # 启动监听master
-        master_ipc_address = self.app.config['MASTER_IPC_ADDRESS']
-        if os.path.exists(master_ipc_address):
-            os.remove(master_ipc_address)
-        reactor.listenUNIX(master_ipc_address, self.master_connection_factory_class(self))
+        master_address = os.path.join(ipc_directory, self.app.config['MASTER_ADDRESS'])
+        if os.path.exists(master_address):
+            os.remove(master_address)
+        reactor.listenUNIX(master_address, self.master_connection_factory_class(self))
 
         # 启动监听worker
         for group_id in self.app.config['GROUP_CONFIG']:
-            ipc_address = self.app.config['WORKER_IPC_ADDRESS_TPL'] % group_id
+            ipc_address = os.path.join(ipc_directory, self.app.config['WORKER_ADDRESS_TPL'] % group_id)
 
             # 防止之前异常导致遗留
             if os.path.exists(ipc_address):
@@ -95,6 +95,7 @@ class Proxy(object):
                                   interface=admin_address[0])
             elif isinstance(admin_address, str):
                 # 说明是文件
+                admin_address = os.path.join(ipc_directory, admin_address)
                 # 防止之前异常导致遗留
                 if os.path.exists(admin_address):
                     os.remove(admin_address)

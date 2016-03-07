@@ -86,11 +86,14 @@ DEFAULT_CONFIG = {
     # 停止子进程超时(秒). 使用 TERM 进行停止时，如果超时未停止会发送KILL信号
     'STOP_TIMEOUT': None,
 
+    # 进程间通信存储目录
+    'IPC_ADDRESS_DIRECTORY': NAME + '_ipc',
+
     # master<->worker之间通信的address
-    'MASTER_IPC_ADDRESS': NAME + '_ipc/master.sock',
+    'MASTER_ADDRESS': 'master.sock',
 
     # proxy<->worker之间通信的address模板
-    'WORKER_IPC_ADDRESS_TPL': NAME + '_ipc/%s.sock',
+    'WORKER_ADDRESS_TPL': '%s.sock',
 
     # proxy的backlog
     'PROXY_BACKLOG': 256,
@@ -106,8 +109,8 @@ DEFAULT_CONFIG = {
     'CHILD_PROCESS_ENV_KEY': 'BURST_ENV',
 
     # 管理员，可以连接proxy获取数据
-    # 管理员访问地址: NAME + '_ipc/admin.sock' or ('127.0.0.1', 9910)
-    'ADMIN_ADDRESS': NAME + '_ipc/admin.sock',
+    # 管理员访问地址: 'admin.sock' or ('127.0.0.1', 9910)
+    'ADMIN_ADDRESS': 'admin.sock',
     'ADMIN_USERNAME': None,
     'ADMIN_PASSWORD': None,
 

@@ -2,6 +2,7 @@
 
 import signal
 import setproctitle
+import os
 
 from .connection import Connection
 from ..share.log import logger
@@ -39,7 +40,10 @@ class Worker(object):
         self._on_worker_run()
 
         try:
-            address = self.app.config['WORKER_IPC_ADDRESS_TPL'] % self.group_id
+            address = os.path.join(
+                self.app.config['IPC_ADDRESS_DIRECTORY'],
+                self.app.config['WORKER_ADDRESS_TPL'] % self.group_id
+            )
             conn = self.connection_class(self, address, self.app.config['WORKER_CONN_TIMEOUT'])
             conn.run()
         except KeyboardInterrupt:

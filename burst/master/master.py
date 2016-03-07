@@ -63,7 +63,11 @@ class Master(object):
         连接到proxy，因为有些命令要发过来
         :return:
         """
-        client = TcpClient(Box, address=self.app.config['MASTER_IPC_ADDRESS'])
+        address = os.path.join(
+            self.app.config['IPC_ADDRESS_DIRECTORY'],
+            self.app.config['MASTER_ADDRESS']
+        )
+        client = TcpClient(Box, address=address)
 
         while True:
             try:
@@ -72,7 +76,7 @@ class Master(object):
                 break
             except:
                 # 只要连接失败
-                logger.error('connect fail. address: %s', self.app.config['MASTER_IPC_ADDRESS'])
+                logger.error('connect fail. address: %s', address)
                 time.sleep(1)
                 continue
 
