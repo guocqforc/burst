@@ -7,7 +7,7 @@ from twisted.internet.protocol import Protocol, Factory, connectionDone
 from ...share.utils import safe_call
 from ...share.log import logger
 from ...share import constants
-from ...share.task_box import TaskBox
+from ...share.task import Task
 
 
 class WorkerConnectionFactory(Factory):
@@ -28,7 +28,7 @@ class WorkerConnection(Protocol):
     _task_begin_time = None
 
     # 正在处理的任务
-    _doing_task = None
+    _doing_task_container = None
     # 读取缓冲
     _read_buffer = None
 
@@ -62,15 +62,15 @@ class WorkerConnection(Protocol):
 
         while self._read_buffer:
             # 因为box后面还是要用的
-            task_box = TaskBox()
-            ret = task_box.unpack(self._read_buffer)
+            task = Task()
+            ret = task.unpack(self._read_buffer)
             if ret == 0:
                 # 说明要继续收
                 return
             elif ret > 0:
                 # 收好了
                 self._read_buffer = self._read_buffer[ret:]
-                safe_call(self._on_read_complete, task_box)
+                safe_call(self._on_read_complete, task)
                 continue
             else:
                 # 数据已经混乱了，全部丢弃
@@ -78,22 +78,22 @@ class WorkerConnection(Protocol):
                 self._read_buffer = ''
                 return
 
-    def _on_read_complete(self, task_box):
+    def _on_read_complete(self, task):
         """
         完整数据接收完成
-        :param task_box: 解析之后的task_box
+        :param task: 解析之后的task
         :return:
         """
 
-        if task_box.cmd == constants.CMD_WORKER_TASK_DONE:
+        if task.cmd == constants.CMD_WORKER_TASK_DONE:
             self._on_task_end()
 
             # 如果有数据，就要先处理
-            if task_box.body:
+            if task.body:
                 # 要转发数据给原来的用户
                 # 要求连接存在，并且连接还处于连接中
-                if self._doing_task.client_conn and self._doing_task.client_conn.connected:
-                    self._doing_task.client_conn.transport.write(task_box.body)
+                if self._doing_task_container.client_conn and self._doing_task_container.client_conn.connected:
+                    self._doing_task_container.client_conn.transport.write(task.body)
 
                     self.factory.proxy.stat_counter.client_rsp += 1
 
@@ -101,20 +101,20 @@ class WorkerConnection(Protocol):
 
     def _try_alloc_task(self):
         # 无论有没有任务，都会标记自己空闲
-        task = self.factory.proxy.task_dispatcher.alloc_task(self)
-        if task:
+        task_container = self.factory.proxy.task_dispatcher.alloc_task(self)
+        if task_container:
             # 如果能申请成功，就继续执行
-            self.assign_task(task)
+            self.assign_task(task_container)
 
-    def assign_task(self, task):
+    def assign_task(self, task_container):
         """
         分配任务
-        :param task:
+        :param task_container:
         :return:
         """
-        self._doing_task = task
+        self._doing_task_container = task_container
         # 发送
-        self.transport.write(task.task_box.pack())
+        self.transport.write(task_container.task.pack())
         self._on_task_begin()
 
     @property
@@ -127,7 +127,7 @@ class WorkerConnection(Protocol):
 
         if self._status == constants.WORKER_STATUS_IDLE:
             # 没有正在处理的任务
-            self._doing_task = None
+            self._doing_task_container = None
             self._task_begin_time = None
 
     def _on_task_begin(self):
