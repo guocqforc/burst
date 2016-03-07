@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 
-from ..share.task_box import TaskBox
+from ..share.task import Task
 from ..share import constants
 from ..share.log import logger
 from ..share.utils import ip_int_to_str
@@ -78,7 +78,7 @@ class Request(object):
     @property
     def client_ip(self):
         """
-        客户端连接IP，外面不需要了解task_box
+        客户端连接IP，外面不需要了解task
         :return:
         """
         return ip_int_to_str(self.task.client_ip_num)
@@ -116,7 +116,7 @@ class Request(object):
         elif isinstance(data, dict):
             data = self.box.map(data).pack()
 
-        task = TaskBox(dict(
+        task = Task(dict(
             cmd=constants.CMD_WORKER_TASK_DONE,
             body=data or '',
         ))

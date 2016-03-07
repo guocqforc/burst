@@ -8,7 +8,7 @@ from netkit.contrib.tcp_client import TcpClient
 
 from ..share import constants
 from ..share.log import logger
-from ..share.task_box import TaskBox
+from ..share.task import Task
 
 
 class Connection(object):
@@ -19,7 +19,7 @@ class Connection(object):
     def __init__(self, worker, address, conn_timeout):
         self.worker = worker
         # 直接创建即可
-        self.client = TcpClient(TaskBox, address=address, timeout=conn_timeout)
+        self.client = TcpClient(Task, address=address, timeout=conn_timeout)
 
     def run(self):
         thread.start_new_thread(self._monitor_work_timeout, ())
