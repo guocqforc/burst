@@ -28,7 +28,7 @@ class WorkerConnection(Protocol):
     _task_begin_time = None
 
     # 正在处理的任务
-    _doing_task = None
+    _doing_task_container = None
     # 读取缓冲
     _read_buffer = None
 
@@ -92,8 +92,8 @@ class WorkerConnection(Protocol):
             if task.body:
                 # 要转发数据给原来的用户
                 # 要求连接存在，并且连接还处于连接中
-                if self._doing_task.client_conn and self._doing_task.client_conn.connected:
-                    self._doing_task.client_conn.transport.write(task.body)
+                if self._doing_task_container.client_conn and self._doing_task_container.client_conn.connected:
+                    self._doing_task_container.client_conn.transport.write(task.body)
 
                     self.factory.proxy.stat_counter.client_rsp += 1
 
@@ -106,15 +106,15 @@ class WorkerConnection(Protocol):
             # 如果能申请成功，就继续执行
             self.assign_task(task_container)
 
-    def assign_task(self, task):
+    def assign_task(self, task_container):
         """
         分配任务
-        :param task:
+        :param task_container:
         :return:
         """
-        self._doing_task = task
+        self._doing_task_container = task_container
         # 发送
-        self.transport.write(task.task.pack())
+        self.transport.write(task_container.task.pack())
         self._on_task_begin()
 
     @property
@@ -127,7 +127,7 @@ class WorkerConnection(Protocol):
 
         if self._status == constants.WORKER_STATUS_IDLE:
             # 没有正在处理的任务
-            self._doing_task = None
+            self._doing_task_container = None
             self._task_begin_time = None
 
     def _on_task_begin(self):
