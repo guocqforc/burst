@@ -57,6 +57,7 @@ class ClientConnection(Protocol):
                 return
             elif ret > 0:
                 # 收好了
+                box.raw_data = self._read_buffer[:ret]
                 self._read_buffer = self._read_buffer[ret:]
                 safe_call(self._on_read_complete, box)
                 continue
@@ -81,7 +82,7 @@ class ClientConnection(Protocol):
         task = Task(dict(
             cmd=constants.CMD_WORKER_TASK_ASSIGN,
             client_ip_num=self._client_ip_num,
-            body=box.unpack_buf,
+            body=box.raw_data,
         ))
 
         task_container = TaskContainer(task, self)
