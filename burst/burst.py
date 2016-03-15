@@ -89,10 +89,10 @@ class Burst(RoutesMixin, AppEventsMixin):
         :param subtitle:
         :return:
         """
-        proc_name = '[%s %s:%s] %s' % (
-            self.config['NAME'],
+        proc_name = '[%s:%s %s] %s' % (
             constants.NAME,
             subtitle,
+            self.config['NAME'],
             ' '.join([sys.executable] + sys.argv)
         )
 
