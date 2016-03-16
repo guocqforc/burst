@@ -23,7 +23,7 @@ class Connection(object):
 
     def run(self):
         thread.start_new_thread(self._monitor_work_timeout, ())
-        while 1:
+        while self.worker.enable:
             try:
                 self._handle()
             except KeyboardInterrupt:
@@ -59,7 +59,7 @@ class Connection(object):
 
         if not self.worker.enable:
             # 安全退出
-            raise KeyboardInterrupt
+            return
 
         self._read_message()
 
