@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-__version__ = '1.0.79'
+__version__ = '1.0.80'
 
 from .burst import Burst
 from .blueprint import Blueprint
