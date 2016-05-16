@@ -23,7 +23,7 @@ class BurstCtl(object):
 
     tcp_client = None
 
-    def __init__(self, address_uri, timeout, username, password, extra=None):
+    def __init__(self, address_uri, timeout, username, password):
         self.address_uri = address_uri
         self.timeout = timeout
         self.username = username
