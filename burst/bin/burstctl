@@ -202,7 +202,16 @@ class BurstCtl(object):
         for key in ('clients', 'busy_workers', 'idle_workers', 'pending_tasks',
                     'client_req', 'client_rsp', 'worker_req', 'worker_rsp'):
 
-            output_items.append((key, body_dict.get(key)))
+            stat_data = body_dict.get(key)
+
+            # 因为原始数据里面没有数据的总和，需要在工具这边处理一下
+            if isinstance(stat_data, dict):
+                sub_items = sorted(stat_data.items(), cmp=lambda x, y: cmp(int(x[0]), int(y[0])))
+                sub_items.insert(0, ('all', sum(stat_data.values())))
+
+                stat_data = OrderedDict(sub_items)
+
+            output_items.append((key, stat_data))
 
         def tasks_time_cmp_func(item1, item2):
             k1 = item1[0]
