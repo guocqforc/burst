@@ -52,11 +52,42 @@ class Master(object):
         self._handle_proc_signals()
 
         self._spawn_proxy()
+
+        # 等待proxy启动，为了防止worker在连接的时候一直报connect失败的错误
+        if not self._wait_proxy():
+            # 有可能ctrl-c终止，这个时候就要直接返回了
+            return
+
         self._spawn_workers()
 
         thread.start_new(self._connect_to_proxy, ())
 
         self._monitor_child_processes()
+
+    def _wait_proxy(self):
+        """
+        尝试连接proxy，如果连接成功，说明proxy启动起来了
+        :return:
+        """
+        address = os.path.join(
+            self.app.config['IPC_ADDRESS_DIRECTORY'],
+            self.app.config['MASTER_ADDRESS']
+        )
+        client = TcpClient(Box, address=address)
+
+        while self.enable:
+            try:
+                client.connect()
+                # 连接成功后，就关闭连接
+                client.close()
+                return True
+            except KeyboardInterrupt:
+                return False
+            except:
+                time.sleep(0.1)
+                continue
+
+        return False
 
     def _connect_to_proxy(self):
         """
@@ -69,9 +100,10 @@ class Master(object):
         )
         client = TcpClient(Box, address=address)
 
-        while True:
+        while self.enable:
             try:
-                client.connect()
+                if client.closed():
+                    client.connect()
             except KeyboardInterrupt:
                 break
             except:
