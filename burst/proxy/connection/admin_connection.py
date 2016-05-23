@@ -76,7 +76,6 @@ class AdminConnection(Protocol):
         :param box: 解析之后的box
         :return:
         """
-        logger.info('box: %s', box)
 
         # 无论是哪一种请求，都先验证用户
         req_body = json.loads(box.body)
