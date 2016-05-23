@@ -199,7 +199,7 @@ class BurstCtl(object):
         对统计的结果进行排序
         """
         output_items = []
-        for key in ('clients', 'busy_workers', 'workers', 'idle_workers', 'pending_tasks',
+        for key in ('clients', 'workers', 'busy_workers', 'idle_workers', 'pending_tasks',
                     'client_req', 'client_rsp', 'worker_req', 'worker_rsp'):
 
             stat_data = body_dict.get(key)
