@@ -89,6 +89,8 @@ class AdminConnection(Protocol):
             ))
         else:
             if box.cmd == constants.CMD_ADMIN_SERVER_STAT:
+                workers = dict([(group_id, group_info['count']) for group_id, group_info in
+                                self.factory.proxy.app.config['GROUP_CONFIG']])
                 idle_workers = dict([(group_id, len(workers)) for group_id, workers in
                                      self.factory.proxy.task_dispatcher.idle_workers_dict.items()])
                 busy_workers = dict([(group_id, len(workers)) for group_id, workers in
@@ -104,6 +106,7 @@ class AdminConnection(Protocol):
                     client_rsp=self.factory.proxy.stat_counter.client_rsp,
                     worker_req=self.factory.proxy.stat_counter.worker_req,
                     worker_rsp=self.factory.proxy.stat_counter.worker_rsp,
+                    workers=workers,
                     idle_workers=idle_workers,
                     busy_workers=busy_workers,
                     pending_tasks=pending_tasks,
