@@ -13,9 +13,9 @@ RET_ADIMN_AUTH_FAIL = -20000
 RET_MASTER_NOT_CONNECTED = -21000
 
 # 内部使用的命令字
-# 分配任务. 如果body里面带数据，说明是要写回；如果没有数据，说明只是要分配task
+# 分配任务.
 CMD_WORKER_TASK_ASSIGN = 100
-# 任务完成
+# 任务完成. 如果body里面带数据，说明是要写回；如果没有数据，说明只是要求分配task
 CMD_WORKER_TASK_DONE = 200
 
 # 管理员命令
