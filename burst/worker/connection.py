@@ -101,12 +101,12 @@ class Connection(object):
         return ret
 
     def _read_message(self):
-        req_box = None
+        task = None
 
         while 1:
             try:
                 # 读取数据 gw_box
-                req_box = self.client.read()
+                task = self.client.read()
             except socket.timeout:
                 # 超时了
                 if not self.worker.enable:
@@ -118,8 +118,8 @@ class Connection(object):
                 # 正常收到数据了
                 break
 
-        if req_box:
-            self._on_read_complete(req_box)
+        if task:
+            self._on_read_complete(task)
 
         if self.closed():
             self._on_connection_close()
@@ -133,11 +133,11 @@ class Connection(object):
             bp.events.close_app_conn(self)
         self.worker.app.events.close_conn(self)
 
-    def _on_read_complete(self, data):
+    def _on_read_complete(self, task):
         """
         数据获取结束
         """
-        request = self.worker.request_class(self, data)
+        request = self.worker.request_class(self, task)
 
         # 设置task开始处理的时间和信息
         self.work_progress = dict(
