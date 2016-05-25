@@ -14,7 +14,6 @@ import thread
 
 from ..share.log import logger
 from ..share.utils import safe_call
-from ..share.thread_timer import ThreadTimer
 from ..share import constants
 
 
@@ -29,14 +28,14 @@ class Master(object):
 
     enable = True
 
-    # 等待重启所有workers的timer
-    restart_workers_timer = None
-
     # proxy进程列表
     proxy_process = None
 
     # worker进程列表
     worker_processes = None
+
+    # 准备好worker进程列表，HUP的时候，用来替换现役workes
+    ready_worker_processes = None
 
     def __init__(self, app):
         """
@@ -44,7 +43,6 @@ class Master(object):
         :return:
         """
         self.app = app
-        self.restart_workers_timer = ThreadTimer()
 
     def run(self):
         setproctitle.setproctitle(self.app.make_proc_name(self.type))
@@ -145,12 +143,10 @@ class Master(object):
             else:
                 self.app.config['GROUP_CONFIG'][group_id]['count'] = count
 
-            self._restart_workers()
+            self._reload_workers()
 
         elif box.cmd == constants.CMD_ADMIN_RELOAD_WORKERS:
             self._reload_workers()
-        elif box.cmd == constants.CMD_ADMIN_RESTART_WORKERS:
-            self._restart_workers()
         elif box.cmd == constants.CMD_ADMIN_STOP:
             self._safe_stop()
 
@@ -198,53 +194,25 @@ class Master(object):
                     proc_env = p.proc_env
                     self.worker_processes[idx] = None
 
-                    if self.enable and not self.restart_workers_timer.is_set():
+                    if self.enable:
                         # 如果还要继续服务
                         p = self._start_child_process(proc_env)
                         self.worker_processes[idx] = p
 
             if not filter(lambda x: x, self.worker_processes):
                 # 没活着的了worker了
-
-                if self.restart_workers_timer.is_set():
-                    # 如果是在等待重启，就直接重启了
-                    self.restart_workers_timer.clear()
-                    self._spawn_workers()
-                    continue
-                else:
-                    break
+                break
 
             # 时间短点，退出的快一些
             time.sleep(0.1)
 
-    def _restart_workers(self):
-        """
-        安全停止所有workers
-        :return:
-        """
-
-        for p in self.worker_processes:
-            if p:
-                p.send_signal(signal.SIGTERM)
-
-        def final_kill_workers():
-            """
-            如果到时间还没停止，那就只能强制kill了
-            """
-            for p in self.worker_processes:
-                if p:
-                    p.send_signal(signal.SIGKILL)
-
-        self.restart_workers_timer.set(self.app.config['STOP_TIMEOUT'], final_kill_workers)
-
     def _reload_workers(self):
         """
-        reload是热更新，停一个，起一个
+        reload是热更新，全部都准备好了之后，再将worker挨个换掉
         :return:
         """
-        for p in self.worker_processes:
-            if p:
-                p.send_signal(signal.SIGHUP)
+        # 给proxy发送信号，告知当前处于替换worker的状态
+        self.proxy_process.send_signal(signal.SIGHUP)
 
     def _safe_stop(self):
         """
