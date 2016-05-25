@@ -54,7 +54,7 @@ class Proxy(object):
         self.host = host
         self.port = port
 
-        self.task_dispatcher = TaskDispatcher()
+        self.task_dispatcher = TaskDispatcher(self)
         self.reload_helper = ReloadHelper(self)
         self.stat_counter = StatCounter(self.app.config['TASKS_TIME_BENCHMARK'])
 

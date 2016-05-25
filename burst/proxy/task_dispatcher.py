@@ -12,6 +12,8 @@ class TaskDispatcher(object):
     主要包括: 消息来了之后的分发
     """
 
+    proxy = None
+
     # 之所以不用WeakSet的原因是，经过测试worker断掉之后，对象不会立即被删除，极有有可能会被用到。
     # 繁忙worker列表
     busy_workers_dict = None
@@ -20,10 +22,12 @@ class TaskDispatcher(object):
     # 消息队列
     group_queue = None
 
-    def __init__(self):
+    def __init__(self, proxy):
         self.busy_workers_dict = defaultdict(set)
         self.idle_workers_dict = defaultdict(set)
         self.group_queue = GroupQueue()
+
+        self.proxy = proxy
 
     def remove_worker(self, worker):
         """
