@@ -24,14 +24,16 @@ class TaskDispatcher(object):
     group_queue = None
 
     reload_helper = None
+    reload_over_callback = None
 
-    def __init__(self, proxy):
+    def __init__(self, proxy, reload_over_callback=None):
         self.busy_workers_dict = defaultdict(set)
         self.idle_workers_dict = defaultdict(set)
         self.group_queue = GroupQueue()
 
         self.proxy = proxy
         self.reload_helper = ReloadHelper(self.proxy)
+        self.reload_over_callback = reload_over_callback
 
     def remove_worker(self, worker):
         """
@@ -173,3 +175,11 @@ class TaskDispatcher(object):
 
         dst_workers_dict[worker.group_id].add(worker)
 
+    def _on_workers_reload_over(self):
+        """
+        当workers reload结束后的操作
+        :return:
+        """
+
+        if self.reload_over_callback:
+            self.reload_over_callback()
