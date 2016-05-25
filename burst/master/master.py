@@ -212,7 +212,8 @@ class Master(object):
                 # 没活着的了worker了
                 break
 
-            if self.reload_status == constants.RELOAD_STATUS_WORKERS_DONE:
+            if self.reload_status == constants.RELOAD_STATUS_WORKERS_DONE and \
+                    len(self.worker_processes) == len(self.ready_worker_processes):
                 # 先停掉所有的worker
                 self._stop_workers()
                 # 替换workers
@@ -230,6 +231,9 @@ class Master(object):
         reload是热更新，全部都准备好了之后，再将worker挨个换掉
         :return:
         """
+        if self.reload_status != constants.RELOAD_STATUS_PREPARING:
+            return False
+
         # 正在进行reloading
         self.reload_status = constants.RELOAD_STATUS_PREPARING
 
@@ -238,6 +242,8 @@ class Master(object):
 
         # 启动预备役的workers
         self.ready_worker_processes = self._spawn_workers()
+
+        return True
 
     def _stop_workers(self):
         """

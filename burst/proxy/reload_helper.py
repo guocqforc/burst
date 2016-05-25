@@ -22,7 +22,11 @@ class ReloadHelper(object):
         启动
         :return:
         """
+        if self.status != constants.RELOAD_STATUS_STOPPED:
+            return False
+
         self.status = constants.RELOAD_STATUS_PREPARING
+        return True
 
     def stop(self):
         """
