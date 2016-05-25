@@ -26,7 +26,11 @@ class Master(object):
 
     app = None
 
+    # 是否有效
     enable = True
+
+    # 是否在reloading...
+    reloading = False
 
     # proxy进程列表
     proxy_process = None
@@ -34,7 +38,7 @@ class Master(object):
     # worker进程列表
     worker_processes = None
 
-    # 准备好worker进程列表，HUP的时候，用来替换现役workes
+    # 准备好worker进程列表，HUP的时候，用来替换现役workers
     ready_worker_processes = None
 
     def __init__(self, app):
@@ -49,14 +53,14 @@ class Master(object):
 
         self._handle_proc_signals()
 
-        self._spawn_proxy()
+        self.proxy_process = self._spawn_proxy()
 
         # 等待proxy启动，为了防止worker在连接的时候一直报connect失败的错误
         if not self._wait_proxy():
             # 有可能ctrl-c终止，这个时候就要直接返回了
             return
 
-        self._spawn_workers()
+        self.worker_processes = self._spawn_workers()
 
         thread.start_new(self._connect_to_proxy, ())
 
@@ -165,10 +169,10 @@ class Master(object):
         proc_env = dict(
             type=constants.PROC_TYPE_PROXY
         )
-        self.proxy_process = self._start_child_process(proc_env)
+        return self._start_child_process(proc_env)
 
     def _spawn_workers(self):
-        self.worker_processes = []
+        worker_processes = []
 
         for group_id, group_info in self.app.config['GROUP_CONFIG'].items():
             proc_env = dict(
@@ -179,7 +183,9 @@ class Master(object):
             # 进程个数
             for it in xrange(0, group_info['count']):
                 p = self._start_child_process(proc_env)
-                self.worker_processes.append(p)
+                worker_processes.append(p)
+
+        return worker_processes
 
     def _monitor_child_processes(self):
         while 1:
@@ -211,8 +217,14 @@ class Master(object):
         reload是热更新，全部都准备好了之后，再将worker挨个换掉
         :return:
         """
+        # 正在进行reloading
+        self.reloading = True
+
         # 给proxy发送信号，告知当前处于替换worker的状态
         self.proxy_process.send_signal(signal.SIGHUP)
+
+        # 启动预备役的workers
+        self.ready_worker_processes = self._spawn_workers()
 
     def _safe_stop(self):
         """

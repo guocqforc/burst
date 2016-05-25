@@ -45,8 +45,12 @@ class WorkerConnection(Protocol):
         self._read_buffer = ''
 
     def connectionMade(self):
-        # 建立连接就直接去申请task
-        self._try_alloc_task()
+        if self.factory.proxy.reload_helper.running:
+            # 如果当前正处于运行状态，那么就应该放到ready_workers列表里去
+            self.factory.proxy.reload_helper.add_worker(self)
+        else:
+            # 建立连接就直接去申请task
+            self._try_alloc_task()
 
     def connectionLost(self, reason=connectionDone):
         # 要删除掉对应的worker
