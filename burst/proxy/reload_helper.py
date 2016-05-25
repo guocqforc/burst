@@ -1,13 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
+from ..share import constants
 
 
 class ReloadHelper(object):
-
-    STATUS_STOPPED = 0
-    STATUS_PREPARING = 1      # 准备中
-    STATUS_WORKERS_DONE = 2   # 已经准备好了
 
     proxy = None
     status = None
@@ -16,7 +13,7 @@ class ReloadHelper(object):
     workers_dict = None
 
     def __init__(self, proxy):
-        self.status = self.STATUS_STOPPED
+        self.status = constants.RELOAD_STATUS_STOPPED
         self.proxy = proxy
         self.workers_dict = defaultdict(set)
 
@@ -25,14 +22,14 @@ class ReloadHelper(object):
         启动
         :return:
         """
-        self.status = self.STATUS_PREPARING
+        self.status = constants.RELOAD_STATUS_PREPARING
 
     def stop(self):
         """
         停止
         :return:
         """
-        self.status = self.STATUS_STOPPED
+        self.status = constants.RELOAD_STATUS_STOPPED
         self.workers_dict.clear()
 
     def add_worker(self, worker):
@@ -50,12 +47,12 @@ class ReloadHelper(object):
                 # 只要找到一个没有满足的，就可以扔掉了
                 return False
         else:
-            self.status = self.STATUS_WORKERS_DONE
+            self.status = constants.RELOAD_STATUS_WORKERS_DONE
             return True
 
     @property
     def running(self):
-        return self.status in (self.STATUS_PREPARING, self.STATUS_WORKERS_DONE)
+        return self.status in (constants.RELOAD_STATUS_PREPARING, constants.RELOAD_STATUS_WORKERS_DONE)
 
     @property
     def workers_done(self):
@@ -63,4 +60,4 @@ class ReloadHelper(object):
         workers是否已经准备好了
         :return:
         """
-        return self.status == self.STATUS_WORKERS_DONE
+        return self.status == constants.RELOAD_STATUS_WORKERS_DONE

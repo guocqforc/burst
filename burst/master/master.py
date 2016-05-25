@@ -29,8 +29,8 @@ class Master(object):
     # 是否有效
     enable = True
 
-    # 是否在reloading...
-    reloading = False
+    # reload状态
+    reload_status = constants.RELOAD_STATUS_STOPPED
 
     # proxy进程列表
     proxy_process = None
@@ -153,6 +153,9 @@ class Master(object):
             self._reload_workers()
         elif box.cmd == constants.CMD_ADMIN_STOP:
             self._safe_stop()
+        elif box.cmd == constants.CMD_MASTER_REPLACE_WORKERS:
+            # 要替换workers
+            self.reload_status = constants.RELOAD_STATUS_WORKERS_DONE
 
     def _start_child_process(self, proc_env):
         worker_env = copy.deepcopy(os.environ)
@@ -209,6 +212,16 @@ class Master(object):
                 # 没活着的了worker了
                 break
 
+            if self.reload_status == constants.RELOAD_STATUS_WORKERS_DONE:
+                # 先停掉所有的worker
+                self._stop_workers()
+                # 替换workers
+                self.worker_processes = self.ready_worker_processes
+                self.ready_worker_processes = list()
+
+                # 结束reload
+                self.reload_status = constants.RELOAD_STATUS_STOPPED
+
             # 时间短点，退出的快一些
             time.sleep(0.1)
 
@@ -218,13 +231,23 @@ class Master(object):
         :return:
         """
         # 正在进行reloading
-        self.reloading = True
+        self.reload_status = constants.RELOAD_STATUS_PREPARING
 
         # 给proxy发送信号，告知当前处于替换worker的状态
         self.proxy_process.send_signal(signal.SIGHUP)
 
         # 启动预备役的workers
         self.ready_worker_processes = self._spawn_workers()
+
+    def _stop_workers(self):
+        """
+        停止所有的workers
+        :return:
+        """
+
+        for p in self.worker_processes:
+            if p:
+                p.send_signal(signal.SIGTERM)
 
     def _safe_stop(self):
         """
