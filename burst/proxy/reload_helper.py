@@ -33,6 +33,7 @@ class ReloadHelper(object):
         :return:
         """
         self.status = self.STATUS_STOPPED
+        self.workers_dict.clear()
 
     def add_worker(self, worker):
         """
@@ -55,3 +56,11 @@ class ReloadHelper(object):
     @property
     def running(self):
         return self.status in (self.STATUS_PREPARING, self.STATUS_WORKERS_DONE)
+
+    @property
+    def workers_done(self):
+        """
+        workers是否已经准备好了
+        :return:
+        """
+        return self.status == self.STATUS_WORKERS_DONE

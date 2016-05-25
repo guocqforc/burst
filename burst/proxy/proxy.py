@@ -13,7 +13,6 @@ from connection.admin_connection import AdminConnectionFactory
 from connection.master_connection import MasterConnectionFactory
 from task_dispatcher import TaskDispatcher
 from stat_counter import StatCounter
-from reload_helper import ReloadHelper
 from ..share import constants
 from ..share.log import logger
 
@@ -31,8 +30,6 @@ class Proxy(object):
     master_connection_factory_class = MasterConnectionFactory
 
     app = None
-
-    reload_helper = None
 
     host = None
     port = None
@@ -55,7 +52,6 @@ class Proxy(object):
         self.port = port
 
         self.task_dispatcher = TaskDispatcher(self)
-        self.reload_helper = ReloadHelper(self)
         self.stat_counter = StatCounter(self.app.config['TASKS_TIME_BENCHMARK'])
 
     def run(self):
@@ -128,7 +124,7 @@ class Proxy(object):
             """
             让所有子进程重新加载
             """
-            self.reload_helper.start()
+            self.task_dispatcher.start_reload()
 
         # 强制结束，抛出异常终止程序进行
         signal.signal(signal.SIGINT, exit_handler)
