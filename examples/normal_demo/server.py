@@ -44,8 +44,6 @@ app.config.from_object(__name__)
 
 @app.create_worker
 def create_worker(worker):
-    import time
-    time.sleep(5)
     logger.error('create_worker: %r', worker)
 
 
