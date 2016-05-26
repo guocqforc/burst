@@ -31,8 +31,7 @@
     管理工具，可以在线完成统计、配置变更、重启等操作。
 
     * change_group     修改group配置，比如workers数量
-    * reload_workers   更新workers
-    * restart_workers  重启workers.
+    * reload   更新workers
     * stat             查看统计
     * stop             安全停止整个服务
     * version          版本号
@@ -41,30 +40,37 @@
 
         /--------------------------------------------------------------------------------
         {
-            "clients": 100,
+            "clients": 11,
+            "workers": {
+                "all": 4,
+                "1": 2,
+                "10": 2
+            },
             "busy_workers": {
+                "all": 2,
                 "1": 2,
                 "10": 0
             },
             "idle_workers": {
+                "all": 2,
                 "1": 0,
                 "10": 2
             },
             "pending_tasks": {
-                "1": 97,
+                "all": 7,
+                "1": 7,
                 "10": 0
             },
-            "client_req": 19691,
-            "client_rsp": 19592,
-            "worker_req": 19594,
-            "worker_rsp": 19592,
+            "client_req": 129316,
+            "client_rsp": 129307,
+            "worker_req": 129309,
+            "worker_rsp": 129307,
             "tasks_time": {
-                "10": 19238,
-                "50": 353,
-                "100": 1
+                "10": 129286,
+                "50": 21
             }
         }
-        --------------------------------------------------------------------------------/
+                --------------------------------------------------------------------------------/
     
 
 ### 三. 部署
@@ -94,13 +100,32 @@
     kill -QUIT $master_pid
 
 
-### 四. 注意
+### 四. 设计思路
+
+1. 优雅重启
+
+maple的优雅重启比较简单，即将worker安全停止后，master自然会将停止的worker重新启动，从而实现优雅重启.  
+但是后来发现一个问题，即worker的启动速度越来越慢，主要原因是当应用越来越复杂是，import的库和模块会越来越多。尤其多个worker同时启动时，时间更长。  
+这在maple中还是能够接受的，因为maple的worker其实是无状态的，所以无非是启动两套workers，每套workers单独优雅重启就足以不影响业务。
+
+但是在burst中，这个是接受不了的，因为burst的workers是分组的，如果用上面的方法启动，就可以导致某个组内的消息一直被堵塞。
+
+所以，我实现了另一套方案:
+
+    1. master收到HUP信号后，先标识自己的状态为reload中，并通知proxy也变成reload中状态。
+    2. master启动一批worker，但是作为替补worker存在，不替换原有的worker。
+    3. proxy在reload状态下，将收到的新worker连接也都放到替补workers中去。
+    4. proxy在收到client消息、worker工作完成消息、worker建立新连接消息后，都去判断替补worker是否已经达到替换老workers的条件，如果已经达到则替换老workers，并通过master_connection向master发送消息，告知master可以替换掉老workers了。表示自己为非reload状态。
+    5. master替换掉老的workers，并向老的workers发送TERM信号。标识自己状态为非reload状态。
+
+
+### 五. 注意
 
 1. 配置要求
 
     group_id务必为数字类型，否则burstctl无法正确处理.
 
-### 五. TODO
+### 六. TODO
 
 1. <del>支持修改worker数量后，优雅重启worker. 目前可行方案是通过burst ctl，但是ctl是连接到了proxy，貌似还不行</del>
 2. 考虑group_conf和group_router怎么更好的重新载入
