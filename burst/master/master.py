@@ -230,7 +230,7 @@ class Master(object):
         reload是热更新，全部都准备好了之后，再将worker挨个换掉
         :return:
         """
-        if self.reload_status != constants.RELOAD_STATUS_PREPARING:
+        if self.reload_status != constants.RELOAD_STATUS_STOPPED:
             return False
 
         # 正在进行reloading

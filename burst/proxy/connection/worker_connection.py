@@ -47,7 +47,7 @@ class WorkerConnection(Protocol):
     def connectionMade(self):
         if self.factory.proxy.task_dispatcher.reloading:
             # 如果当前正处于运行状态，那么就应该放到ready_workers列表里去
-            self.factory.proxy.add_ready_worker(self)
+            self.factory.proxy.task_dispatcher.add_ready_worker(self)
         else:
             # 建立连接就直接去申请task
             self._try_alloc_task()
