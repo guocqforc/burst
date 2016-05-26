@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="burst",
-    version='1.0.87',
+    version='1.0.88',
     zip_safe=False,
     platforms='any',
     packages=find_packages(exclude=['ez_setup', 'examples', 'tests']),

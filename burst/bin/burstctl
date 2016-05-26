@@ -310,7 +310,7 @@ def stat(address, timeout, username, password, loop, diff):
 @click.option('--count', help='workers count ', required=True, type=int)
 def change(address, timeout, username, password, group, count):
     """
-    修改group配置，比如workers数量
+    修改配置。比如workers数量
     """
     ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
@@ -325,7 +325,7 @@ def change(address, timeout, username, password, group, count):
 @click.option('-p', '--password', help='password', default=None)
 def reload(address, timeout, username, password):
     """
-    更新workers
+    优雅重启workers
     """
     ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
@@ -340,7 +340,7 @@ def reload(address, timeout, username, password):
 @click.option('-p', '--password', help='password', default=None)
 def stop(address, timeout, username, password):
     """
-    安全停止整个服务
+    优雅停止整个服务
     """
     ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
