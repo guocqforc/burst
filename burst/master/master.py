@@ -212,8 +212,7 @@ class Master(object):
                 # 没活着的了worker了
                 break
 
-            if self.reload_status == constants.RELOAD_STATUS_WORKERS_DONE and \
-                    len(self.worker_processes) == len(self.ready_worker_processes):
+            if self.reload_status == constants.RELOAD_STATUS_WORKERS_DONE:
                 # 先停掉所有的worker
                 self._stop_workers()
                 # 替换workers
