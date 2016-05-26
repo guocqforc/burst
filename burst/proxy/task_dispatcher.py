@@ -58,6 +58,9 @@ class TaskDispatcher(object):
         :return:
         """
         if self.reload_helper.workers_done:
+            # 不能丢消息
+            self.group_queue.put(group_id, item)
+
             # 说明在reload，并且worker已经都ok了
             self._try_replace_workers()
             return
