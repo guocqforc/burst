@@ -110,6 +110,14 @@ class TaskDispatcher(object):
         if self.reload_helper.workers_done:
             self._try_replace_workers()
 
+    def remove_ready_worker(self, worker):
+        """
+        删掉
+        :param worker:
+        :return:
+        """
+        self.reload_helper.remove_worker(worker)
+
     def start_reload(self):
         """
         开始reload

@@ -44,6 +44,31 @@ class ReloadHelper(object):
         """
         self.workers_dict[worker.group_id].add(worker)
 
+        if self.status == constants.RELOAD_STATUS_PREPARING and self._match_expect_workers():
+            self.status = constants.RELOAD_STATUS_WORKERS_DONE
+
+    def remove_worker(self, worker):
+        """
+        添加worker
+        :param worker:
+        :return:
+        """
+        if worker in self.workers_dict[worker.group_id]:
+            self.workers_dict[worker.group_id].remove(worker)
+
+            if self.status == constants.RELOAD_STATUS_WORKERS_DONE and not self._match_expect_workers():
+                self.status = constants.RELOAD_STATUS_PREPARING
+
+            return True
+        else:
+            return False
+
+    def _match_expect_workers(self):
+        """
+        是否满足预期的workers
+        :return:
+        """
+
         for group_id, group_info in self.proxy.app.config['GROUP_CONFIG'].items():
             expect_count = group_info['count']
 
@@ -51,7 +76,6 @@ class ReloadHelper(object):
                 # 只要找到一个没有满足的，就可以扔掉了
                 return False
         else:
-            self.status = constants.RELOAD_STATUS_WORKERS_DONE
             return True
 
     @property

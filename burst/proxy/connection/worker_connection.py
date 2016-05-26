@@ -56,6 +56,10 @@ class WorkerConnection(Protocol):
         # 要删除掉对应的worker
         self.factory.proxy.task_dispatcher.remove_worker(self)
 
+        if self.factory.proxy.task_dispatcher.reloading:
+            # 如果当前正处于运行状态，那么还应该去尝试一下删除
+            self.factory.proxy.task_dispatcher.remove_ready_worker(self)
+
     def dataReceived(self, data):
         """
         当数据接受到时
