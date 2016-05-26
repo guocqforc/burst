@@ -78,7 +78,7 @@ class TaskDispatcher(object):
         self.busy_workers_dict[group_id].add(worker)
 
         # 让worker去处理任务吧
-        worker.assign_task(item)
+        worker._assign_task(item)
 
     def alloc_task(self, worker):
         """
@@ -166,7 +166,7 @@ class TaskDispatcher(object):
         # 分配现有的idle workers
         for group_id, _workers in bk_idle_workers_dict.items():
             for worker in _workers:
-                if not self.alloc_task(worker):
+                if not worker.alloc_task():
                     # 一个group内的第一个分配不到task的worker，那么之后的也肯定分配不到了
                     break
 
