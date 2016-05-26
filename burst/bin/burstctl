@@ -122,28 +122,9 @@ class BurstCtl(object):
 
         self.output('succ.')
 
-    def handle_reload_workers(self):
+    def handle_reload(self):
         send_box = self.make_send_box(
             constants.CMD_ADMIN_RELOAD_WORKERS,
-            self.username, self.password,
-        )
-        self.tcp_client.write(send_box)
-
-        rsp_box = self.tcp_client.read()
-
-        if not rsp_box:
-            self.output('disconnected.')
-            return False
-
-        if rsp_box.ret != 0:
-            self.output('fail. rsp_box.ret=%s' % rsp_box.ret)
-            return False
-
-        self.output('succ.')
-
-    def handle_restart_workers(self):
-        send_box = self.make_send_box(
-            constants.CMD_ADMIN_RESTART_WORKERS,
             self.username, self.password,
         )
         self.tcp_client.write(send_box)
@@ -182,17 +163,20 @@ class BurstCtl(object):
     def _parse_address_uri(self, uri):
         """
         解析uri为可用的address
-        :param uri: 127.0.0.1:5555, file:///data/release/ipc.sock
+        :param uri: tcp://127.0.0.1:5555, /data/release/ipc.sock
         :return: address
         """
 
-        if uri.startswith('file://'):
+        if uri.startswith('tcp://'):
             # 文件
-            return uri.replace('file://', '')
-        else:
+            uri = uri.replace('tcp://', '')
+
             host, port = uri.split(':')
             port = int(port)
+
             return (host, port)
+        else:
+            return uri
 
     def _sort_stat_dict(self, body_dict):
         """
@@ -300,8 +284,8 @@ def version():
 
 
 @cli.command()
-@click.option('-a', '--address', default='file://admin.sock',
-              help='burst admin address. file://admin.sock or 127.0.0.1:9910')
+@click.option('-a', '--address', default='admin.sock',
+              help='burst admin address. admin.sock or tcp://127.0.0.1:9910')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
@@ -317,8 +301,8 @@ def stat(address, timeout, username, password, loop, diff):
 
 
 @cli.command()
-@click.option('-a', '--address', default='file://admin.sock',
-              help='burst admin address. file://admin.sock or 127.0.0.1:9910')
+@click.option('-a', '--address', default='admin.sock',
+              help='burst admin address. admin.sock or tcp://127.0.0.1:9910')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
@@ -334,38 +318,23 @@ def change_group(address, timeout, username, password, group, count):
 
 
 @cli.command()
-@click.option('-a', '--address', default='file://admin.sock',
-              help='burst admin address. file://admin.sock or 127.0.0.1:9910')
+@click.option('-a', '--address', default='admin.sock',
+              help='burst admin address. admin.sock or tcp://127.0.0.1:9910')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
-def reload_workers(address, timeout, username, password):
+def reload(address, timeout, username, password):
     """
     更新workers
     """
     ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
-    ctl.handle_reload_workers()
+    ctl.handle_reload()
 
 
 @cli.command()
-@click.option('-a', '--address', default='file://admin.sock',
-              help='burst admin address. file://admin.sock or 127.0.0.1:9910')
-@click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
-@click.option('-u', '--username', help='username', default=None)
-@click.option('-p', '--password', help='password', default=None)
-def restart_workers(address, timeout, username, password):
-    """
-    重启workers. 与reload不同，会等待所有workers退出之后，再开始启动新workers
-    """
-    ctl = BurstCtl(address, timeout, username, password)
-    ctl.start()
-    ctl.handle_restart_workers()
-
-
-@cli.command()
-@click.option('-a', '--address', default='file://admin.sock',
-              help='burst admin address. file://admin.sock or 127.0.0.1:9910')
+@click.option('-a', '--address', default='admin.sock',
+              help='burst admin address. admin.sock or tcp://127.0.0.1:9910')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)

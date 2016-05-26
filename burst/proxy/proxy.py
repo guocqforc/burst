@@ -7,6 +7,7 @@ import os
 from twisted.internet import reactor
 import setproctitle
 
+from netkit.box import Box
 from connection.client_connection import ClientConnectionFactory
 from connection.worker_connection import WorkerConnectionFactory
 from connection.admin_connection import AdminConnectionFactory
@@ -51,7 +52,7 @@ class Proxy(object):
         self.host = host
         self.port = port
 
-        self.task_dispatcher = TaskDispatcher()
+        self.task_dispatcher = TaskDispatcher(self, self._on_workers_reload_over)
         self.stat_counter = StatCounter(self.app.config['TASKS_TIME_BENCHMARK'])
 
     def run(self):
@@ -111,7 +112,7 @@ class Proxy(object):
             logger.error('exc occur.', exc_info=True)
 
     def _handle_proc_signals(self):
-        def exit_handler(signum, frame):
+        def stop_handler(signum, frame):
             """
             在centos6下，callFromThread(stop)无效，因为处理不够及时
             """
@@ -120,10 +121,28 @@ class Proxy(object):
             except:
                 pass
 
+        def safe_reload_handler(signum, frame):
+            """
+            让所有子进程重新加载
+            """
+            self.task_dispatcher.start_reload()
+
         # 强制结束，抛出异常终止程序进行
-        signal.signal(signal.SIGINT, exit_handler)
-        signal.signal(signal.SIGQUIT, exit_handler)
+        signal.signal(signal.SIGINT, stop_handler)
+        signal.signal(signal.SIGQUIT, stop_handler)
         # 直接停止
-        signal.signal(signal.SIGTERM, exit_handler)
+        signal.signal(signal.SIGTERM, stop_handler)
         # 忽略，因为这个时候是在重启worker
-        signal.signal(signal.SIGHUP, signal.SIG_IGN)
+        signal.signal(signal.SIGHUP, safe_reload_handler)
+
+    def _on_workers_reload_over(self):
+        """
+        当workers reload之后的操作
+        需要给master通知，让master替换掉workers
+        :return:
+        """
+        if self.master_conn and self.master_conn.transport:
+            box = Box(dict(
+                cmd=constants.CMD_MASTER_REPLACE_WORKERS
+            ))
+            self.master_conn.transport.write(box.pack())

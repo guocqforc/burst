@@ -45,12 +45,20 @@ class WorkerConnection(Protocol):
         self._read_buffer = ''
 
     def connectionMade(self):
-        # 建立连接就直接去申请task
-        self._try_alloc_task()
+        if self.factory.proxy.task_dispatcher.reloading:
+            # 如果当前正处于运行状态，那么就应该放到ready_workers列表里去
+            self.factory.proxy.task_dispatcher.add_ready_worker(self)
+        else:
+            # 建立连接就直接去申请task
+            self.alloc_task()
 
     def connectionLost(self, reason=connectionDone):
         # 要删除掉对应的worker
         self.factory.proxy.task_dispatcher.remove_worker(self)
+
+        if self.factory.proxy.task_dispatcher.reloading:
+            # 如果当前正处于运行状态，那么还应该去尝试一下删除
+            self.factory.proxy.task_dispatcher.remove_ready_worker(self)
 
     def dataReceived(self, data):
         """
@@ -78,6 +86,19 @@ class WorkerConnection(Protocol):
                 self._read_buffer = ''
                 return
 
+    def alloc_task(self):
+        """
+        申请任务，如果申请到的话，就直接开始执行
+        :return:
+        """
+        # 无论有没有任务，都会标记自己空闲
+        task_container = self.factory.proxy.task_dispatcher.alloc_task(self)
+        if task_container:
+            # 如果能申请成功，就继续执行
+            self._assign_task(task_container)
+
+        return task_container
+
     def _on_read_complete(self, task):
         """
         完整数据接收完成
@@ -97,16 +118,9 @@ class WorkerConnection(Protocol):
 
                     self.factory.proxy.stat_counter.client_rsp += 1
 
-            self._try_alloc_task()
+            self.alloc_task()
 
-    def _try_alloc_task(self):
-        # 无论有没有任务，都会标记自己空闲
-        task_container = self.factory.proxy.task_dispatcher.alloc_task(self)
-        if task_container:
-            # 如果能申请成功，就继续执行
-            self.assign_task(task_container)
-
-    def assign_task(self, task_container):
+    def _assign_task(self, task_container):
         """
         分配任务
         :param task_container:

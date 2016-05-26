@@ -57,7 +57,7 @@ class Worker(object):
             bp.events.create_app_worker(self)
 
     def _handle_proc_signals(self):
-        def exit_handler(signum, frame):
+        def stop_handler(signum, frame):
             # 防止重复处理KeyboardInterrupt，导致抛出异常
             if self.enable:
                 self.enable = False
@@ -67,8 +67,8 @@ class Worker(object):
             self.enable = False
 
         # 强制结束，抛出异常终止程序进行
-        signal.signal(signal.SIGINT, exit_handler)
-        signal.signal(signal.SIGQUIT, exit_handler)
+        signal.signal(signal.SIGINT, stop_handler)
+        signal.signal(signal.SIGQUIT, stop_handler)
         # 安全停止
         signal.signal(signal.SIGTERM, safe_stop_handler)
         signal.signal(signal.SIGHUP, safe_stop_handler)

@@ -36,12 +36,16 @@ GROUP_CONFIG = {
 }
 GROUP_ROUTER = lambda box: 1 if box.cmd == 1 else 10
 
+STOP_TIMEOUT = 10
+
 app = Burst()
 app.config.from_object(__name__)
 
 
 @app.create_worker
 def create_worker(worker):
+    import time
+    time.sleep(5)
     logger.error('create_worker: %r', worker)
 
 
