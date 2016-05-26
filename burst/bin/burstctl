@@ -163,17 +163,20 @@ class BurstCtl(object):
     def _parse_address_uri(self, uri):
         """
         解析uri为可用的address
-        :param uri: 127.0.0.1:5555, file:///data/release/ipc.sock
+        :param uri: tcp://127.0.0.1:5555, /data/release/ipc.sock
         :return: address
         """
 
-        if uri.startswith('file://'):
+        if uri.startswith('tcp://'):
             # 文件
-            return uri.replace('file://', '')
-        else:
+            uri = uri.replace('tcp://', '')
+
             host, port = uri.split(':')
             port = int(port)
+
             return (host, port)
+        else:
+            return uri
 
     def _sort_stat_dict(self, body_dict):
         """
@@ -281,8 +284,8 @@ def version():
 
 
 @cli.command()
-@click.option('-a', '--address', default='file://admin.sock',
-              help='burst admin address. file://admin.sock or 127.0.0.1:9910')
+@click.option('-a', '--address', default='admin.sock',
+              help='burst admin address. admin.sock or tcp://127.0.0.1:9910')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
@@ -298,8 +301,8 @@ def stat(address, timeout, username, password, loop, diff):
 
 
 @cli.command()
-@click.option('-a', '--address', default='file://admin.sock',
-              help='burst admin address. file://admin.sock or 127.0.0.1:9910')
+@click.option('-a', '--address', default='admin.sock',
+              help='burst admin address. admin.sock or tcp://127.0.0.1:9910')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
@@ -315,8 +318,8 @@ def change_group(address, timeout, username, password, group, count):
 
 
 @cli.command()
-@click.option('-a', '--address', default='file://admin.sock',
-              help='burst admin address. file://admin.sock or 127.0.0.1:9910')
+@click.option('-a', '--address', default='admin.sock',
+              help='burst admin address. admin.sock or tcp://127.0.0.1:9910')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
@@ -330,8 +333,8 @@ def reload(address, timeout, username, password):
 
 
 @cli.command()
-@click.option('-a', '--address', default='file://admin.sock',
-              help='burst admin address. file://admin.sock or 127.0.0.1:9910')
+@click.option('-a', '--address', default='admin.sock',
+              help='burst admin address. admin.sock or tcp://127.0.0.1:9910')
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
