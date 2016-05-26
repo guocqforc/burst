@@ -198,6 +198,12 @@ class Master(object):
                     self.proxy_process = self._start_child_process(proc_env)
 
             for idx, p in enumerate(self.worker_processes):
+
+                if self.reload_status != constants.RELOAD_STATUS_STOPPED:
+                    # 如果是处于reload中，那么就不要检测worker状态
+                    # 否则会导致worker重连，而proxy那边重新分配任务
+                    continue
+
                 if p and p.poll() is not None:
                     # 说明退出了
                     proc_env = p.proc_env
