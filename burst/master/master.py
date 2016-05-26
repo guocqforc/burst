@@ -231,6 +231,24 @@ class Master(object):
             # 时间短点，退出的快一些
             time.sleep(0.1)
 
+    def _kill_processes_later(self, processes, timeout):
+        """
+        等待一段时间后杀死所有进程
+        :param processes:
+        :param timeout:
+        :return:
+        """
+        def _kill_processes():
+            # 等待一段时间
+            time.sleep(timeout)
+
+            for p in processes:
+                if p and p.poll() is None:
+                    # 说明进程还活着
+                    p.send_signal(signal.SIGKILL)
+
+        thread.start_new_thread(_kill_processes, ())
+
     def _reload_workers(self):
         """
         reload是热更新，全部都准备好了之后，再将worker挨个换掉
@@ -256,9 +274,14 @@ class Master(object):
         :return:
         """
 
-        for p in self.worker_processes:
+        processes = self.worker_processes[:]
+
+        for p in processes:
             if p:
                 p.send_signal(signal.SIGTERM)
+
+        if self.app.config['STOP_TIMEOUT'] is not None:
+            self._kill_processes_later(processes, self.app.config['STOP_TIMEOUT'])
 
     def _safe_stop(self):
         """
@@ -268,12 +291,14 @@ class Master(object):
         """
         self.enable = False
 
-        for p in self.worker_processes + [self.proxy_process]:
+        processes = self.worker_processes + [self.proxy_process]
+
+        for p in processes:
             if p:
                 p.send_signal(signal.SIGTERM)
 
         if self.app.config['STOP_TIMEOUT'] is not None:
-            signal.alarm(self.app.config['STOP_TIMEOUT'])
+            self._kill_processes_later(processes, self.app.config['STOP_TIMEOUT'])
 
     def _handle_proc_signals(self):
         def exit_handler(signum, frame):
@@ -282,20 +307,14 @@ class Master(object):
             # 如果是终端直接CTRL-C，子进程自然会在父进程之后收到INT信号，不需要再写代码发送
             # 如果直接kill -INT $parent_pid，子进程不会自动收到INT
             # 所以这里可能会导致重复发送的问题，重复发送会导致一些子进程异常，所以在子进程内部有做重复处理判断。
-            for p in self.worker_processes + [self.proxy_process]:
+            processes = self.worker_processes + [self.proxy_process]
+
+            for p in processes:
                 if p:
                     p.send_signal(signum)
 
-            # https://docs.python.org/2/library/signal.html#signal.alarm
             if self.app.config['STOP_TIMEOUT'] is not None:
-                signal.alarm(self.app.config['STOP_TIMEOUT'])
-
-        def final_kill_handler(signum, frame):
-            if not self.enable:
-                # 只有满足了not enable，才发送term命令
-                for p in self.worker_processes + [self.proxy_process]:
-                    if p:
-                        p.send_signal(signal.SIGKILL)
+                self._kill_processes_later(processes, self.app.config['STOP_TIMEOUT'])
 
         def safe_stop_handler(signum, frame):
             """
@@ -316,5 +335,3 @@ class Master(object):
         signal.signal(signal.SIGTERM, safe_stop_handler)
         # HUP为热更新
         signal.signal(signal.SIGHUP, safe_reload_handler)
-        # 最终判决，KILL掉子进程
-        signal.signal(signal.SIGALRM, final_kill_handler)

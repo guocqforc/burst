@@ -26,15 +26,15 @@ logger.setLevel(logging.DEBUG)
 # 配置得放到config.from_object前面
 NAME = 'normal_demo'
 # ADMIN_ADDRESS = ('127.0.0.1', 7778)
-# GROUP_CONFIG = {
-#     1: {
-#         'count': 2,
-#     },
-#     10: {
-#         'count': 2,
-#     },
-# }
-# GROUP_ROUTER = lambda box: 1 if box.cmd == 1 else 10
+GROUP_CONFIG = {
+    1: {
+        'count': 2,
+    },
+    10: {
+        'count': 2,
+    },
+}
+GROUP_ROUTER = lambda box: 1 if box.cmd == 1 else 10
 
 app = Burst()
 app.config.from_object(__name__)
