@@ -117,8 +117,8 @@ class AdminConnection(Protocol):
                 ))
 
             elif box.cmd in (
-                    constants.CMD_ADMIN_CHANGE_GROUP,
-                    constants.CMD_ADMIN_RELOAD_WORKERS,
+                    constants.CMD_ADMIN_CHANGE,
+                    constants.CMD_ADMIN_RELOAD,
                     constants.CMD_ADMIN_STOP,
             ):
                 if self.factory.proxy.master_conn and self.factory.proxy.master_conn.transport:

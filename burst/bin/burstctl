@@ -99,9 +99,9 @@ class BurstCtl(object):
             except KeyboardInterrupt:
                 break
 
-    def handle_change_group(self, group_id, count):
+    def handle_change(self, group_id, count):
         send_box = self.make_send_box(
-            constants.CMD_ADMIN_CHANGE_GROUP,
+            constants.CMD_ADMIN_CHANGE,
             self.username, self.password,
             payload=dict(
                 group_id=group_id,
@@ -124,7 +124,7 @@ class BurstCtl(object):
 
     def handle_reload(self):
         send_box = self.make_send_box(
-            constants.CMD_ADMIN_RELOAD_WORKERS,
+            constants.CMD_ADMIN_RELOAD,
             self.username, self.password,
         )
         self.tcp_client.write(send_box)
@@ -308,13 +308,13 @@ def stat(address, timeout, username, password, loop, diff):
 @click.option('-p', '--password', help='password', default=None)
 @click.option('--group', help='group id', required=True, type=int)
 @click.option('--count', help='workers count ', required=True, type=int)
-def change_group(address, timeout, username, password, group, count):
+def change(address, timeout, username, password, group, count):
     """
     修改group配置，比如workers数量
     """
     ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
-    ctl.handle_change_group(group, count)
+    ctl.handle_change(group, count)
 
 
 @cli.command()

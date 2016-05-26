@@ -131,7 +131,7 @@ class Master(object):
         :return:
         """
 
-        if box.cmd == constants.CMD_ADMIN_CHANGE_GROUP:
+        if box.cmd == constants.CMD_ADMIN_CHANGE:
             jdata = json.loads(box.body)
             group_id = jdata['payload']['group_id']
             count = jdata['payload']['count']
@@ -149,7 +149,7 @@ class Master(object):
 
             self._reload_workers()
 
-        elif box.cmd == constants.CMD_ADMIN_RELOAD_WORKERS:
+        elif box.cmd == constants.CMD_ADMIN_RELOAD:
             self._reload_workers()
         elif box.cmd == constants.CMD_ADMIN_STOP:
             self._stop_by_signal(signal.SIGTERM)
