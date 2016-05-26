@@ -157,6 +157,8 @@ class TaskDispatcher(object):
                     # 一个group内的第一个分配不到task的worker，那么之后的也肯定分配不到了
                     break
 
+        # 调用通知，workers已经替换完成
+        self._on_workers_reload_over()
         return True
 
     def _sync_worker_status(self, worker):
