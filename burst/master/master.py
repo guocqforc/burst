@@ -152,7 +152,7 @@ class Master(object):
         elif box.cmd == constants.CMD_ADMIN_RELOAD_WORKERS:
             self._reload_workers()
         elif box.cmd == constants.CMD_ADMIN_STOP:
-            self._safe_stop()
+            self._stop_by_signal(signal.SIGTERM)
         elif box.cmd == constants.CMD_MASTER_REPLACE_WORKERS:
             # 要替换workers
             self.reload_status = constants.RELOAD_STATUS_WORKERS_DONE
@@ -220,7 +220,7 @@ class Master(object):
 
             if self.reload_status == constants.RELOAD_STATUS_WORKERS_DONE:
                 # 先停掉所有的worker
-                self._stop_workers()
+                self._safe_stop_workers()
                 # 替换workers
                 self.worker_processes = self.ready_worker_processes
                 self.ready_worker_processes = list()
@@ -268,7 +268,7 @@ class Master(object):
 
         return True
 
-    def _stop_workers(self):
+    def _safe_stop_workers(self):
         """
         停止所有的workers
         :return:
@@ -283,44 +283,32 @@ class Master(object):
         if self.app.config['STOP_TIMEOUT'] is not None:
             self._kill_processes_later(processes, self.app.config['STOP_TIMEOUT'])
 
-    def _safe_stop(self):
+    def _stop_by_signal(self, signum):
         """
-        安全停止所有子进程，并最终退出
-        如果退出失败，要最终kill -9
+        通过信号停止
+        :param signum:
         :return:
         """
         self.enable = False
 
+        # 如果是终端直接CTRL-C，子进程自然会在父进程之后收到INT信号，不需要再写代码发送
+        # 如果直接kill -INT $parent_pid，子进程不会自动收到INT
+        # 所以这里可能会导致重复发送的问题，重复发送会导致一些子进程异常，所以在子进程内部有做重复处理判断。
         processes = self.worker_processes + [self.proxy_process]
 
         for p in processes:
             if p:
-                p.send_signal(signal.SIGTERM)
+                p.send_signal(signum)
 
         if self.app.config['STOP_TIMEOUT'] is not None:
             self._kill_processes_later(processes, self.app.config['STOP_TIMEOUT'])
 
     def _handle_proc_signals(self):
-        def exit_handler(signum, frame):
-            self.enable = False
-
-            # 如果是终端直接CTRL-C，子进程自然会在父进程之后收到INT信号，不需要再写代码发送
-            # 如果直接kill -INT $parent_pid，子进程不会自动收到INT
-            # 所以这里可能会导致重复发送的问题，重复发送会导致一些子进程异常，所以在子进程内部有做重复处理判断。
-            processes = self.worker_processes + [self.proxy_process]
-
-            for p in processes:
-                if p:
-                    p.send_signal(signum)
-
-            if self.app.config['STOP_TIMEOUT'] is not None:
-                self._kill_processes_later(processes, self.app.config['STOP_TIMEOUT'])
-
-        def safe_stop_handler(signum, frame):
+        def stop_handler(signum, frame):
             """
             等所有子进程结束，父进程也退出
             """
-            self._safe_stop()
+            self._stop_by_signal(signum)
 
         def safe_reload_handler(signum, frame):
             """
@@ -329,9 +317,9 @@ class Master(object):
             self._reload_workers()
 
         # INT, QUIT为强制结束
-        signal.signal(signal.SIGINT, exit_handler)
-        signal.signal(signal.SIGQUIT, exit_handler)
+        signal.signal(signal.SIGINT, stop_handler)
+        signal.signal(signal.SIGQUIT, stop_handler)
         # TERM为安全结束
-        signal.signal(signal.SIGTERM, safe_stop_handler)
+        signal.signal(signal.SIGTERM, stop_handler)
         # HUP为热更新
         signal.signal(signal.SIGHUP, safe_reload_handler)

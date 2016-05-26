@@ -112,7 +112,7 @@ class Proxy(object):
             logger.error('exc occur.', exc_info=True)
 
     def _handle_proc_signals(self):
-        def exit_handler(signum, frame):
+        def stop_handler(signum, frame):
             """
             在centos6下，callFromThread(stop)无效，因为处理不够及时
             """
@@ -128,10 +128,10 @@ class Proxy(object):
             self.task_dispatcher.start_reload()
 
         # 强制结束，抛出异常终止程序进行
-        signal.signal(signal.SIGINT, exit_handler)
-        signal.signal(signal.SIGQUIT, exit_handler)
+        signal.signal(signal.SIGINT, stop_handler)
+        signal.signal(signal.SIGQUIT, stop_handler)
         # 直接停止
-        signal.signal(signal.SIGTERM, exit_handler)
+        signal.signal(signal.SIGTERM, stop_handler)
         # 忽略，因为这个时候是在重启worker
         signal.signal(signal.SIGHUP, safe_reload_handler)
 
