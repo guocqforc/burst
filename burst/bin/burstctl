@@ -122,7 +122,7 @@ class BurstCtl(object):
 
         self.output('succ.')
 
-    def handle_reload_workers(self):
+    def handle_reload(self):
         send_box = self.make_send_box(
             constants.CMD_ADMIN_RELOAD_WORKERS,
             self.username, self.password,
@@ -320,13 +320,13 @@ def change_group(address, timeout, username, password, group, count):
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
-def reload_workers(address, timeout, username, password):
+def reload(address, timeout, username, password):
     """
     更新workers
     """
     ctl = BurstCtl(address, timeout, username, password)
     ctl.start()
-    ctl.handle_reload_workers()
+    ctl.handle_reload()
 
 
 @cli.command()
