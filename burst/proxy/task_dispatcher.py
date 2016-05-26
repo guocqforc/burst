@@ -101,7 +101,12 @@ class TaskDispatcher(object):
         return task
 
     def add_ready_worker(self, worker):
-        return self.reload_helper.add_worker(worker)
+        # 设置为空闲状态
+        worker.status = constants.WORKER_STATUS_IDLE
+        self.reload_helper.add_worker(worker)
+
+        if self.reload_helper.workers_done:
+            self._try_replace_workers()
 
     def start_reload(self):
         """
