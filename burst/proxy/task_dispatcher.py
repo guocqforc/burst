@@ -23,7 +23,9 @@ class TaskDispatcher(object):
     # 消息队列
     group_queue = None
 
+    # worker reload的帮助类
     reload_helper = None
+    # reload结束后的回调
     reload_over_callback = None
 
     def __init__(self, proxy, reload_over_callback=None):
