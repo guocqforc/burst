@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from twisted.internet.protocol import Protocol, Factory, connectionDone
+from twisted.internet import reactor
 
 from ...share.utils import safe_call, ip_str_to_int
 from ...share.log import logger
@@ -24,6 +25,9 @@ class ClientConnection(Protocol):
     # 客户端IP的数字
     _client_ip_num = None
 
+    # 过期timer
+    _expire_timer = None
+
     def __init__(self, factory, address):
         self.factory = factory
         self.address = address
@@ -36,7 +40,10 @@ class ClientConnection(Protocol):
         # 转换string为int
         self._client_ip_num = ip_str_to_int(self.transport.client[0])
 
+        self._set_expire_callback()
+
     def connectionLost(self, reason=connectionDone):
+        self._clear_expire_callback()
 
         self.factory.proxy.stat_counter.clients -= 1
 
@@ -88,3 +95,34 @@ class ClientConnection(Protocol):
 
         task_container = TaskContainer(task, self)
         self.factory.proxy.task_dispatcher.add_task(group_id, task_container)
+
+    def _set_expire_callback(self):
+        """
+        注册超时之后的回调
+        :return:
+        """
+
+        self._clear_expire_callback()
+
+        self._expire_timer = reactor.callLater(
+            self.factory.proxy.app.config['PROXY_CLIENT_TIMEOUT'], self._expire_callback
+        )
+
+    def _clear_expire_callback(self):
+        """
+        清空超时之后的回调
+        :return:
+        """
+        if self._expire_timer:
+            self._expire_timer.cancel()
+            self._expire_timer = None
+
+    def _expire_callback(self):
+        """
+        能关闭的话，就关闭掉
+        :return:
+        """
+        self._expire_timer = None
+
+        if self.transport and self.transport.connected:
+            self.transport.loseConnection()

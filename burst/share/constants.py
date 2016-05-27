@@ -104,6 +104,9 @@ DEFAULT_CONFIG = {
     # proxy的backlog
     'PROXY_BACKLOG': 256,
 
+    # proxy的客户端连接超时
+    'PROXY_CLIENT_TIMEOUT': None,
+
     # worker<->proxy网络连接超时(秒), 包括 connect once，read once，write once
     'WORKER_CONN_TIMEOUT': 3,
     # 处理task超时(秒). 超过后worker会自杀. None 代表永不超时

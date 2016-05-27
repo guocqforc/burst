@@ -35,6 +35,7 @@ GROUP_CONFIG = {
     },
 }
 GROUP_ROUTER = lambda box: 1 if box.cmd == 1 else 10
+PROXY_CLIENT_TIMEOUT = 10
 
 STOP_TIMEOUT = 10
 
