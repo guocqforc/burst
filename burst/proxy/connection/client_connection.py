@@ -102,6 +102,9 @@ class ClientConnection(Protocol):
         :return:
         """
 
+        if self.factory.proxy.app.config['PROXY_CLIENT_TIMEOUT'] is None:
+            return
+
         self._clear_expire_callback()
 
         self._expire_timer = reactor.callLater(
