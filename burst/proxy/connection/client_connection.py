@@ -82,6 +82,7 @@ class ClientConnection(Protocol):
         :return:
         """
         self.factory.proxy.stat_counter.client_req += 1
+        self._set_expire_callback()
 
         # 获取映射的group_id
         group_id = self.factory.proxy.app.config['GROUP_ROUTER'](box)
