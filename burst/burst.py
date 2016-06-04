@@ -110,7 +110,7 @@ class Burst(RoutesMixin, AppEventsMixin):
         if not isinstance(group_id, int) or not isinstance(count, int):
             return False
 
-        if group_id not in self.app.config['GROUP_CONFIG']:
+        if group_id not in self.config['GROUP_CONFIG']:
             self.config['GROUP_CONFIG'][group_id] = dict(
                 count=count
             )
