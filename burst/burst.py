@@ -98,6 +98,28 @@ class Burst(RoutesMixin, AppEventsMixin):
 
         return proc_name
 
+    def change_group_config(self, group_id, count):
+        """
+        修改组配置，master和proxy都会用到
+        :param group_id:
+        :param count:
+        :return:
+        """
+
+        # 不能设置成个奇怪的值就麻烦了
+        if not isinstance(group_id, int) or not isinstance(count, int):
+            return False
+
+        if group_id not in self.app.config['GROUP_CONFIG']:
+            self.config['GROUP_CONFIG'][group_id] = dict(
+                count=count
+            )
+
+        else:
+            self.config['GROUP_CONFIG'][group_id]['count'] = count
+
+        return True
+
     def _validate_cmds(self):
         """
         确保 cmd 没有重复

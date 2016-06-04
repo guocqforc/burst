@@ -133,19 +133,9 @@ class Master(object):
 
         if box.cmd == constants.CMD_ADMIN_CHANGE:
             jdata = json.loads(box.body)
-            group_id = jdata['payload']['group_id']
-            count = jdata['payload']['count']
-
-            # 不能设置成个奇怪的值就麻烦了
-            assert isinstance(count, int), 'data: %s' % box.body
-
-            if group_id not in self.app.config['GROUP_CONFIG']:
-                self.app.config['GROUP_CONFIG'][group_id] = dict(
-                    count=count
-                )
-
-            else:
-                self.app.config['GROUP_CONFIG'][group_id]['count'] = count
+            if not self.app.change_group_config(jdata['payload']['group_id'], jdata['payload']['count']):
+                logger.error('change group config fail. data: %s', box.body)
+                return
 
             self._reload_workers()
 

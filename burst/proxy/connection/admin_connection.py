@@ -121,6 +121,14 @@ class AdminConnection(Protocol):
                     constants.CMD_ADMIN_RELOAD,
                     constants.CMD_ADMIN_STOP,
             ):
+
+                if box.cmd == constants.CMD_ADMIN_CHANGE:
+                    # 修改配置，要把proxy里面的也修改了，否则reload workers会永远结束不了
+                    jdata = json.loads(box.body)
+                    if not self.app.change_group_config(jdata['payload']['group_id'], jdata['payload']['count']):
+                        logger.error('change group config fail. data: %s', box.body)
+                        return
+
                 if self.factory.proxy.master_conn and self.factory.proxy.master_conn.transport:
                     self.factory.proxy.master_conn.transport.write(box.pack())
 
