@@ -16,6 +16,8 @@ class Burst(RoutesMixin, AppEventsMixin):
 
     # 配置都放到 burst 里，而和proxy或者worker直接相关的类，则放到自己的部分
     ############################## configurable begin ##############################
+    
+    name = ConfigAttribute('NAME')
 
     box_class = ConfigAttribute('BOX_CLASS',
                                 get_converter=import_module_or_string)
