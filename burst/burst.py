@@ -94,7 +94,7 @@ class Burst(RoutesMixin, AppEventsMixin):
         proc_name = '[%s:%s %s] %s' % (
             constants.NAME,
             subtitle,
-            self.config['NAME'],
+            self.name,
             ' '.join([sys.executable] + sys.argv)
         )
 
