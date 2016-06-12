@@ -171,8 +171,8 @@ class Connection(object):
 
         if request.interrupted:
             # 业务要求中断
-            if request.interrupt_data is not None:
-                request.write(request.interrupt_data)
+            # 无论interrupt_data是否为None都返回
+            request.write(request.interrupt_data)
             return True
 
         view_func_exc = None
