@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from collections import Counter
+from collections import defaultdict
 
 
 class StatCounter(object):
@@ -15,16 +15,25 @@ class StatCounter(object):
     # 客户端回应数
     client_rsp = 0
     # worker请求数
-    worker_req = 0
+    worker_req_counter = None
     # worker回应数
-    worker_rsp = 0
+    worker_rsp_counter = None
     # 作业完成时间统计
-    tasks_time_counter = Counter()
+    tasks_time_counter = None
     # 作业时间统计标准
     tasks_time_benchmark = None
 
     def __init__(self, tasks_time_benchmark):
+        self.worker_req_counter = defaultdict(int)
+        self.worker_rsp_counter = defaultdict(int)
+        self.tasks_time_counter = defaultdict(int)
         self.tasks_time_benchmark = tasks_time_benchmark
+
+    def add_worker_req(self, group_id):
+        self.worker_req_counter[group_id] += 1
+
+    def add_worker_rsp(self, group_id):
+        self.worker_rsp_counter[group_id] += 1
 
     def add_task_time(self, task_time):
         """

@@ -103,13 +103,13 @@ class AdminConnection(Protocol):
                     clients=self.factory.proxy.stat_counter.clients,
                     client_req=self.factory.proxy.stat_counter.client_req,
                     client_rsp=self.factory.proxy.stat_counter.client_rsp,
-                    worker_req=self.factory.proxy.stat_counter.worker_req,
-                    worker_rsp=self.factory.proxy.stat_counter.worker_rsp,
+                    worker_req=self.factory.proxy.stat_counter.worker_req_counter,
+                    worker_rsp=self.factory.proxy.stat_counter.worker_rsp_counter,
                     workers=workers,
                     idle_workers=idle_workers,
                     busy_workers=busy_workers,
                     pending_tasks=pending_tasks,
-                    tasks_time=dict(self.factory.proxy.stat_counter.tasks_time_counter),
+                    tasks_time=self.factory.proxy.stat_counter.tasks_time_counter,
                 )
 
                 rsp = box.map(dict(
