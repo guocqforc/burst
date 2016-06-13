@@ -149,7 +149,7 @@ class WorkerConnection(Protocol):
         当作业开始
         :return:
         """
-        self.factory.proxy.stat_counter.worker_req += 1
+        self.factory.proxy.stat_counter.add_worker_req(self.group_id)
         self._task_begin_time = time.time()
 
     def _on_task_end(self):
@@ -161,4 +161,4 @@ class WorkerConnection(Protocol):
         past_time_ms = int((now - self._task_begin_time) * 1000)
 
         self.factory.proxy.stat_counter.add_task_time(past_time_ms)
-        self.factory.proxy.stat_counter.worker_rsp += 1
+        self.factory.proxy.stat_counter.add_worker_rsp(self.group_id)
