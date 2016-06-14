@@ -6,8 +6,6 @@
 
 import weakref
 
-from ..share.log import logger
-
 
 class TaskContainer(object):
 
