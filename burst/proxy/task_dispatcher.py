@@ -3,6 +3,7 @@
 from collections import defaultdict
 
 from ..share import constants
+from ..share.log import logger
 from group_queue import GroupQueue
 from reload_helper import ReloadHelper
 
@@ -31,9 +32,9 @@ class TaskDispatcher(object):
     def __init__(self, proxy, reload_over_callback=None):
         self.busy_workers_dict = defaultdict(set)
         self.idle_workers_dict = defaultdict(set)
-        self.group_queue = GroupQueue()
 
         self.proxy = proxy
+        self.group_queue = GroupQueue(self.proxy.app.config['PROXY_MSG_QUEUE_MAX_SIZE'])
         self.reload_helper = ReloadHelper(self.proxy)
         self.reload_over_callback = reload_over_callback
 
@@ -59,7 +60,9 @@ class TaskDispatcher(object):
         """
         if self.reload_helper.workers_done:
             # 不能丢消息
-            self.group_queue.put(group_id, item)
+            if not self.group_queue.put(group_id, item):
+                logger.error('put item fail. group_id: %s, item: %s, queue_size: %s / %s',
+                             group_id, item, self.group_queue.qsize(group_id), self.group_queue.max_size)
 
             # 说明在reload，并且worker已经都ok了
             self._try_replace_workers()
@@ -67,7 +70,9 @@ class TaskDispatcher(object):
 
         idle_workers = self.idle_workers_dict[group_id]
         if not idle_workers:
-            self.group_queue.put(group_id, item)
+            if not self.group_queue.put(group_id, item):
+                logger.error('put item fail. group_id: %s, item: %s, queue_size: %s / %s',
+                             group_id, item, self.group_queue.qsize(group_id), self.group_queue.max_size)
             return
 
         # 弹出一个可用的worker

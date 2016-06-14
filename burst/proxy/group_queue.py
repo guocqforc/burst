@@ -13,13 +13,35 @@ class GroupQueue(object):
     通过group来区分的queue
     """
 
+    max_size = None
     queue_dict = None
 
-    def __init__(self):
-        self.queue_dict = defaultdict(Queue.Queue)
+    def __init__(self, max_size=-1):
+        self.max_size = max_size
+        self.queue_dict = defaultdict(self._queue_factory)
+
+    def _queue_factory(self):
+        """
+        生成queue的工厂
+        :return:
+        """
+        return Queue.Queue(self.max_size)
 
     def put(self, group_id, item):
-        return self.queue_dict[group_id].put_nowait(item)
+        """
+        加入item
+        如果成功返回True，如果失败返回False
+        :param group_id:
+        :param item:
+        :return:
+        """
+        try:
+            self.queue_dict[group_id].put_nowait(item)
+            return True
+        except Queue.Full:
+            return False
+        except:
+            return False
 
     def get(self, group_id):
         if self.empty(group_id):
@@ -34,3 +56,11 @@ class GroupQueue(object):
         :return:
         """
         return self.queue_dict[group_id].empty()
+
+    def qsize(self, group_id):
+        """
+        某个队列的size
+        :param group_id:
+        :return:
+        """
+        return self.queue_dict[group_id].qsize()

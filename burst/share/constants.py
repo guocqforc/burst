@@ -103,9 +103,10 @@ DEFAULT_CONFIG = {
 
     # proxy的backlog
     'PROXY_BACKLOG': 256,
-
     # proxy的客户端连接超时
     'PROXY_CLIENT_TIMEOUT': None,
+    # proxy的每个分组的消息队列的最大长度, <=0 代表无限
+    'PROXY_MSG_QUEUE_MAX_SIZE': -1,
 
     # worker<->proxy网络连接超时(秒), 包括 connect once，read once，write once
     'WORKER_CONN_TIMEOUT': 3,
