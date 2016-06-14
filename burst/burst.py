@@ -70,11 +70,9 @@ class Burst(RoutesMixin, AppEventsMixin):
 
         if not str_burst_env:
             # 主进程
-            logger.info('Running server on %s:%s, debug: %s',
-                        self.config['HOST'], self.config['PORT'], self.debug
-                        )
-            if self.config['ADMIN_ADDRESS']:
-                logger.info('Running admin server on %s', self.config['ADMIN_ADDRESS'])
+            logger.info('Running server. name: %s, address: %s:%s, admin_address: %s, debug: %s',
+                        self.name, self.config['HOST'], self.config['PORT'], self.config['ADMIN_ADDRESS'],
+                        self.debug)
             self.master_class(self).run()
         else:
             burst_env = json.loads(str_burst_env)
