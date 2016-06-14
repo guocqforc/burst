@@ -8,7 +8,7 @@ from netkit.box import Box
 
 import time
 
-client = TcpClient(Box, '127.0.0.1', 9900, timeout=20)
+client = TcpClient(Box, '127.0.0.1', 9900, timeout=300)
 client.connect()
 
 box = Box()
