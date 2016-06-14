@@ -53,7 +53,8 @@ class AdminConnection(Protocol):
                 continue
             else:
                 # 数据已经混乱了，全部丢弃
-                logger.error('buffer invalid. ret: %d, read_buffer: %r', ret, self._read_buffer)
+                logger.error('buffer invalid. proxy: %s, ret: %d, read_buffer: %r',
+                             self.factory.proxy, ret, self._read_buffer)
                 self._read_buffer = ''
                 return
 
@@ -126,7 +127,8 @@ class AdminConnection(Protocol):
                     # 修改配置，要把proxy里面的也修改了，否则reload workers会永远结束不了
                     jdata = json.loads(box.body)
                     if not self.factory.proxy.app.change_group_config(jdata['payload']['group_id'], jdata['payload']['count']):
-                        logger.error('change group config fail. data: %s', box.body)
+                        logger.error('change group config fail. proxy: %s, data: %s',
+                                     self.factory.proxy, box.body)
                         return
 
                 if self.factory.proxy.master_conn and self.factory.proxy.master_conn.transport:

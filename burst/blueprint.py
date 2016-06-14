@@ -20,3 +20,8 @@ class Blueprint(RoutesMixin, BlueprintEventsMixin):
         self.app = app
         # 注册上
         self.app.blueprints.append(self)
+
+    def __repr__(self):
+        return '<%s name: %s>' % (
+            type(self).__name__, self.name
+        )

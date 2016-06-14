@@ -110,17 +110,17 @@ class Master(object):
                 break
             except:
                 # 只要连接失败
-                logger.error('connect fail. address: %s', address)
+                logger.error('connect fail. master: %s, address: %s', self, address)
                 time.sleep(1)
                 continue
 
             # 读取的数据
             box = client.read()
             if not box:
-                logger.info('connection closed.')
+                logger.info('connection closed. master: %s', self)
                 continue
 
-            logger.info('box: %s', box)
+            logger.info('box received. master: %s, box: %s', self, box)
 
             safe_call(self._handle_proxy_data, box)
 
@@ -134,7 +134,7 @@ class Master(object):
         if box.cmd == constants.CMD_ADMIN_CHANGE:
             jdata = json.loads(box.body)
             if not self.app.change_group_config(jdata['payload']['group_id'], jdata['payload']['count']):
-                logger.error('change group config fail. data: %s', box.body)
+                logger.error('change group config fail. master: %s, data: %s', self, box.body)
                 return
 
             self._reload_workers()
@@ -313,3 +313,8 @@ class Master(object):
         signal.signal(signal.SIGTERM, stop_handler)
         # HUP为热更新
         signal.signal(signal.SIGHUP, safe_reload_handler)
+
+    def __repr__(self):
+        return '<%s name: %s>' % (
+            type(self).__name__, self.app.name
+        )

@@ -49,7 +49,7 @@ class Worker(object):
         except KeyboardInterrupt:
             pass
         except:
-            logger.error('exc occur.', exc_info=True)
+            logger.error('exc occur. worker: %s', self, exc_info=True)
 
     def _on_worker_run(self):
         self.app.events.create_worker(self)
@@ -73,3 +73,7 @@ class Worker(object):
         signal.signal(signal.SIGTERM, safe_stop_handler)
         signal.signal(signal.SIGHUP, safe_stop_handler)
 
+    def __repr__(self):
+        return '<%s name: %s, group_id: %r>' % (
+            type(self).__name__, self.app.name, self.group_id
+        )

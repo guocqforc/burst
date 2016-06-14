@@ -102,14 +102,14 @@ class Proxy(object):
                     os.remove(admin_address)
                 reactor.listenUNIX(admin_address, self.admin_connection_factory_class(self))
             else:
-                logger.error('invalid address: %s', admin_address)
+                logger.error('invalid admin address. proxy: %s, admin_address: %s', self, admin_address)
 
         try:
             reactor.run(installSignalHandlers=False)
         except KeyboardInterrupt:
             pass
         except:
-            logger.error('exc occur.', exc_info=True)
+            logger.error('exc occur. proxy: %s', self, exc_info=True)
 
     def _handle_proc_signals(self):
         def stop_handler(signum, frame):
@@ -146,3 +146,8 @@ class Proxy(object):
                 cmd=constants.CMD_MASTER_REPLACE_WORKERS
             ))
             self.master_conn.transport.write(box.pack())
+
+    def __repr__(self):
+        return '<%s name: %s>' % (
+            type(self).__name__, self.app.name
+        )

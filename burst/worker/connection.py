@@ -29,7 +29,8 @@ class Connection(object):
             except KeyboardInterrupt:
                 break
             except:
-                logger.error('exc occur.', exc_info=True)
+                logger.error('exc occur. worker: %s',
+                             self.worker, exc_info=True)
 
     def _monitor_work_timeout(self):
         """
@@ -53,8 +54,8 @@ class Connection(object):
     def _handle(self):
         while self.worker.enable and self.closed():
             if not self._connect():
-                logger.error('connect fail, address: %s, sleep %ss',
-                             self.client.address, self.worker.app.config['WORKER_TRY_CONNECT_INTERVAL'])
+                logger.error('connect fail. worker: %s, address: %s, sleep %ss',
+                             self.worker, self.client.address, self.worker.app.config['WORKER_TRY_CONNECT_INTERVAL'])
                 time.sleep(self.worker.app.config['WORKER_TRY_CONNECT_INTERVAL'])
 
         if not self.worker.enable:
@@ -82,7 +83,7 @@ class Connection(object):
         发送数据    True: 成功   else: 失败
         """
         if self.client.closed():
-            logger.error('connection closed. data: %r', data)
+            logger.error('connection closed. worker: %s, data: %r', self.worker, data)
             return False
 
         # 只支持字符串
@@ -92,7 +93,7 @@ class Connection(object):
 
         ret = self.client.write(data)
         if not ret:
-            logger.error('connection write fail. data: %r', data)
+            logger.error('connection write fail. worker: %s, data: %r', self.worker, data)
 
         for bp in self.worker.app.blueprints:
             bp.events.after_app_response(self, data, ret)
@@ -127,7 +128,7 @@ class Connection(object):
     def _on_connection_close(self):
         # 链接被关闭的回调
 
-        logger.error('connection closed, address: %s', self.client.address)
+        logger.error('connection closed. worker: %s, address: %s', self.worker, self.client.address)
 
         for bp in self.worker.app.blueprints:
             bp.events.close_app_conn(self)
@@ -180,8 +181,7 @@ class Connection(object):
         try:
             rsp = request.view_func(request)
         except Exception, e:
-            logger.error('view_func raise exception. app_name: %s, group_id: %r, request: %s, e: %s',
-                         self.worker.app.name, self.worker.group_id, request, e, exc_info=True)
+            logger.error('view_func raise exception. e: %s, request: %s', e, request, exc_info=True)
             view_func_exc = e
             request.write(dict(ret=constants.RET_INTERNAL))
         else:

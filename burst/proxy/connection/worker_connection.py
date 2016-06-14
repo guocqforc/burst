@@ -82,7 +82,8 @@ class WorkerConnection(Protocol):
                 continue
             else:
                 # 数据已经混乱了，全部丢弃
-                logger.error('buffer invalid. ret: %d, read_buffer: %r', ret, self._read_buffer)
+                logger.error('buffer invalid. proxy: %s, ret: %d, read_buffer: %r',
+                             self.factory.proxy, ret, self._read_buffer)
                 self._read_buffer = ''
                 return
 

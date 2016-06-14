@@ -134,4 +134,6 @@ class Request(object):
         self.interrupt_data = data
 
     def __repr__(self):
-        return 'cmd: %r, endpoint: %s, box: %r' % (self.cmd, self.endpoint, self.box)
+        return '<%s cmd: %r, endpoint: %s, box: %r, worker: %s>' % (
+            type(self).__name__, self.cmd, self.endpoint, self.box, self.worker
+        )
