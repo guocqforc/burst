@@ -180,8 +180,8 @@ class Connection(object):
         try:
             rsp = request.view_func(request)
         except Exception, e:
-            logger.error('view_func raise exception. request: %s, e: %s',
-                         request, e, exc_info=True)
+            logger.error('view_func raise exception. app_name: %s, group_id: %r, request: %s, e: %s',
+                         self.worker.app.name, self.worker.group_id, request, e, exc_info=True)
             view_func_exc = e
             request.write(dict(ret=constants.RET_INTERNAL))
         else:
