@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 
 import signal
-import socket
 import os
 # linux 默认就是epoll
 from twisted.internet import reactor
