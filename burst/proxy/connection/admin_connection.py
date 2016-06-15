@@ -3,7 +3,6 @@
 import json
 
 from twisted.internet.protocol import Protocol, Factory
-
 from netkit.box import Box
 
 from ...share.utils import safe_call
