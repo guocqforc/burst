@@ -136,6 +136,6 @@ class Burst(RoutesMixin, AppEventsMixin):
         assert not duplicate_cmds, 'duplicate cmds: %s' % duplicate_cmds
 
     def __repr__(self):
-        return '<%s name: %s, blueprints: %s>' % (
-            type(self).__name__, self.name, self.blueprints
+        return '<%s name: %s>' % (
+            type(self).__name__, self.name
         )
