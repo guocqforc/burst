@@ -90,7 +90,12 @@ class BurstCtl(object):
 
             loop_times += 1
             if loop_times >= loop > 0:
+                # 之所以不打印分割线，是为了让统计的读取工具更容易写。
+                # 之前用上了正则表达式，很慢
                 break
+
+            # 如果还有下一个数据的话
+            self.output('-' * 80)
 
             try:
                 time.sleep(1)
