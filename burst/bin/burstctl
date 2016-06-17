@@ -44,9 +44,7 @@ class BurstCtl(object):
         ))
 
     def output(self, s):
-        print '/' + '-' * 80
         print s
-        print '-' * 80 + '/'
 
     def start(self):
 
@@ -296,7 +294,8 @@ def stat(address, timeout, username, password, loop, diff):
     查看统计
     """
     ctl = BurstCtl(address, timeout, username, password)
-    ctl.start()
+    if not ctl.start():
+        return
     ctl.handle_stat(loop, diff)
 
 
@@ -313,7 +312,8 @@ def change(address, timeout, username, password, group, count):
     修改配置。比如workers数量
     """
     ctl = BurstCtl(address, timeout, username, password)
-    ctl.start()
+    if not ctl.start():
+        return
     ctl.handle_change(group, count)
 
 
@@ -328,7 +328,8 @@ def reload(address, timeout, username, password):
     优雅重启workers
     """
     ctl = BurstCtl(address, timeout, username, password)
-    ctl.start()
+    if not ctl.start():
+        return
     ctl.handle_reload()
 
 
@@ -343,7 +344,8 @@ def stop(address, timeout, username, password):
     优雅停止整个服务
     """
     ctl = BurstCtl(address, timeout, username, password)
-    ctl.start()
+    if not ctl.start():
+        return
     ctl.handle_stop()
 
 if __name__ == '__main__':
