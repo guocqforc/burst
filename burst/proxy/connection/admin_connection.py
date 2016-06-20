@@ -116,6 +116,18 @@ class AdminConnection(Protocol):
                     body=json.dumps(rsp_body)
                 ))
 
+            elif box.cmd == constants.CMD_ADMIN_CLEAR:
+                jdata = json.loads(box.body)
+                if jdata['payload']['all_groups']:
+                    self.factory.proxy.task_dispatcher.clear_all_tasks()
+                else:
+                    for group_id in jdata['payload']['group_list'] or ():
+                        self.factory.proxy.task_dispatcher.clear_tasks(group_id)
+
+                rsp = box.map(dict(
+                    ret=0
+                ))
+
             elif box.cmd in (
                     constants.CMD_ADMIN_CHANGE,
                     constants.CMD_ADMIN_RELOAD,
