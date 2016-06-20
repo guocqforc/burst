@@ -292,8 +292,8 @@ def version():
 @click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
-@click.option('--loop', type=int, help='loop times, <=0 means infinite loop', default=-1)
-@click.option('--diff', is_flag=True, help='show diff values between 1 seconds', default=False)
+@click.option('--loop', help='loop times, <=0 means infinite loop', type=int, default=-1)
+@click.option('--diff', help='show diff values between 1 seconds', is_flag=True, default=False)
 def stat(address, timeout, username, password, loop, diff):
     """
     查看统计
@@ -347,6 +347,24 @@ def reload(address, timeout, username, password):
 def stop(address, timeout, username, password):
     """
     优雅停止整个服务
+    """
+    ctl = BurstCtl(address, timeout, username, password)
+    if not ctl.start():
+        return
+    ctl.handle_stop()
+
+
+@cli.command()
+@click.option('-a', '--address', default='admin.sock',
+              help='burst admin address. admin.sock or tcp://127.0.0.1:9910')
+@click.option('-o', '--timeout', type=int, help='connect/send/receive timeout', default=10)
+@click.option('-u', '--username', help='username', default=None)
+@click.option('-p', '--password', help='password', default=None)
+@click.option('--group', help='group id', type=int, multiple=True)
+@click.option('--all', help='all groups', is_flag=True, default=False)
+def purge(address, timeout, username, password):
+    """
+    清空消息
     """
     ctl = BurstCtl(address, timeout, username, password)
     if not ctl.start():
