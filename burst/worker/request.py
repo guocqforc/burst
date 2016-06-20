@@ -105,7 +105,7 @@ class Request(object):
 
     def make_rsp(self, data):
         """
-        生成要写回的数据
+        生成要写回的数据。业务层代码不要调用
         如果处理函数没有return数据的话，data可能为None，此时相当于直接进行ask_for_task
         :param data: dict/box/str
         :return:
