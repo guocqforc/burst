@@ -49,6 +49,21 @@ class GroupQueue(object):
         else:
             return self.queue_dict[group_id].get_nowait()
 
+    def clear(self, group_id):
+        """
+        清空
+        :param group_id:
+        :return:
+        """
+        self.queue_dict.pop(group_id, None)
+
+    def clear_all(self):
+        """
+        清空所有
+        :return:
+        """
+        self.queue_dict.clear()
+
     def empty(self, group_id):
         """
         判断是否是空的

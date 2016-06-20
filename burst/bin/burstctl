@@ -163,6 +163,29 @@ class BurstCtl(object):
 
         self.output('succ.')
 
+    def handle_clear(self, group_list, all_groups):
+        send_box = self.make_send_box(
+            constants.CMD_ADMIN_CLEAR,
+            self.username, self.password,
+            dict(
+                group_list=group_list,
+                all_groups=all_groups,
+            ),
+        )
+        self.tcp_client.write(send_box)
+
+        rsp_box = self.tcp_client.read()
+
+        if not rsp_box:
+            self.output('disconnected.')
+            return False
+
+        if rsp_box.ret != 0:
+            self.output('fail. rsp_box.ret=%s' % rsp_box.ret)
+            return False
+
+        self.output('succ.')
+
     def _parse_address_uri(self, uri):
         """
         解析uri为可用的address
@@ -361,15 +384,15 @@ def stop(address, timeout, username, password):
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
 @click.option('--group', help='group id', type=int, multiple=True)
-@click.option('--all', help='all groups', is_flag=True, default=False)
-def purge(address, timeout, username, password):
+@click.option('--all_groups', help='all groups', is_flag=True, default=False)
+def clear(address, timeout, username, password, group, all_groups):
     """
-    清空消息
+    清空消息队列
     """
     ctl = BurstCtl(address, timeout, username, password)
     if not ctl.start():
         return
-    ctl.handle_stop()
+    ctl.handle_clear(group, all_groups)
 
 if __name__ == '__main__':
     cli()

@@ -110,6 +110,21 @@ class TaskDispatcher(object):
 
         return task
 
+    def clear_tasks(self, group_id):
+        """
+        清空任务
+        :param group_id:
+        :return:
+        """
+        self.group_queue.clear(group_id)
+
+    def clear_all_tasks(self):
+        """
+        清空所有任务
+        :return:
+        """
+        self.group_queue.clear_all()
+
     def add_ready_worker(self, worker):
         # 设置为空闲状态
         worker.status = constants.WORKER_STATUS_IDLE
