@@ -103,14 +103,13 @@ class Request(object):
 
         return '.'.join([self.blueprint.name, bp_endpoint] if self.blueprint else [bp_endpoint])
 
-    def write(self, data):
+    def make_rsp(self, data):
         """
-        写回响应，业务代码中请勿调用
+        生成要写回的数据
         如果处理函数没有return数据的话，data可能为None，此时相当于直接进行ask_for_task
-        :param data: 可以是dict也可以是box
+        :param data: dict/box/str
         :return:
         """
-
         if isinstance(data, self.app.box_class):
             data = data.pack()
         elif isinstance(data, dict):
@@ -121,7 +120,7 @@ class Request(object):
             body=data or '',
         ))
 
-        return self.conn.write(task.pack())
+        return task.pack()
 
     def interrupt(self, data=None):
         """

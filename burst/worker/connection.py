@@ -155,7 +155,9 @@ class Connection(object):
 
         if not request.view_func:
             logger.info('cmd invalid. request: %s' % request)
-            request.write(dict(ret=constants.RET_INVALID_CMD))
+            self.write(request.make_rsp(
+                dict(ret=constants.RET_INVALID_CMD)
+            ))
             return False
 
         if not self.worker.got_first_request:
@@ -173,7 +175,9 @@ class Connection(object):
         if request.interrupted:
             # 业务要求中断
             # 无论interrupt_data是否为None都返回
-            request.write(request.interrupt_data)
+            self.write(request.make_rsp(
+                request.interrupt_data
+            ))
             return True
 
         view_func_exc = None
@@ -183,9 +187,13 @@ class Connection(object):
         except Exception, e:
             logger.error('view_func raise exception. e: %s, request: %s', e, request, exc_info=True)
             view_func_exc = e
-            request.write(dict(ret=constants.RET_INTERNAL))
+            self.write(request.make_rsp(
+                dict(ret=constants.RET_INTERNAL)
+            ))
         else:
-            request.write(rsp)
+            self.write(request.make_rsp(
+                rsp
+            ))
 
         if request.blueprint:
             request.blueprint.events.after_request(request, view_func_exc)
