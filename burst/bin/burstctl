@@ -384,15 +384,15 @@ def stop(address, timeout, username, password):
 @click.option('-u', '--username', help='username', default=None)
 @click.option('-p', '--password', help='password', default=None)
 @click.option('--group', help='group id', type=int, multiple=True)
-@click.option('--all_groups', help='all groups', is_flag=True, default=False)
-def clear(address, timeout, username, password, group, all_groups):
+@click.option('--all', help='all groups', is_flag=True, default=False)
+def clear(address, timeout, username, password, group, all):
     """
     清空消息队列
     """
     ctl = BurstCtl(address, timeout, username, password)
     if not ctl.start():
         return
-    ctl.handle_clear(group, all_groups)
+    ctl.handle_clear(group, all)
 
 if __name__ == '__main__':
     cli()
