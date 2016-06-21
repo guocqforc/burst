@@ -132,4 +132,4 @@ maple的优雅重启比较简单，即将worker安全停止后，master自然会
 3. <del>考虑是不是要支持udp，似乎没法直接支持。其实调用方可以直接在前面建一个udp代理server即可</del>
 4. <del>怎样在刚开始启动的时候，不报connect fail的错误</del>
 5. <del>client.timeout配置</del>
-6. burstctl支持clear某个group的消息
+6. <del>burstctl支持clear某个group的消息</del>
