@@ -31,6 +31,7 @@
     管理工具，可以在线完成统计、配置变更、重启等操作。
 
     * change           修改group配置，比如workers数量
+    * clear            清空消息队列
     * reload           更新workers
     * stat             查看统计
     * stop             安全停止整个服务
