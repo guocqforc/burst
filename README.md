@@ -89,7 +89,7 @@
     user=dantezhu
     autorestart=true
     redirect_stderr=true
-
+    stopwaitsecs=10
 
 优雅重启:
 
