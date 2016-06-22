@@ -96,9 +96,13 @@
 
     kill -HUP $master_pid
 
+    burstctl reload
+
 优雅停止:
 
     kill -TERM $master_pid
+
+    burstctl stop
 
 强制停止:
 
