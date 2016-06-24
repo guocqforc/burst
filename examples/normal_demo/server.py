@@ -39,6 +39,7 @@ PROXY_CLIENT_TIMEOUT = 60
 # PROXY_MSG_QUEUE_MAX_SIZE = 1
 
 STOP_TIMEOUT = 10
+# WORKER_AUTO_RSP_ON_FAIL = False
 
 app = Burst()
 app.config.from_object(__name__)
