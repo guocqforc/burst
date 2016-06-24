@@ -116,6 +116,8 @@ DEFAULT_CONFIG = {
     'WORK_TIMEOUT': None,
     # worker重连等待时间
     'WORKER_TRY_CONNECT_INTERVAL': 1,
+    # 当失败时，是否自动响应
+    'WORKER_AUTO_RSP_ON_FAIL': True,
 
     # 子进程标识进程类型的环境变量
     'CHILD_PROCESS_ENV_KEY': 'BURST_ENV',

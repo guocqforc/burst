@@ -156,7 +156,7 @@ class Connection(object):
         if not request.view_func:
             logger.info('cmd invalid. request: %s' % request)
             self.write(request.make_rsp(
-                dict(ret=constants.RET_INVALID_CMD)
+                dict(ret=constants.RET_INVALID_CMD) if self.worker.app.config['WORKER_AUTO_RSP_ON_FAIL'] else None
             ))
             return False
 
@@ -188,7 +188,7 @@ class Connection(object):
             logger.error('view_func raise exception. e: %s, request: %s', e, request, exc_info=True)
             view_func_exc = e
             self.write(request.make_rsp(
-                dict(ret=constants.RET_INTERNAL)
+                dict(ret=constants.RET_INTERNAL) if self.worker.app.config['WORKER_AUTO_RSP_ON_FAIL'] else None
             ))
         else:
             self.write(request.make_rsp(
