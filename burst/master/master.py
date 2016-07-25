@@ -54,6 +54,9 @@ class Master(object):
         self._handle_proc_signals()
 
         self.proxy_process = self._spawn_proxy()
+        if not self.proxy_process:
+            # 启动proxy失败，就应该直接返回
+            return
 
         # 等待proxy启动，为了防止worker在连接的时候一直报connect失败的错误
         if not self._wait_proxy():
@@ -154,9 +157,14 @@ class Master(object):
         })
 
         args = [sys.executable] + sys.argv
-        inner_p = subprocess.Popen(args, env=worker_env)
-        inner_p.proc_env = proc_env
-        return inner_p
+        try:
+            inner_p = subprocess.Popen(args, env=worker_env)
+            inner_p.proc_env = proc_env
+            return inner_p
+        except:
+            logger.error('exc occur. app: %s, args: %s, env: %s',
+                         self, args, worker_env, exc_info=True)
+            return None
 
     def _spawn_proxy(self):
         proc_env = dict(
