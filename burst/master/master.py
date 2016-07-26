@@ -192,6 +192,9 @@ class Master(object):
         while 1:
             if self.proxy_process and self.proxy_process.poll() is not None:
                 proc_env = self.proxy_process.proc_env
+                # 底下会一次为依据判断主进程退出
+                self.proxy_process = None
+
                 if self.enable:
                     self.proxy_process = self._start_child_process(proc_env)
 
@@ -212,8 +215,8 @@ class Master(object):
                         p = self._start_child_process(proc_env)
                         self.worker_processes[idx] = p
 
-            if not filter(lambda x: x, self.worker_processes):
-                # 没活着的了worker了
+            if self.proxy_process is None and not filter(lambda x: x, self.worker_processes):
+                # 没活着的proxy和worker了
                 break
 
             if self.reload_status == constants.RELOAD_STATUS_WORKERS_DONE:
