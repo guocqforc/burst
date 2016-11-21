@@ -44,10 +44,10 @@ class Connection(object):
             work_progress = self.work_progress
             if work_progress:
                 past_time = time.time() - work_progress['begin_time']
-                if self.worker.app.config['WORK_TIMEOUT'] is not None and past_time > self.worker.app.config['WORK_TIMEOUT']:
+                if self.worker.app.config['WORKER_WORK_TIMEOUT'] is not None and past_time > self.worker.app.config['WORKER_WORK_TIMEOUT']:
                     # 说明worker的处理时间已经太长了
                     logger.error('work timeout: %s / %s, request: %s',
-                                 past_time, self.worker.app.config['WORK_TIMEOUT'], work_progress['request'])
+                                 past_time, self.worker.app.config['WORKER_WORK_TIMEOUT'], work_progress['request'])
                     # 强制从子线程退出worker
                     os._exit(-1)
 

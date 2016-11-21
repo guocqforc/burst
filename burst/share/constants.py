@@ -113,7 +113,7 @@ DEFAULT_CONFIG = {
     # worker<->proxy网络连接超时(秒), 包括 connect once，read once，write once
     'WORKER_CONN_TIMEOUT': 3,
     # 处理task超时(秒). 超过后worker会自杀. None 代表永不超时
-    'WORK_TIMEOUT': None,
+    'WORKER_WORK_TIMEOUT': None,
     # worker重连等待时间
     'WORKER_TRY_CONNECT_INTERVAL': 1,
     # 当失败时，是否自动响应
