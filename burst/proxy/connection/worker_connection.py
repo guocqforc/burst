@@ -112,8 +112,8 @@ class WorkerConnection(Protocol):
 
             # 如果有数据，就要先处理
             # 要转发数据给原来的用户
-            if task.body and self._doing_task_container.client_conn:
-                self._doing_task_container.client_conn.write(task.body)
+            if task.body:
+                self._doing_task_container.response(task.body)
 
             self.alloc_task()
 

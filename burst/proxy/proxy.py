@@ -8,6 +8,7 @@ import setproctitle
 
 from netkit.box import Box
 from connection.client_connection import ClientConnectionFactory
+from connection.client_udp_connection import ClientConnection as ClientUDPConnection
 from connection.worker_connection import WorkerConnectionFactory
 from connection.admin_connection import AdminConnectionFactory
 from connection.master_connection import MasterConnectionFactory
@@ -25,6 +26,7 @@ class Proxy(object):
     type = constants.PROC_TYPE_PROXY
 
     client_connection_factory_class = ClientConnectionFactory
+    client_udp_connection_class = ClientUDPConnection
     worker_connection_factory_class = WorkerConnectionFactory
     admin_connection_factory_class = AdminConnectionFactory
     master_connection_factory_class = MasterConnectionFactory
@@ -88,8 +90,12 @@ class Proxy(object):
             reactor.listenUNIX(ipc_address, self.worker_connection_factory_class(self, group_id))
 
         # 启动对外监听
-        reactor.listenTCP(self.port, self.client_connection_factory_class(self),
-                          backlog=self.app.config['PROXY_BACKLOG'], interface=self.host)
+        if self.tcp:
+            reactor.listenTCP(self.port, self.client_connection_factory_class(self),
+                              backlog=self.app.config['PROXY_BACKLOG'], interface=self.host)
+
+        if self.udp:
+            reactor.listenUDP(self.port, self.client_udp_connection_class(self), interface=self.host)
 
         # 启动admin服务
         admin_address = self.app.config['ADMIN_ADDRESS']

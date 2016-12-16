@@ -9,7 +9,7 @@ from ...share.task import Task
 from ...share import constants
 
 
-class ClientProtocol(DatagramProtocol):
+class ClientConnection(DatagramProtocol):
 
     def __init__(self, proxy):
         self.proxy = proxy
@@ -42,8 +42,6 @@ class ClientProtocol(DatagramProtocol):
     def _on_read_complete(self, box, address):
         self.proxy.stat_counter.client_req += 1
 
-        conn = ClientConnection(self, address)
-
         # 获取映射的group_id
         group_id = self.factory.proxy.app.config['GROUP_ROUTER'](box)
 
@@ -54,7 +52,7 @@ class ClientProtocol(DatagramProtocol):
             body=box._raw_data,
         ))
 
-        task_container = TaskContainer(task, conn)
+        task_container = TaskContainer(task, self, address)
         self.proxy.task_dispatcher.add_task(group_id, task_container)
 
     def write(self, data, address):
@@ -63,21 +61,6 @@ class ClientProtocol(DatagramProtocol):
             self.transport.write(data, address)
             self.proxy.stat_counter.client_rsp += 1
 
+            return True
 
-class ClientConnection(object):
-
-    protocol = None
-
-    address = None
-
-    def __init__(self, protocol, address):
-        self.protocol = protocol
-        self.address = address
-
-    def write(self, data):
-        """
-        响应
-        :return:
-        """
-        self.protocol.write(data, self.address)
-        return True
+        return False
