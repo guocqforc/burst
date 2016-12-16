@@ -30,12 +30,12 @@ class ClientConnection(DatagramProtocol):
                 # 不能使用双下划线，会导致别的地方取的时候变为 _Gateway__raw_data，很奇怪
                 box._raw_data = data[:ret]
                 data = data[ret:]
-                safe_call(self._on_read_complete, box)
+                safe_call(self._on_read_complete, box, address)
                 continue
             else:
                 # 数据已经混乱了，全部丢弃
                 logger.error('buffer invalid. proxy: %s, ret: %d, read_buffer: %r',
-                             self.factory.proxy, ret, data)
+                             self.proxy, ret, data)
                 data = ''
                 return
 
@@ -43,7 +43,7 @@ class ClientConnection(DatagramProtocol):
         self.proxy.stat_counter.client_req += 1
 
         # 获取映射的group_id
-        group_id = self.factory.proxy.app.config['GROUP_ROUTER'](box)
+        group_id = self.proxy.app.config['GROUP_ROUTER'](box)
 
         # 打包成内部通信的task
         task = Task(dict(
