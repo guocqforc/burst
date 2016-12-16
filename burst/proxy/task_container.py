@@ -15,7 +15,7 @@ class TaskContainer(object):
     # 客户端连接的弱引用
     _client_conn_ref = None
 
-    # udp可能会使用到
+    # udp会使用到
     client_address = None
 
     def __init__(self, task, client_conn, client_address=None):
