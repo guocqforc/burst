@@ -2,7 +2,7 @@
 
 from twisted.internet.protocol import DatagramProtocol
 
-from ...share.utils import safe_call
+from ...share.utils import safe_call, ip_str_to_int
 from ...share.log import logger
 from ..task_container import TaskContainer
 from ...share.task import Task
@@ -44,11 +44,12 @@ class ClientConnection(DatagramProtocol):
 
         # 获取映射的group_id
         group_id = self.proxy.app.config['GROUP_ROUTER'](box)
+        client_ip_num = ip_str_to_int(address[0])
 
         # 打包成内部通信的task
         task = Task(dict(
             cmd=constants.CMD_WORKER_TASK_ASSIGN,
-            client_ip_num=self._client_ip_num,
+            client_ip_num=client_ip_num,
             body=box._raw_data,
         ))
 
