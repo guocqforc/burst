@@ -111,13 +111,9 @@ class WorkerConnection(Protocol):
             self._on_task_end()
 
             # 如果有数据，就要先处理
-            if task.body:
-                # 要转发数据给原来的用户
-                # 要求连接存在，并且连接还处于连接中
-                if self._doing_task_container.client_conn and self._doing_task_container.client_conn.connected:
-                    self._doing_task_container.client_conn.transport.write(task.body)
-
-                    self.factory.proxy.stat_counter.client_rsp += 1
+            # 要转发数据给原来的用户
+            if task.body and self._doing_task_container.client_conn:
+                self._doing_task_container.client_conn.write(task.body)
 
             self.alloc_task()
 

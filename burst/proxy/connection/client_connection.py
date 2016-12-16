@@ -76,6 +76,19 @@ class ClientConnection(Protocol):
                 self._read_buffer = ''
                 return
 
+    def write(self, data):
+        """
+        响应
+        :return:
+        """
+        if self.connected:
+            # 要求连接存在，并且连接还处于连接中
+            self.transport.write(data)
+            self.factory.proxy.stat_counter.client_rsp += 1
+            return True
+        else:
+            return False
+
     def _on_read_complete(self, box):
         """
         完整数据接收完成
