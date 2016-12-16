@@ -34,6 +34,10 @@ class Proxy(object):
     host = None
     port = None
 
+    tcp = None
+
+    udp = None
+
     # 任务调度器
     task_dispatcher = None
     # 统计
@@ -42,7 +46,7 @@ class Proxy(object):
     # master的连接，因为一定只有一个，所以就一个变量即可
     master_conn = None
 
-    def __init__(self, app, host, port):
+    def __init__(self, app, host, port, tcp, udp):
         """
         构造函数
         :return:
@@ -50,6 +54,8 @@ class Proxy(object):
         self.app = app
         self.host = host
         self.port = port
+        self.tcp = tcp
+        self.udp = udp
 
         self.task_dispatcher = TaskDispatcher(self, self._on_workers_reload_over)
         self.stat_counter = StatCounter(self.app.config['TASKS_TIME_BENCHMARK'])
