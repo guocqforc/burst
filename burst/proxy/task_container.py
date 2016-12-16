@@ -32,7 +32,12 @@ class TaskContainer(object):
     def client_conn(self, value):
         self._client_conn_ref = weakref.ref(value)
 
-    def response(self, data):
+    def write_to_client(self, data):
+        """
+        响应
+        :param data:
+        :return:
+        """
         if not self.client_conn:
             return False
 
