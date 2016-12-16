@@ -57,6 +57,12 @@ DEFAULT_CONFIG = {
     # 监听端口
     'PORT': 9900,
 
+    # 监听TCP
+    'TCP': True,
+
+    # 监听UDP
+    'UDP': False,
+
     # 进程名
     'NAME': NAME,
 

@@ -25,6 +25,7 @@ logger.setLevel(logging.DEBUG)
 
 # 配置得放到config.from_object前面
 NAME = 'normal_demo'
+UDP = True
 # ADMIN_ADDRESS = ('127.0.0.1', 7778)
 GROUP_CONFIG = {
     1: {
@@ -79,7 +80,8 @@ def after_response(worker, rsp, result):
 def index(request):
     logger.error('request: %s, client_ip: %s, worker: %s', request, request.client_ip, request.worker)
     return dict(
-        ret=10
+        ret=10,
+        body='ok'
     )
 
 

@@ -78,7 +78,7 @@ class Burst(RoutesMixin, AppEventsMixin):
             burst_env = json.loads(str_burst_env)
             if burst_env['type'] == constants.PROC_TYPE_PROXY:
                 # proxy
-                self.proxy_class(self, self.config['HOST'], self.config['PORT']).run()
+                self.proxy_class(self).run()
             else:
                 # worker
                 self.worker_class(self, burst_env['group_id']).run()
