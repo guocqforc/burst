@@ -15,7 +15,7 @@ box.body = '我爱你'
 
 sock.sendto(box.pack(), ('127.0.0.1', 9900))
 
-data = sock.recvfrom(1000)
+data, address = sock.recvfrom(1000)
 
 recv_box = Box()
 recv_box.unpack(data)
