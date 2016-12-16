@@ -49,7 +49,7 @@ class Burst(RoutesMixin, AppEventsMixin):
     def register_blueprint(self, blueprint):
         blueprint.register_to_app(self)
 
-    def run(self, host=None, port=None, debug=None, tcp=None, udp=None):
+    def run(self, host=None, port=None, debug=None):
         self._validate_cmds()
 
         if host is not None:
@@ -60,16 +60,6 @@ class Burst(RoutesMixin, AppEventsMixin):
         if port is not None:
             self.config.update({
                 'PORT': port,
-            })
-
-        if tcp is not None:
-            self.config.update({
-                'TCP': tcp,
-            })
-
-        if udp is not None:
-            self.config.update({
-                'UDP': udp,
             })
 
         if debug is not None:
@@ -88,10 +78,7 @@ class Burst(RoutesMixin, AppEventsMixin):
             burst_env = json.loads(str_burst_env)
             if burst_env['type'] == constants.PROC_TYPE_PROXY:
                 # proxy
-                self.proxy_class(
-                    self,
-                    self.config['HOST'], self.config['PORT'], self.config['TCP'], self.config['UDP']
-                ).run()
+                self.proxy_class(self).run()
             else:
                 # worker
                 self.worker_class(self, burst_env['group_id']).run()

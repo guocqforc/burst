@@ -33,13 +33,6 @@ class Proxy(object):
 
     app = None
 
-    host = None
-    port = None
-
-    tcp = None
-
-    udp = None
-
     # 任务调度器
     task_dispatcher = None
     # 统计
@@ -48,16 +41,12 @@ class Proxy(object):
     # master的连接，因为一定只有一个，所以就一个变量即可
     master_conn = None
 
-    def __init__(self, app, host, port, tcp, udp):
+    def __init__(self, app):
         """
         构造函数
         :return:
         """
         self.app = app
-        self.host = host
-        self.port = port
-        self.tcp = tcp
-        self.udp = udp
 
         self.task_dispatcher = TaskDispatcher(self, self._on_workers_reload_over)
         self.stat_counter = StatCounter(self.app.config['TASKS_TIME_BENCHMARK'])
@@ -90,12 +79,15 @@ class Proxy(object):
             reactor.listenUNIX(ipc_address, self.worker_connection_factory_class(self, group_id))
 
         # 启动对外监听
-        if self.tcp:
-            reactor.listenTCP(self.port, self.client_connection_factory_class(self),
-                              backlog=self.app.config['PROXY_BACKLOG'], interface=self.host)
+        if self.app.config['TCP']:
+            reactor.listenTCP(self.app.config['PORT'], self.client_connection_factory_class(self),
+                              backlog=self.app.config['PROXY_BACKLOG'], interface=self.app.config['HOST'])
 
-        if self.udp:
-            reactor.listenUDP(self.port, self.client_udp_connection_class(self), interface=self.host)
+        if self.app.config['UDP']:
+            reactor.listenUDP(
+                self.app.config['PORT'], self.client_udp_connection_class(self),
+                interface=self.app.config['HOST']
+            )
 
         # 启动admin服务
         admin_address = self.app.config['ADMIN_ADDRESS']
