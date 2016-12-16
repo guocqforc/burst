@@ -79,7 +79,8 @@ def after_response(worker, rsp, result):
 def index(request):
     logger.error('request: %s, client_ip: %s, worker: %s', request, request.client_ip, request.worker)
     return dict(
-        ret=10
+        ret=10,
+        body='ok'
     )
 
 
