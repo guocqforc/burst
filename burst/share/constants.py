@@ -61,7 +61,7 @@ DEFAULT_CONFIG = {
     'TCP': True,
 
     # 监听UDP
-    'UDP': True,
+    'UDP': False,
 
     # 进程名
     'NAME': NAME,
