@@ -10,7 +10,7 @@ from ...share.task import Task
 from ...share import constants
 
 
-class ClientConnectionFactory(Factory):
+class ClientTCPConnectionFactory(Factory):
 
     def __init__(self, proxy):
         self.proxy = proxy

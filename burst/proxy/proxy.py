@@ -7,7 +7,7 @@ from twisted.internet import reactor
 import setproctitle
 
 from netkit.box import Box
-from connection.client_connection import ClientConnectionFactory
+from connection.client_tcp_connection import ClientTCPConnectionFactory
 from connection.client_udp_connection import ClientConnection as ClientUDPConnection
 from connection.worker_connection import WorkerConnectionFactory
 from connection.admin_connection import AdminConnectionFactory
@@ -25,7 +25,7 @@ class Proxy(object):
 
     type = constants.PROC_TYPE_PROXY
 
-    client_connection_factory_class = ClientConnectionFactory
+    client_tcp_connection_factory_class = ClientTCPConnectionFactory
     client_udp_connection_class = ClientUDPConnection
     worker_connection_factory_class = WorkerConnectionFactory
     admin_connection_factory_class = AdminConnectionFactory
@@ -80,7 +80,7 @@ class Proxy(object):
 
         # 启动对外监听
         if self.app.config['TCP']:
-            reactor.listenTCP(self.app.config['PORT'], self.client_connection_factory_class(self),
+            reactor.listenTCP(self.app.config['PORT'], self.client_tcp_connection_factory_class(self),
                               backlog=self.app.config['PROXY_BACKLOG'], interface=self.app.config['HOST'])
 
         if self.app.config['UDP']:
