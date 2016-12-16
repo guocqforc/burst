@@ -7,7 +7,7 @@ from twisted.internet import reactor
 import setproctitle
 
 from netkit.box import Box
-from connection.client_tcp_connection import ClientTCPConnectionFactory
+from connection.client_tcp_connection import ClientConnectionFactory as ClientTCPConnectionFactory
 from connection.client_udp_connection import ClientConnection as ClientUDPConnection
 from connection.worker_connection import WorkerConnectionFactory
 from connection.admin_connection import AdminConnectionFactory
