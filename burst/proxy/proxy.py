@@ -8,7 +8,7 @@ import setproctitle
 
 from netkit.box import Box
 from connection.client_tcp_connection import ClientConnectionFactory as ClientTCPConnectionFactory
-from connection.client_udp_connection import ClientConnection as ClientUDPConnection
+from connection.client_udp_connection import ClientConnectionFactory as ClientUDPConnectionFactory
 from connection.worker_connection import WorkerConnectionFactory
 from connection.admin_connection import AdminConnectionFactory
 from connection.master_connection import MasterConnectionFactory
@@ -26,7 +26,7 @@ class Proxy(object):
     type = constants.PROC_TYPE_PROXY
 
     client_tcp_connection_factory_class = ClientTCPConnectionFactory
-    client_udp_connection_class = ClientUDPConnection
+    client_udp_connection_factory_class = ClientUDPConnectionFactory
     worker_connection_factory_class = WorkerConnectionFactory
     admin_connection_factory_class = AdminConnectionFactory
     master_connection_factory_class = MasterConnectionFactory
@@ -85,7 +85,7 @@ class Proxy(object):
 
         if self.app.config['UDP']:
             reactor.listenUDP(
-                self.app.config['PORT'], self.client_udp_connection_class(self),
+                self.app.config['PORT'], self.client_udp_connection_factory_class(self),
                 interface=self.app.config['HOST']
             )
 

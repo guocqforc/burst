@@ -9,7 +9,7 @@ from ...share.task import Task
 from ...share import constants
 
 
-class ClientConnection(DatagramProtocol):
+class ClientConnectionFactory(DatagramProtocol):
 
     def __init__(self, proxy):
         self.proxy = proxy
@@ -39,6 +39,16 @@ class ClientConnection(DatagramProtocol):
                 data = ''
                 return
 
+    def write(self, data, address):
+        if self.transport:
+            # 要求连接存在
+            self.transport.write(data, address)
+            self.proxy.stat_counter.client_rsp += 1
+
+            return True
+
+        return False
+
     def _on_read_complete(self, box, address):
         self.proxy.stat_counter.client_req += 1
 
@@ -53,15 +63,20 @@ class ClientConnection(DatagramProtocol):
             body=box._raw_data,
         ))
 
-        task_container = TaskContainer(task, self, address)
+        conn = ClientConnection(self, address)
+
+        task_container = TaskContainer(task, conn)
         self.proxy.task_dispatcher.add_task(group_id, task_container)
 
-    def write(self, data, address):
-        if self.transport:
-            # 要求连接存在，并且连接还处于连接中
-            self.transport.write(data, address)
-            self.proxy.stat_counter.client_rsp += 1
 
-            return True
+class ClientConnection(object):
 
-        return False
+    factory = None
+    address = None
+
+    def __init__(self, factory, address):
+        self.factory = factory
+        self.address = address
+
+    def write(self, data):
+        return self.factory.write(data, self.address)
