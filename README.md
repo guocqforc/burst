@@ -17,6 +17,7 @@
 2. proxy
 
     网络进程，负责接收网络消息，并且将任务派发给worker进行处理，之后再返回给client端。  
+    支持tcp/udp监听。
     worker、master 均会与proxy建立连接。并均使用本地socket的方式。  
     proxy还支持bustctl的连接，可以进行worker数量配置，统计等操作。当然，需要在服务器启动的时候，打开ADMIN相关的配置。
 
