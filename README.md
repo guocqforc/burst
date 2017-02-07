@@ -136,6 +136,8 @@ maple的优雅重启比较简单，即将worker安全停止后，master自然会
 
     group_id务必为数字类型，否则burstctl无法正确处理.
 
+2. 使用udp监听的时候，由于udp的特性，clients数量无法统计.
+
 ### 六. TODO
 
 1. <del>支持修改worker数量后，优雅重启worker. 目前可行方案是通过burst ctl，但是ctl是连接到了proxy，貌似还不行</del>
