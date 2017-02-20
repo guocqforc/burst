@@ -19,7 +19,6 @@ class MasterConnection(Protocol):
         self.address = address
 
     def connectionMade(self):
-        self.transport.setTcpNoDelay(True)
         self.factory.proxy.master_conn = self
 
     def connectionLost(self, reason=connectionDone):

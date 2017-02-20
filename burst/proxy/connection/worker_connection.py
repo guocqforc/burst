@@ -45,8 +45,6 @@ class WorkerConnection(Protocol):
         self._read_buffer = ''
 
     def connectionMade(self):
-        self.transport.setTcpNoDelay(True)
-
         if self.factory.proxy.task_dispatcher.reloading:
             # 如果当前正处于运行状态，那么就应该放到ready_workers列表里去
             self.factory.proxy.task_dispatcher.add_ready_worker(self)

@@ -30,9 +30,6 @@ class AdminConnection(Protocol):
         self.address = address
         self._read_buffer = ''
 
-    def connectionMade(self):
-        self.transport.setTcpNoDelay(True)
-
     def dataReceived(self, data):
         """
         当数据接受到时
