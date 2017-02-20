@@ -34,6 +34,7 @@ class ClientConnection(Protocol):
         self._read_buffer = ''
 
     def connectionMade(self):
+        self.transport.setTcpNoDelay(True)
 
         self.factory.proxy.stat_counter.clients += 1
 
