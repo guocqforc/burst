@@ -20,6 +20,7 @@ class Connection(object):
         self.worker = worker
         # 直接创建即可
         self.client = TcpClient(Task, address=address, timeout=conn_timeout)
+        self.client.tcp_nodelay = True
 
     def run(self):
         thread.start_new_thread(self._monitor_work_timeout, ())

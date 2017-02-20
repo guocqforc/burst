@@ -79,6 +79,7 @@ class Master(object):
             self.app.config['MASTER_ADDRESS']
         )
         client = TcpClient(Box, address=address)
+        client.tcp_nodelay = True
 
         while self.enable:
             try:
